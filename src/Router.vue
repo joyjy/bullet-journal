@@ -7,8 +7,10 @@ import NoteTree from "./components/note/NoteTree"
 Vue.use(VueRouter)
 
 export default new VueRouter({
+    mode: "history",
     routes: [
-        { path: "/", component: NoteTree }
+        { path: "/", component: NoteTree },
+        { path: "/n/:id", name: "note", component: NoteTree }
     ]
 })
 

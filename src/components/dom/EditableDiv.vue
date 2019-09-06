@@ -1,5 +1,5 @@
 <template>
-    <div class="text" contenteditable="true" 
+    <div class="note-text" contenteditable="true" 
         v-html="innerText" 
         @focus="editing = true"
         @blur="editing = false"

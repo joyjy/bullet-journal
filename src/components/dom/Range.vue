@@ -1,9 +1,12 @@
 <script>
 export default {
+    data:() => ({
+        defaultTextClass:"note-text"
+    }),
     position(){
         let range = window.getSelection().getRangeAt(0);
         let el = range.commonAncestorContainer;
-        if(el instanceof Text || el.className == "text"){
+        if(el instanceof Text || el.className == this.defaultTextClass){
             return range.startOffset;
         }else{
             return 0;
@@ -14,10 +17,10 @@ export default {
             el = this.$el;
         }
         let text;
-        if(el.className == "text"){
+        if(el.className == this.defaultTextClass){
             text = el;
         }else{
-            text = el.getElementsByClassName("text")[0];
+            text = el.getElementsByClassName(this.defaultTextClass)[0];
         }
         text.focus();
         return text;

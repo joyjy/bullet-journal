@@ -1,9 +1,7 @@
 <template>
     <li>
-        <div class="note-wrapper">
-            <div class="control">
-                -
-            </div>
+        <div class="note-wrapper"> 
+            <note-bullet :note="note"></note-bullet>
             <editable-div 
                 v-model="note.text"
                 @new-note="newNote($event)"
@@ -23,6 +21,7 @@
 </template>
 
 <script>
+import NoteBullet from "./NoteBullet.vue"
 import EditableDiv from "../dom/EditableDiv.vue"
 import Range from "../dom/Range.vue"
 
@@ -37,6 +36,7 @@ export default {
         };
     },
     components:{
+        NoteBullet,
         EditableDiv
     },
     mounted: function(){
@@ -177,13 +177,9 @@ export default {
 }
 </script>
 
-<style scoped>
+<style>
 .note-wrapper{
     display: flex;
-}
-
-.control{
-    width: 1rem;
-    cursor: pointer;
+    align-items: center;
 }
 </style>
