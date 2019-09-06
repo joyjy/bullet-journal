@@ -2,8 +2,8 @@
     <li class="note-item">
         <div class="note-wrapper"> 
             <note-bullet :note="note"></note-bullet>
-            <editable-div 
-                v-model="note.text"
+            <editable-div :value="note.text"
+                @input="saveNote($event)"
                 @new-note="newNote($event)"
                 @del-note="deleteNote"
                 @merge-note="mergeNoteToLast"
@@ -40,63 +40,60 @@ export default {
         EditableDiv
     },
     mounted: function(){
-        if(this.note.created || this.note.changed){ // new created note get focus
+        if(this.note.created || this.note.changed){ // new created or recreated(up/down) note get focus
             this.$nextTick(() => {
                 this.focus();
-                this.note.created = false;
-                this.note.change = false;
+                this.$store.commit("afterMounted", this.note)
             })
         }
     },
     methods:{
+        saveNote: function(text){
+            this.$store.dispatch('saveNote', { 
+                note: this.note,
+                text: text
+            })
+        },
         newNote: function(text){
-            // todo: create by server
-            let note = { id: new Date().getTime(), text: "" , notes:[], created: true};
-            if(text){
-                note.text = text;
-            }
-            // ----
-
-            this.parent.notes.splice(this.index + 1, 0, note);
+            this.$store.dispatch('addNote', {
+                parent: this.parent, 
+                index: this.index+1, 
+                text: text
+            })
         },
         deleteNote: function(){
             // first node can't be remove, only empty
-            if(this.index == 0 && !this.parent.text){
+            if(this.index == 0 && !this.parent.id){
                 return;
             }
-
-            // todo: delete from server
-            //
-
-            this.parent.notes.splice(this.index, 1);
-
-            if(this.index == 0){
-                this.$nextTick(() => {
-                    this.$parent.focusAtEnd();
-                })
-            }else{
-                let prev = this.$el.previousSibling;
-                this.$nextTick(() => {
-                    this.focusAtEnd(prev);
-                })
-            }
+            this.$store.dispatch('deleteNote', {
+                parent: this.parent,
+                index: this.index
+            }).then(() => {
+                if(this.index == 0){
+                    this.$nextTick(() => {
+                        this.$parent.focusAtEnd();
+                    })
+                }else{
+                    let prev = this.$el.previousSibling;
+                    this.$nextTick(() => {
+                        this.focusAtEnd(prev);
+                    })
+                }
+            })
         },
         mergeNoteToLast: function(){
-            if(this.index == 0 && !this.parent.text){ // first node can't be remove
+            if(this.index == 0 && !this.parent.id){ // first node can't be remove
                 return;
             }
-
-            // todo: merged at server
-            //
-
-            let appendText = this.note.text;
-            this.parent.notes.splice(this.index, 1);
 
             if(this.index == 0){
                 // merge to parent
-                this.$nextTick(() => {
-                    let position = this.$parent.focusAtEnd();
-                    this.parent.text += appendText;
+                let position = this.$parent.focusAtEnd();
+                this.$store.dispatch('saveNote', { 
+                    note: this.parent, 
+                    text: this.parent.text + this.note.text
+                }).then(() => {
                     this.$nextTick(() => {
                         this.$parent.focusAt(position);
                     })
@@ -104,38 +101,43 @@ export default {
             }else{
                 // merge to prev
                 let prev = this.parent.notes[this.index-1];
-                let position = prev.text.length;
-                prev.text += appendText;
                 let prevEl = this.$el.previousSibling;
-                this.$nextTick(() => {
-                    this.focusAt(position, prevEl);
+
+                let position = prev.text.length;
+                this.$store.dispatch('saveNote', {
+                    note: prev,
+                    text: prev.text + this.note.text
+                }).then(() => {
+                    this.$nextTick(() => {
+                        this.focusAt(position, prevEl);
+                    })
                 })
             }
+
+            this.$store.dispatch('deleteNote', { parent: this.parent, index: this.index})
         },
         downgradeNote: function(){
             if(this.index == 0){
                 return;
             }
-
-            // todo server
-            
-            let prev = this.parent.notes[this.index-1];
-
-            this.parent.notes.splice(this.index, 1);
-            prev.notes.push(this.note);
-            this.note.changed = true;
+            this.$store.dispatch('downgradeNote', { 
+                parent: this.parent, 
+                index: this.index, 
+                note: this.note
+            })
         },
         upgradeNote: function(){
-            if(this.index == 0 && !this.parent.text){
+            if(!this.parent.id){
                 return;
             }
             // todo server
-
-            let grandParent = this.$parent.parent;
-
-            this.parent.notes.splice(this.index, 1);
-            grandParent.notes.push(this.note);
-            this.note.changed = true;
+            this.$store.dispatch('upgradeNote', {
+                grandParent: this.$parent.parent,
+                grandIndex: this.$parent.index+1,
+                parent: this.parent,
+                index: this.index,
+                note: this.note
+            })
         },
         navigationNote: function(direction){
             if(direction == "up"){
@@ -143,7 +145,6 @@ export default {
                     if(!this.parent.text){
                         return;
                     }
-
                     this.$nextTick(()=>{
                         this.$parent.focusAtEnd();
                     })
@@ -170,8 +171,6 @@ export default {
                     })
                 }
             }
-        },
-        saveNote: function(note){
         },
     }
 }
