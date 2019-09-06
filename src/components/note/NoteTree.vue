@@ -1,6 +1,6 @@
 <template>
     <div>
-        <div>
+        <v-toolbar flat dense color="#fafafa">
             <v-breadcrumbs :items="breadsrumbs" divider=">">
                 <template v-slot:item="props">
                     <v-breadcrumbs-item v-if="props.item.id" :to="{ name:'note', params:{ id: props.item.id }}">
@@ -11,11 +11,16 @@
                     </v-breadcrumbs-item>
                 </template>
             </v-breadcrumbs>
-        </div>
-        <ul>
-            <note-tree-item v-for="(note,i) in notes" :key="note.id" :note="note" :index="i" :parent="$data">
-            </note-tree-item>
-        </ul>
+
+            <div class="flex-grow-1"></div>
+        </v-toolbar>
+        <v-divider></v-divider>
+        <v-container fluid>
+            <ul class="note-tree">
+                <note-tree-item v-for="(note,i) in notes" :key="note.id" :note="note" :index="i" :parent="$data">
+                </note-tree-item>
+            </ul>
+        </v-container>
     </div>
 </template>
 
@@ -115,4 +120,6 @@ export default {
 </script>
 
 <style>
+.note-tree{
+}
 </style>
