@@ -1,12 +1,9 @@
 <script>
 export default {
-    data:() => ({
-        defaultTextClass:"note-text"
-    }),
     position(){
         let range = window.getSelection().getRangeAt(0);
         let el = range.commonAncestorContainer;
-        if(el instanceof Text || el.className == this.defaultTextClass){
+        if(el instanceof Text || el.hasAttribute("contenteditable")){
             return range.startOffset;
         }else{
             return 0;
@@ -17,10 +14,10 @@ export default {
             el = this.$el;
         }
         let text;
-        if(el.className == this.defaultTextClass){
+        if(el.hasAttribute("contenteditable")){
             text = el;
         }else{
-            text = el.getElementsByClassName(this.defaultTextClass)[0];
+            text = el.querySelectorAll('[contenteditable="true"]')[0];
         }
         text.focus();
         return text;

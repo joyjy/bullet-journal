@@ -1,10 +1,10 @@
 <template>
     <div class="note-control">
-        <v-menu open-on-hover offset-y nudge-left="21%" nudge-top="5%">
+        <v-menu open-on-hover offset-y nudge-left="25%" nudge-top="1%" open-delay="100">
             <template v-slot:activator="{ on }">
-                <v-btn small icon v-on="on">
-                    <div class="note-bullet"></div>
-                </v-btn>
+                <div>
+                    <div class="note-bullet" v-on="on"></div>
+                </div>
             </template>
             <v-list subheader dense>
                 <v-list-item>
@@ -26,15 +26,21 @@ export default {
 </script>
 
 <style>
-.note-control{
-    margin-right: .25rem
+.note-control {
+    cursor: pointer;
+    margin-right: .25rem;
+    display: flex;
 }
 
 .note-bullet{
     width: 1rem;
     height: 1rem;
-    border: .25rem solid #bbb;
+    border: .25rem solid #fafafa;
     background-color: #666;
     border-radius: 50%;
+}
+
+.note-bullet:hover{
+    border-color: #bbb
 }
 </style>

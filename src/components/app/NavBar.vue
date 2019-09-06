@@ -23,11 +23,11 @@
       <v-divider></v-divider>
 
       <v-list nav dense>
-        <v-list-item link>
+        <v-list-item :to="{name:'note'}">
           <v-list-item-icon>
-            <v-icon>mdi-folder</v-icon>
+            <v-icon>mdi-format-list-bulleted</v-icon>
           </v-list-item-icon>
-          <v-list-item-title>My Files</v-list-item-title>
+          <v-list-item-title>All Notes</v-list-item-title>
         </v-list-item>
         <v-list-item link>
           <v-list-item-icon>

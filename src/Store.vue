@@ -26,10 +26,30 @@ export default new Vuex.Store({
         user: {},
         settings: {}
     },
+    getters: {
+        find: (state, getters) => (array, id) => {
+            if(array.length == 0){
+                return;
+            }
+            let found;
+            array.forEach((note) => {
+                if(note.id == parseInt(id)){
+                    found = note;
+                }else{
+                    found = getters.find(note.notes, id);
+                }
+            })
+            return found;
+        },
+        findNoteById: (state, getters) => (id) => {
+            return getters.find(state.notes, id)
+        }
+    },
     mutations: {
     },
     actions: {
     }})
+
 </script>
 
 <style>

@@ -10,7 +10,7 @@ export default new VueRouter({
     mode: "history",
     routes: [
         { path: "/", component: NoteTree },
-        { path: "/n/:id", name: "note", component: NoteTree }
+        { path: "/n/:id?", name: "note", component: NoteTree }
     ]
 })
 

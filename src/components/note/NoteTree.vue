@@ -63,27 +63,13 @@ export default {
                 return;
             }
 
-            let note = this.find(this.$store.state.notes, id)
-            if(note){
-                this.setBreadsrumbs(note)
-                this.notes = [note]
+            let root = this.$store.getters.findNoteById(id)
+            if(root){
+                this.setBreadsrumbs(root)
+                this.notes = [root]
             }else{
                 this.notes = [] // todo
             }
-        },
-        find: function(array, id){
-            if(array.length == 0){
-                return;
-            }
-            let found;
-            array.forEach((note) => {
-                if(note.id == parseInt(id)){
-                    found = note;
-                }else{
-                    found = this.find(note.notes, id);
-                }
-            })
-            return found;
         },
         setBreadsrumbs: function(note){
             this.breadsrumbs = [];
