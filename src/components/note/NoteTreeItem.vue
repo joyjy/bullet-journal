@@ -1,5 +1,5 @@
 <template>
-    <li>
+    <li class="note-item">
         <div class="note-wrapper"> 
             <note-bullet :note="note"></note-bullet>
             <editable-div 
@@ -178,6 +178,9 @@ export default {
 </script>
 
 <style>
+.note-item {
+    list-style: none;
+}
 .note-wrapper{
     display: flex;
     align-items: center;

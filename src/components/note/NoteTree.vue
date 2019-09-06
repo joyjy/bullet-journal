@@ -32,20 +32,6 @@ export default {
     name: "note-tree",
     data: function(){
         return {
-            data: [
-                {
-                    id: 1,
-                    text: 'hello',
-                    notes: [
-                        {
-                            id:2,
-                            parent: { id: 1, text: "hello"},
-                            text:'world',
-                            notes: []
-                        }
-                    ]
-                }
-            ],
             notes: [],
             breadsrumbs: [],
             focus: Range.focus
@@ -55,17 +41,7 @@ export default {
         NoteTreeItem
     },
     created: function(){
-        if(this.$route.params.id){
-            let note = this.find(this.data, this.$route.params.id);
-            if(note){
-                this.setBreadsrumbs(note)
-                this.notes = [note]
-            }else{
-                this.notes = [];
-            }
-        }else{
-            this.notes = this.data;
-        }
+        this.setRoot(this.$route.params.id)
     },
     mounted: function(){
         if(this.notes.length == 1 && this.notes[0].text == ""){
@@ -76,22 +52,25 @@ export default {
     },
     watch: {
         '$route' (to, from) {
-            if(!to.params.id){
+            this.setRoot(to.params.id)
+        }
+    },
+    methods:{
+        setRoot: function(id){
+            if(!id){
                 this.breadsrumbs = []
-                this.notes = this.data;
+                this.notes = this.$store.state.notes;
                 return;
             }
 
-            let note = this.find(this.data, to.params.id)
+            let note = this.find(this.$store.state.notes, id)
             if(note){
                 this.setBreadsrumbs(note)
                 this.notes = [note]
             }else{
-                this.notes = []
+                this.notes = [] // todo
             }
-        }
-    },
-    methods:{
+        },
         find: function(array, id){
             if(array.length == 0){
                 return;
