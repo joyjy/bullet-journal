@@ -40,12 +40,14 @@ export default {
         EditableDiv
     },
     mounted: function(){
-        if(this.note.created || this.note.changed){ // new created or recreated(up/down) note get focus
-            this.$nextTick(() => {
-                this.focus();
-                this.$store.commit("afterMounted", this.note)
-            })
-        }
+        this.$nextTick(() =>{
+            if(this.note.created || this.note.changed){ // new created or recreated(up/down) note get focus
+                this.$nextTick(() => {
+                    this.focus();
+                    this.$store.commit("afterMounted", this.note)
+                })
+            }
+        })
     },
     methods:{
         saveNote: function(text){
@@ -66,6 +68,7 @@ export default {
             if(this.index == 0 && !this.parent.id){
                 return;
             }
+            let prev = this.$el.previousSibling;
             this.$store.dispatch('deleteNote', {
                 parent: this.parent,
                 index: this.index
@@ -75,7 +78,6 @@ export default {
                         this.$parent.focusAtEnd();
                     })
                 }else{
-                    let prev = this.$el.previousSibling;
                     this.$nextTick(() => {
                         this.focusAtEnd(prev);
                     })
@@ -182,6 +184,5 @@ export default {
 }
 .note-wrapper{
     display: flex;
-    align-items: center;
 }
 </style>

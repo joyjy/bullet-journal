@@ -1,6 +1,6 @@
 <template>
     <div class="note-text" contenteditable="true" 
-        v-html="innerText" 
+        v-html="innerHtml" 
         @focus="editing = true"
         @blur="editing = false"
         @input="inputText($event)" 
@@ -30,7 +30,7 @@ export default {
     props: ['value'],
     data(){
         return {
-            innerText: this.value, // display note.text
+            innerHtml: "", // display note.text
             editing: false,
             beforeDelete: this.value,
             position: Range.position,
@@ -38,13 +38,16 @@ export default {
             focusAt: Range.focusAt
         }
     },
+    created: function() {
+        this.innerHtml = this.decoText(this.value)
+    },
     watch: {
         'value'(){
             let position
             if(this.editing){
                 position = this.position();
             }
-            this.innerText = this.value;
+            this.innerHtml = this.decoText(this.value)
             if(this.editing){
                 this.$nextTick(() =>{
                     this.focusAt(position)
@@ -53,6 +56,26 @@ export default {
         }
     },
     methods: {
+        decoText(text){
+            let deco = "";
+            let open = -1;
+            for(var i=0;i<text.length;i++){
+                let ch = text.charAt(i);
+                if(ch == ' ' && open >= 0){
+                    deco = deco.slice(0, open) + "<span class='tag'>" + deco.slice(open);
+                    deco += "</span>"
+                    open = -1;
+                }else if( ch == '#'){
+                    open = i;
+                }
+                deco += ch
+            }
+            if(open >= 0){
+                deco = deco.slice(0, open) + "<span class='tag'>" + deco.slice(open);
+                deco += "</span>"
+            }
+            return deco;
+        },
         inputText(e){
             // console.log(e);
             if(e.isComposing && e.data == "　"){ // ime hasn't submit 
@@ -123,10 +146,14 @@ export default {
 
 <style>
 [contenteditable="true"]{
-    width: 100%;
+    width: 96%;
 }
 [contenteditable="true"]:active,[contenteditable="true"]:focus{
     border:none;
     outline:none;
+}
+span.tag{
+    color:cadetblue;
+    cursor: pointer;
 }
 </style>

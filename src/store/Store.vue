@@ -1,10 +1,18 @@
 <script>
 import Vue from 'vue'
 import Vuex from 'vuex'
+import VuexPersist from 'vuex-persist'
+
+const vuexPersist = new VuexPersist({
+  key: 'bullet-note',
+  storage: window.localStorage
+})
+
 Vue.use(Vuex)
 
 export default new Vuex.Store({
     strict: true,
+    plugins: [vuexPersist.plugin],
     state: {
         notes: [
                 {
@@ -30,10 +38,12 @@ export default new Vuex.Store({
             }
             let found;
             array.forEach((note) => {
-                if(note.id == parseInt(id)){
-                    found = note;
-                }else{
-                    found = getters.recursiveFindNote(note.notes, id);
+                if(!found){
+                    if(note.id == parseInt(id)){
+                        found = note;
+                    }else{
+                        found = getters.recursiveFindNote(note.notes, id);
+                    }
                 }
             })
             return found;

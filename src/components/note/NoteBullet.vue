@@ -2,9 +2,7 @@
     <div class="note-control">
         <v-menu open-on-hover offset-y nudge-left="25%" nudge-top="1%" open-delay="100">
             <template v-slot:activator="{ on }">
-                <div>
-                    <div class="note-bullet" v-on="on"></div>
-                </div>
+                <div class="note-bullet" v-on="on"></div>
             </template>
             <v-list subheader dense>
                 <v-list-item>
@@ -28,7 +26,10 @@ export default {
 <style>
 .note-control {
     cursor: pointer;
-    margin-right: .25rem;
+    width: 1.5rem;
+    height: 1.5rem;
+    align-self: flex-start;
+    flex-shrink: 0;
     display: flex;
 }
 
@@ -38,6 +39,7 @@ export default {
     border: .25rem solid #fafafa;
     background-color: #666;
     border-radius: 50%;
+    align-self: center;
 }
 
 .note-bullet:hover{
