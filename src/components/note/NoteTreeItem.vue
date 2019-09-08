@@ -1,10 +1,13 @@
 <template>
     <li class="note-item">
         <div class="note-wrapper"> 
-            <note-bullet :note="note"></note-bullet>
-            <editable-div :value="note.text"
-                @input="saveNote($event)"
-                @new-note="newNote($event)"
+            <note-bullet :note="note" :collapsed="collapsed"
+                @collapse-note="$store.commit('collapse', note)"
+                @del-note="deleteNote">
+            </note-bullet>
+            <editable-div :note="note"
+                @input="saveNote"
+                @new-note="newNote"
                 @del-note="deleteNote"
                 @merge-note="mergeNoteToLast"
                 @downgrade-note="downgradeNote"
@@ -22,39 +25,27 @@
 
 <script>
 import NoteBullet from "./NoteBullet.vue"
-import EditableDiv from "../dom/EditableDiv.vue"
-import Range from "../dom/Range.vue"
+import EditableDiv from "./EditableDiv.vue"
+import range from "../../lib/range"
 
 export default {
     name: "note-tree-item",
     props: ["parent", 'note', 'index'],
-    data: function(){
-        return {
-            focus: Range.focus,
-            focusAt: Range.focusAt,
-            focusAtEnd: Range.focusAtEnd,
-        };
-    },
+    data: () => ({
+    }),
     components:{
         NoteBullet,
         EditableDiv
     },
-    mounted: function(){
-        this.$nextTick(() =>{
-            if(this.note.created || this.note.changed){ // new created or recreated(up/down) note get focus
-                this.$nextTick(() => {
-                    this.focus();
-                    this.$store.commit("afterMounted", this.note)
-                })
-            }
-        })
+    computed: {
+        collapsed: function(){
+            return this.note.display.collapse && this.note.notes.length > 0
+        }
     },
     methods:{
-        saveNote: function(text){
-            this.$store.dispatch('saveNote', { 
-                note: this.note,
-                text: text
-            })
+        saveNote: function(payload){
+            payload.note = this.note;
+            this.$store.dispatch('saveNote', payload)
         },
         newNote: function(text){
             this.$store.dispatch('addNote', {
@@ -63,24 +54,23 @@ export default {
                 text: text
             })
         },
-        deleteNote: function(){
+        deleteNote: function(payload){
             // first node can't be remove, only empty
             if(this.index == 0 && !this.parent.id){
                 return;
             }
-            let prev = this.$el.previousSibling;
+            let last;
+            if(this.index == 0){
+                last = this.parent;
+            }else{
+                last = this.parent.notes[this.index-1];
+            }
             this.$store.dispatch('deleteNote', {
                 parent: this.parent,
                 index: this.index
             }).then(() => {
-                if(this.index == 0){
-                    this.$nextTick(() => {
-                        this.$parent.focusAtEnd();
-                    })
-                }else{
-                    this.$nextTick(() => {
-                        this.focusAtEnd(prev);
-                    })
+                if(payload && payload.keyboard){
+                    this.$store.commit("focus", {note: last, position: last.text.length})
                 }
             })
         },
@@ -89,90 +79,76 @@ export default {
                 return;
             }
 
+            let last;
             if(this.index == 0){
-                // merge to parent
-                let position = this.$parent.focusAtEnd();
-                this.$store.dispatch('saveNote', { 
-                    note: this.parent, 
-                    text: this.parent.text + this.note.text
-                }).then(() => {
-                    this.$nextTick(() => {
-                        this.$parent.focusAt(position);
-                    })
-                })
+                last = this.parent;
             }else{
-                // merge to prev
-                let prev = this.parent.notes[this.index-1];
-                let prevEl = this.$el.previousSibling;
-
-                let position = prev.text.length;
-                this.$store.dispatch('saveNote', {
-                    note: prev,
-                    text: prev.text + this.note.text
-                }).then(() => {
-                    this.$nextTick(() => {
-                        this.focusAt(position, prevEl);
-                    })
-                })
+                last = this.parent.notes[this.index-1];
             }
+            let position = last.text.length;
 
+            this.$store.dispatch('saveNote', { 
+                note: last, 
+                text: last.text + this.note.text
+            }).then(() => {
+                this.$nextTick(() => {
+                    this.$store.commit("focus", {note: last, position: position})
+                })
+            })
             this.$store.dispatch('deleteNote', { parent: this.parent, index: this.index})
         },
-        downgradeNote: function(){
+        downgradeNote: function(payload){
             if(this.index == 0){
                 return;
             }
-            this.$store.dispatch('downgradeNote', { 
-                parent: this.parent, 
-                index: this.index, 
-                note: this.note
-            })
+            payload.parent = this.parent;
+            payload.index = this.index;
+            payload.note = this.note;
+            this.$store.dispatch('downgradeNote', payload)
         },
-        upgradeNote: function(){
+        upgradeNote: function(payload){
             if(!this.parent.id){
                 return;
             }
-            // todo server
-            this.$store.dispatch('upgradeNote', {
-                grandParent: this.$parent.parent,
-                grandIndex: this.$parent.index+1,
-                parent: this.parent,
-                index: this.index,
-                note: this.note
-            })
+            payload.parent = this.parent;
+            payload.index = this.index;
+            payload.note = this.note;
+            this.$store.dispatch('upgradeNote', payload)
         },
-        navigationNote: function(direction){
-            if(direction == "up"){
-                if(this.index == 0){
-                    if(!this.parent.text){
+        navigationNote: function(payload){
+            let target;
+            switch(payload.direction){
+                case "up":
+                    if(this.index == 0 && !this.parent.id){
                         return;
                     }
-                    this.$nextTick(()=>{
-                        this.$parent.focusAtEnd();
-                    })
-                }else{
-                    let prevEl = this.$el.previousSibling;
-                    this.$nextTick(() => {
-                        this.focusAtEnd(prevEl);
-                    })
-                }
-            }else if(direction == "down"){
-                if(this.index == this.parent.notes.length-1){
-                    if(this.note.notes.length == 0){
-                        return;
+                    if(this.index == 0){
+                        target = this.parent;
+                    }else{
+                        target = this.parent.notes[this.index-1]; // todo
+                    }
+                    break;
+                case "down":
+                    if(this.index == this.parent.notes.length-1
+                        && this.note.notes.length == 0){
+                        return
+                    }
+                    if(this.index == this.parent.notes.length-1){
+                        target = this.notes[0];
+                    }else{
+                        target = this.parent.notes[this.index+1]
                     }
 
-                    let firstChildEl = this.$el.childNodes[1];
-                    this.$nextTick(() => {
-                        this.focusAtEnd(firstChildEl);
-                    })
-                }else{
-                    let nextEl = this.$el.nextSibling;
-                    this.$nextTick(() => {
-                        this.focusAtEnd(nextEl);
-                    })
-                }
+                    break;
             }
+
+            if(payload.position > target.text.length){
+                payload.position = target.text.length;
+            }
+            this.$nextTick(() => {
+                this.$store.commit("focus", {note: target, position: payload.position})
+            })
+        },
         },
     }
 }
@@ -183,6 +159,7 @@ export default {
     list-style: none;
 }
 .note-wrapper{
+    margin-top: .25rem;
     display: flex;
 }
 </style>

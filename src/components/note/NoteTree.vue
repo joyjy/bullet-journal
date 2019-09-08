@@ -26,7 +26,7 @@
 
 <script>
 import NoteTreeItem from './NoteTreeItem.vue'
-import Range from '../dom/Range'
+import range from '../../lib/range'
 
 export default {
     name: "note-tree",
@@ -34,7 +34,6 @@ export default {
         return {
             notes: [],
             breadsrumbs: [],
-            focus: Range.focus
         }
     },
     components:{

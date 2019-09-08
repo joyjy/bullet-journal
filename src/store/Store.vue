@@ -10,6 +10,10 @@ const vuexPersist = new VuexPersist({
 
 Vue.use(Vuex)
 
+import _ from "underscore"
+
+import parser from "../lib/parser"
+
 export default new Vuex.Store({
     strict: true,
     plugins: [vuexPersist.plugin],
@@ -18,11 +22,15 @@ export default new Vuex.Store({
                 {
                     id: 1,
                     text: 'hello',
+                    tokens: [],
+                    display: { collapse: false, cursor: -1},
                     notes: [
                         {
                             id:2,
                             parent: { id: 1, text: "hello"},
                             text:'world',
+                            display: { collapse: false, cursor: -1},
+                            tokens: [],
                             notes: []
                         }
                     ]
@@ -37,15 +45,18 @@ export default new Vuex.Store({
                 return;
             }
             let found;
-            array.forEach((note) => {
-                if(!found){
-                    if(note.id == parseInt(id)){
-                        found = note;
-                    }else{
-                        found = getters.recursiveFindNote(note.notes, id);
+            for (let i = 0; i < array.length; i++) {
+                let note = array[i];
+                if(note.id == parseInt(id)){
+                    found = note;
+                    break;
+                }else{
+                    found = getters.recursiveFindNote(note.notes, id);
+                    if(found){
+                        break;
                     }
                 }
-            })
+            }
             return found;
         },
         findNoteById: (state, getters) => (id) => {
@@ -54,7 +65,9 @@ export default new Vuex.Store({
     },
     mutations: {
         saveNote(state, payload){
-            payload.note.text = payload.text
+            payload.note.text = payload.text;
+            payload.note.tokens = payload.tokens;
+            payload.note.display.cursor = payload.position;
         },
         newNote(state, payload){
             payload.parent.notes.splice(payload.index, 0, payload.note)
@@ -67,32 +80,39 @@ export default new Vuex.Store({
 
             payload.parent.notes.splice(payload.index, 1);
             prev.notes.push(payload.note);
-            payload.note.changed = true;
+            payload.note.display.cursor = payload.position;
         },
         upgradeNote(state, payload){
             payload.grandParent.notes.splice(payload.grandIndex, 0, payload.note);
             payload.parent.notes.splice(payload.index, 1);
-            payload.note.changed = true;
+            payload.note.display.cursor = payload.position;
         },
-        afterMounted(state, note){
-            note.created = false;
-            note.change = false;
+        collapse(state, note){
+            note.display.collapse = !note.display.collapse
+        },
+        focus(state, payload){
+            payload.note.display.cursor = payload.position;
+        },
+        unfocus(state, note){
+            note.display.cursor = -1;
         }
     },
     actions: {
         saveNote({commit}, payload){
+            payload.tokens = parser.parse(payload.text);
             commit("saveNote", payload)
         },
         addNote({commit}, payload){
-
             let note = { 
                 id: new Date().getTime(),
                 text: "" ,
-                notes:[], 
-                created: true
+                tokens: [],
+                display: { collapse: false, cursor: 0},
+                notes:[],
             };
             if(payload.text){
                 note.text = payload.text;
+                note.tokens = parser.parse(payload.text);
             }
             if(payload.parent.id){
                 note.parent = { id: payload.parent.id, text: payload.parent.text }
@@ -110,8 +130,16 @@ export default new Vuex.Store({
 
             commit("downgradeNote", payload)
         },
-        upgradeNote({commit}, payload){
+        upgradeNote({state, commit, getters}, payload){
 
+            if(payload.parent.parent){
+                payload.grandParent = getters.findNoteById(payload.parent.parent.id);
+                payload.grandIndex = _.indexOf(payload.grandParent.notes, payload.parent) + 1
+            }else{
+                payload.grandParent = state;
+                payload.grandIndex = _.indexOf(state.notes, payload.parent) + 1
+            }
+            
             commit("upgradeNote", payload)
         }
     }})

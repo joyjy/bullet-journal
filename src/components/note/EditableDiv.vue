@@ -15,7 +15,8 @@
 </template>
 
 <script>
-import Range from "./Range.vue"
+import range from "../../lib/range"
+import parser from "../../lib/parser"
 
 // keyboard events' $emit
 // - [x] new-note(with optional text arg)
@@ -27,55 +28,54 @@ import Range from "./Range.vue"
 
 export default {
     name: "editable-div",
-    props: ['value'],
+    props: ['note'],
     data(){
         return {
-            innerHtml: "", // display note.text
+            innerHtml: "",
             editing: false,
-            beforeDelete: this.value,
-            position: Range.position,
-            focus: Range.focus,
-            focusAt: Range.focusAt
+            beforeDelete: "",
         }
     },
     created: function() {
-        this.innerHtml = this.decoText(this.value)
+        this.innerHtml = parser.html(this.note)
+        this.beforeDelete = this.note.text;
+    },
+    mounted: function(){
+        if(this.note.display.cursor > -1){ // new created or recreated(up/down)
+            this.$nextTick(() => {
+                range.focus(this.$el, this.note.display.cursor);
+            })
+        }
+    },
+    computed: {
+        text(){
+            return this.note.text;
+        },
+        cursor(){
+            return this.note.display.cursor;
+        }
     },
     watch: {
-        'value'(){
-            let position
+        text: function(){
+            this.innerHtml = parser.html(this.note)
             if(this.editing){
-                position = this.position();
-            }
-            this.innerHtml = this.decoText(this.value)
-            if(this.editing){
-                this.$nextTick(() =>{
-                    this.focusAt(position)
+                this.$nextTick(() => {
+                    range.focus(this.$el, this.note.display.cursor)
                 })
+            }
+        },
+        cursor: function(cursor, old){
+            if(cursor >= 0){
+                range.focus(this.$el, cursor)
+            }
+        },
+        editing(){
+            if(!this.editing){
+                this.$store.commit("unfocus", this.note);
             }
         }
     },
     methods: {
-        decoText(text){
-            let deco = "";
-            let open = -1;
-            for(var i=0;i<text.length;i++){
-                let ch = text.charAt(i);
-                if(ch == ' ' && open >= 0){
-                    deco = deco.slice(0, open) + "<span class='tag'>" + deco.slice(open);
-                    deco += "</span>"
-                    open = -1;
-                }else if( ch == '#'){
-                    open = i;
-                }
-                deco += ch
-            }
-            if(open >= 0){
-                deco = deco.slice(0, open) + "<span class='tag'>" + deco.slice(open);
-                deco += "</span>"
-            }
-            return deco;
-        },
         inputText(e){
             // console.log(e);
             if(e.isComposing && e.data == "　"){ // ime hasn't submit 
@@ -84,12 +84,16 @@ export default {
             if(e.data){ // only insert has data
                 this.beforeDelete = e.target.innerText;
             }
-            this.$emit("input", e.target.innerText)
+            let payload = { 
+                text: e.target.innerText,
+                position: range.position(this.$el)
+            };
+            this.$emit("input", payload)
         },
         pressEnter(e){
             // console.log(e);
             let text = e.target.innerText;
-            let position = this.position();
+            let position = range.position(this.$el);
             if (position < text.length) {
                 let left = text.substring(0, position);
                 this.$emit('input', left)
@@ -99,12 +103,15 @@ export default {
             }
         },
         pressDelete(e){
-            // console.log(e);
+            //console.log(e, e.target.innerText, this.beforeDelete, range.position(this.$el));
+            if(e.isComposing){ // ime hasn't submit 
+                return;
+            }
             let text = e.target.innerText;
-            let position = this.position();
+            let position = range.position(this.$el);
 
             if(this.beforeDelete == ""){
-                this.$emit('del-note')
+                this.$emit('del-note', {keyboard:true})
             }else if(text == this.beforeDelete && position == 0){
                 this.$emit('merge-note')
             }
@@ -113,9 +120,9 @@ export default {
         pressTab(e){
             // console.log(e);
             if(e.shiftKey){
-                this.$emit("upgrade-note")
+                this.$emit("upgrade-note", {position: range.position(this.$el)})
             }else{
-                this.$emit("downgrade-note")
+                this.$emit("downgrade-note", {position: range.position(this.$el)})
             }
         },
         pressNav(e){
@@ -125,19 +132,19 @@ export default {
             //down arrow          40
             // console.log(e);
             if(e.keyCode == 37){
-                let position = this.position()
+                let position = range.position(this.$el)
                 if(position == 0){
                     this.$emit("nav-between-note", "left");
                 }
             }else if(e.keyCode == 39){
-                let position = this.position()
-                if(position == this.value.length){
+                let position = range.position(this.$el)
+                if(position == this.beforeDelete.length){ // todo
                     this.$emit("nav-between-note", "right");
                 }
             }else if(e.keyCode == 38){
-                this.$emit("nav-between-note", "up")
+                this.$emit("nav-between-note", { direction: "up", position: range.position(this.$el) });
             }else if(e.keyCode == 40){
-                this.$emit("nav-between-note", "down")
+                this.$emit("nav-between-note", { direction: "down", position: range.position(this.$el) })
             }
         }
     }
