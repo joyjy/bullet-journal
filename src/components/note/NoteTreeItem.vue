@@ -68,7 +68,7 @@ export default {
         },
         deleteNote: function(payload){
             // first node can't be remove, only empty
-            if(this.index == 0 && !this.parent.id){
+            if(this.index == 0 && this.parent.notes.length == 1 && !this.parent.id){
                 return;
             }
             let last;

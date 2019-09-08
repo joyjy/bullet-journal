@@ -20,22 +20,21 @@ export default new Vuex.Store({
     plugins: [vuexPersist.plugin],
     state: {
         notes: [
-                {
-                    id: 1,
-                    text: 'hello',
-                    tokens: [],
-                    display: { collapse: false, cursor: -1},
-                    notes: [
-                        {
-                            id:2,
-                            parent: { id: 1, text: "hello"},
-                            text:'world',
-                            display: { collapse: false, cursor: -1},
-                            tokens: [],
-                            notes: []
-                        }
-                    ]
-                }
+                // {
+                //     id: 1,
+                //     text: 'hello',
+                //     tokens: [],
+                //     display: { collapse: false, cursor: -1},
+                //     notes: [
+                //         {
+                //             id:2,
+                //             text:'world',
+                //             display: { collapse: false, cursor: -1},
+                //             tokens: [],
+                //             notes: []
+                //         }
+                //     ]
+                // }
             ],
         user: {},
         settings: {}
@@ -127,9 +126,11 @@ export default new Vuex.Store({
         },
         upgradeNote({state, commit, getters}, payload){
 
-            if(payload.parent.parent){
-                payload.grandParent = getters.findNoteById(payload.parent.parent.id);
+            let stack = getters.findNoteStackById(payload.parent.id);
+            if(stack.length > 1){
+                payload.grandParent = stack[stack.length - 2];
                 payload.grandIndex = _.indexOf(payload.grandParent.notes, payload.parent) + 1
+            
             }else{
                 payload.grandParent = state;
                 payload.grandIndex = _.indexOf(state.notes, payload.parent) + 1
