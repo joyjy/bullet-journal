@@ -12,6 +12,7 @@ Vue.use(Vuex)
 
 import _ from "underscore"
 
+import traversal from "../lib/tree"
 import parser from "../lib/parser"
 
 export default new Vuex.Store({
@@ -40,27 +41,11 @@ export default new Vuex.Store({
         settings: {}
     },
     getters: {
-        recursiveFindNote: (state, getters) => (array, id) => {
-            if(array.length == 0){
-                return;
-            }
-            let found;
-            for (let i = 0; i < array.length; i++) {
-                let note = array[i];
-                if(note.id == parseInt(id)){
-                    found = note;
-                    break;
-                }else{
-                    found = getters.recursiveFindNote(note.notes, id);
-                    if(found){
-                        break;
-                    }
-                }
-            }
-            return found;
+        findNoteById: (state) => (id) => {
+            return traversal.find(state.notes, (note) => note.id == parseInt(id));
         },
-        findNoteById: (state, getters) => (id) => {
-            return getters.recursiveFindNote(state.notes, id)
+        findNoteStackById: (state) => (id) => {
+            return traversal.path(state.notes, (note) => note.id == parseInt(id))
         }
     },
     mutations: {
@@ -95,6 +80,9 @@ export default new Vuex.Store({
         },
         unfocus(state, note){
             note.display.cursor = -1;
+        },
+        switchOutline(state, payload){
+            traversal.each(payload.notes, payload.level, (note, deepth) => { note.display.collapse = deepth == payload.level})
         }
     },
     actions: {
@@ -139,7 +127,7 @@ export default new Vuex.Store({
                 payload.grandParent = state;
                 payload.grandIndex = _.indexOf(state.notes, payload.parent) + 1
             }
-            
+
             commit("upgradeNote", payload)
         }
     }})

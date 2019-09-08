@@ -13,6 +13,12 @@
             </v-breadcrumbs>
 
             <div class="flex-grow-1"></div>
+
+            <v-toolbar-items>
+                <v-btn icon @click="switchCollapse" :class="{op:true}">
+                    <v-icon>mdi-arrow-expand-vertical</v-icon>
+                </v-btn>
+            </v-toolbar-items>
         </v-toolbar>
         <v-divider></v-divider>
         <v-container fluid>
@@ -34,6 +40,7 @@ export default {
         return {
             notes: [],
             breadsrumbs: [],
+            collapseLevel: -1,
         }
     },
     components:{
@@ -62,22 +69,21 @@ export default {
                 return;
             }
 
-            let root = this.$store.getters.findNoteById(id)
-            if(root){
-                this.setBreadsrumbs(root)
-                this.notes = [root]
+            let stack = this.$store.getters.findNoteStackById(id)
+            if(stack){
+                stack.unshift("Root");
+                this.breadsrumbs = stack;
+                this.notes = stack.slice(-1)
             }else{
                 this.notes = [] // todo
             }
         },
-        setBreadsrumbs: function(note){
-            this.breadsrumbs = [];
-            while(note.parent){
-                this.breadsrumbs.unshift(note)
-                note = note.parent;
+        switchCollapse(){
+            this.collapseLevel++;
+            if(this.collapseLevel > 2){
+                this.collapseLevel = -1;
             }
-            this.breadsrumbs.unshift(note)
-            this.breadsrumbs.unshift("Root")
+            this.$store.commit("switchOutline", { notes: this.notes, level: this.collapseLevel });
         }
     }
 }
