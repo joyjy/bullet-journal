@@ -10,7 +10,7 @@ const vuexPersist = new VuexPersist({
 
 Vue.use(Vuex)
 
-import _ from "underscore"
+import _ from "lodash"
 
 import traversal from "../lib/tree"
 import parser from "../lib/parser"
@@ -72,6 +72,13 @@ export default new Vuex.Store({
             payload.parent.notes.splice(payload.index, 1);
             payload.note.display.cursor = payload.position;
         },
+        dragToSort(state, payload){
+            if(payload.note){
+                Vue.set(payload.note, "notes", payload.notes);
+            }else{
+                Vue.set(state, "notes", payload.notes);
+            }
+        },
         collapse(state, note){
             note.display.collapse = !note.display.collapse
         },
@@ -129,7 +136,11 @@ export default new Vuex.Store({
             }
 
             commit("upgradeNote", payload)
-        }
+        },
+        dragToSort({commit}, payload){
+
+            commit("dragToSort", payload)
+        },
     }})
 
 </script>

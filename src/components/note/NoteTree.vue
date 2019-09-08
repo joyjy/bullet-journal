@@ -15,17 +15,23 @@
             <div class="flex-grow-1"></div>
 
             <v-toolbar-items>
-                <v-btn icon @click="switchCollapse" :class="{op:true}">
-                    <v-icon>mdi-arrow-expand-vertical</v-icon>
-                </v-btn>
+                <v-tooltip bottom>
+                    <template v-slot:activator="{ on }">
+                        <v-btn icon @click="switchCollapse" v-on="on" :class="{op:true}">
+                            <v-icon>mdi-arrow-expand-vertical</v-icon>
+                        </v-btn>
+                    </template>
+                    <span>Toggle Outline Level</span>
+                </v-tooltip>
+                
             </v-toolbar-items>
         </v-toolbar>
         <v-divider></v-divider>
         <v-container fluid>
-            <ul class="note-tree">
+            <draggable tag="ul" class="note-tree" v-model="noteList" :group="{ name: 'note-tree' }">
                 <note-tree-item v-for="(note,i) in notes" :key="note.id" :note="note" :index="i" :parent="$data">
                 </note-tree-item>
-            </ul>
+            </draggable>
         </v-container>
     </div>
 </template>
@@ -33,6 +39,8 @@
 <script>
 import NoteTreeItem from './NoteTreeItem.vue'
 import range from '../../lib/range'
+
+import draggable from "vuedraggable"
 
 export default {
     name: "note-tree",
@@ -44,22 +52,31 @@ export default {
         }
     },
     components:{
+        draggable,
         NoteTreeItem
     },
     created: function(){
         this.setRoot(this.$route.params.id)
     },
     mounted: function(){
-        if(this.notes.length == 1 && this.notes[0].text == ""){
-            this.$nextTick(() => {
-                this.focus();
-            })
-        }
     },
     watch: {
         '$route' (to, from) {
             this.setRoot(to.params.id)
         }
+    },
+    computed: {
+        noteList: {
+            get(){
+                return this.notes;
+            },
+            set(value){
+                this.$store.dispatch("dragToSort", { notes: value})
+                    .then(() => {
+                        this.setRoot(this.$route.params.id)
+                    })
+            }
+        },
     },
     methods:{
         setRoot: function(id){
@@ -91,5 +108,9 @@ export default {
 
 <style>
 .note-tree{
+    font-size: 14px;
+}
+button.op:focus:before{
+    opacity: 0 !important;
 }
 </style>

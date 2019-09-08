@@ -1,6 +1,6 @@
 export default {
     position(el){
-        console.log("position", el);
+        //console.log("position", el);
         if(!el.hasAttribute("contenteditable")){
             throw el;
         }
@@ -28,7 +28,7 @@ export default {
         return offset;
     },
     focus(el, position){
-        console.log("focus", el, position)
+        //console.log("focus", el, position)
         if(!el.hasAttribute("contenteditable")){
             throw el;
         }

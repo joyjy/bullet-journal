@@ -15,11 +15,12 @@
                 @nav-between-note="navigationNote($event)">
             </editable-div>
         </div>
-        <ul v-show="note.notes.length > 0">
+        <draggable tag="ul" v-model="noteList" :group="{ name: 'note-tree' }" ghost-class="moving-ghost"
+            v-show="note.notes.length > 0 && !note.display.collapse">
             <note-tree-item v-for="(child,i) in note.notes" :key="child.id"
                 :note="child" :index="i" :parent="note">
             </note-tree-item>
-        </ul>
+        </draggable>
     </li>
 </template>
 
@@ -28,16 +29,27 @@ import NoteBullet from "./NoteBullet.vue"
 import EditableDiv from "./EditableDiv.vue"
 import range from "../../lib/range"
 
+import draggable from "vuedraggable"
+
 export default {
     name: "note-tree-item",
     props: ["parent", 'note', 'index'],
     data: () => ({
     }),
     components:{
+        draggable,
         NoteBullet,
         EditableDiv
     },
     computed: {
+        noteList: {
+            get(){
+                return this.note.notes;
+            },
+            set(value){
+                this.$store.dispatch("dragToSort", { notes: value, note: this.note})
+            }
+        },
         collapsed: function(){
             return this.note.display.collapse && this.note.notes.length > 0
         }
@@ -148,8 +160,7 @@ export default {
             this.$nextTick(() => {
                 this.$store.commit("focus", {note: target, position: payload.position})
             })
-        },
-        },
+        }
     }
 }
 </script>
@@ -161,5 +172,8 @@ export default {
 .note-wrapper{
     margin-top: .25rem;
     display: flex;
+}
+.moving-ghost{
+    display: none;
 }
 </style>
