@@ -1,17 +1,14 @@
-<script>
 import Vue from "vue"
 import VueRouter from "vue-router"
 
-import NoteTree from "./components/note/NoteTree"
+import NoteTree from "@/components/note/NoteTree"
 
 Vue.use(VueRouter)
 
 export default new VueRouter({
     mode: "history",
     routes: [
-        { path: "/", component: NoteTree },
+        { path: "/", redirect: { name: 'note' }},
         { path: "/n/:id?", name: "note", component: NoteTree }
     ]
 })
-
-</script>

@@ -27,7 +27,7 @@
 <script>
 import NoteBullet from "./NoteBullet.vue"
 import EditableDiv from "./EditableDiv.vue"
-import range from "../../lib/range"
+import range from "@/lib/range"
 
 import draggable from "vuedraggable"
 

@@ -15,8 +15,8 @@
 </template>
 
 <script>
-import range from "../../lib/range"
-import parser from "../../lib/parser"
+import range from "@/lib/range"
+import parser from "@/lib/parser"
 
 // keyboard events' $emit
 // - [x] new-note(with optional text arg)
@@ -153,14 +153,14 @@ export default {
 
 <style>
 [contenteditable="true"]{
-    width: 96%;
+    width: calc(100% - 2rem);
 }
 [contenteditable="true"]:active,[contenteditable="true"]:focus{
     border:none;
     outline:none;
 }
 span.tag{
-    color:cadetblue;
+    color:#78909C; /*blue-grey lighten-1*/
     cursor: pointer;
 }
 </style>

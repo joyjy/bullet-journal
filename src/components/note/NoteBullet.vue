@@ -62,14 +62,14 @@ export default {
 .note-bullet{
     width: 1rem;
     height: 1rem;
-    border: .22rem solid #fafafa;
-    background-color: #666;
+    border: .22rem solid #fafafa; /*grey lighten-5*/
+    background-color: #616161; /*grey darken-2*/
     border-radius: 50%;
     align-self: center;
 }
 
 .note-bullet:hover{
-    border-color: #bbb
+    border-color: #BDBDBD /*grey lighten-1*/
 }
 
 .note-bullet.collapsed:before{

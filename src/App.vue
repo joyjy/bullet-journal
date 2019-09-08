@@ -1,21 +1,23 @@
 <template>
   <v-app>
     <app-nav-bar></app-nav-bar>
+    
+    <router-view></router-view>
 
-    <v-content>
-      <router-view></router-view>
-    </v-content>
+    <app-fab></app-fab>
   </v-app>
 </template>
 
 <script>
-import AppNavBar from "./components/app/NavBar.vue"
+import AppNavBar from "@/components/app/NavBar.vue"
+import AppFab from "@/components/app/Fab.vue"
 
 export default {
   name: 'app',
   data: () => ({}),
   components: {
-    AppNavBar
+    AppNavBar,
+    AppFab,
   }
 }
 </script>
@@ -25,6 +27,6 @@ export default {
   font-family: 'Avenir', Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  color: #2c3e50;
+  color: #424242; /*grey darken-3*/
 }
 </style>

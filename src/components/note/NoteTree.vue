@@ -1,6 +1,9 @@
 <template>
     <div>
-        <v-toolbar flat dense color="#fafafa">
+        <v-navigation-drawer app clipped right>
+        </v-navigation-drawer>
+
+        <v-app-bar app flat dense clipped-right color="grey lighten-5">
             <v-breadcrumbs :items="breadsrumbs" divider=">">
                 <template v-slot:item="props">
                     <v-breadcrumbs-item v-if="props.item.id" :to="{ name:'note', params:{ id: props.item.id }}">
@@ -17,28 +20,31 @@
             <v-toolbar-items>
                 <v-tooltip bottom>
                     <template v-slot:activator="{ on }">
-                        <v-btn icon @click="switchCollapse" v-on="on" :class="{op:true}">
+                        <v-btn icon @click="switchCollapse" v-on="on" :class="{nofocus:true}">
                             <v-icon>mdi-arrow-expand-vertical</v-icon>
                         </v-btn>
                     </template>
                     <span>Toggle Outline Level</span>
                 </v-tooltip>
-                
             </v-toolbar-items>
-        </v-toolbar>
-        <v-divider></v-divider>
-        <v-container fluid>
-            <draggable tag="ul" class="note-tree" v-model="noteList" :group="{ name: 'note-tree' }">
-                <note-tree-item v-for="(note,i) in notes" :key="note.id" :note="note" :index="i" :parent="$data">
-                </note-tree-item>
-            </draggable>
-        </v-container>
+        </v-app-bar>
+
+        <v-divider id="app-bar-divider"></v-divider>
+        
+        <v-content>
+            <v-container fluid>
+                <draggable tag="ul" id="note-tree" class="body-2" v-model="noteList" :group="{ name: 'note-tree' }">
+                    <note-tree-item v-for="(note,i) in notes" :key="note.id" :note="note" :index="i" :parent="$data">
+                    </note-tree-item>
+                </draggable>
+            </v-container>
+        </v-content>
     </div>
 </template>
 
 <script>
 import NoteTreeItem from './NoteTreeItem.vue'
-import range from '../../lib/range'
+import range from '@/lib/range'
 
 import draggable from "vuedraggable"
 
@@ -107,10 +113,13 @@ export default {
 </script>
 
 <style>
-.note-tree{
-    font-size: 14px;
-}
-button.op:focus:before{
+button.nofocus:focus:before{
     opacity: 0 !important;
+}
+#app-bar-divider{
+    position: absolute;
+    width: 100%;
+    top: 48px;
+    z-index: 5;
 }
 </style>

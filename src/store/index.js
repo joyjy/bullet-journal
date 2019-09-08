@@ -1,4 +1,3 @@
-<script>
 import Vue from 'vue'
 import Vuex from 'vuex'
 import VuexPersist from 'vuex-persist'
@@ -12,8 +11,8 @@ Vue.use(Vuex)
 
 import _ from "lodash"
 
-import traversal from "../lib/tree"
-import parser from "../lib/parser"
+import traversal from "@/lib/tree"
+import parser from "@/lib/parser"
 
 export default new Vuex.Store({
     strict: true,
@@ -36,6 +35,7 @@ export default new Vuex.Store({
                 //     ]
                 // }
             ],
+        tagHierarchy: {},
         user: {},
         settings: {}
     },
@@ -98,7 +98,7 @@ export default new Vuex.Store({
         },
         addNote({commit}, payload){
             let note = { 
-                id: new Date().getTime(),
+                id: _.now(),
                 text: "" ,
                 tokens: [],
                 display: { collapse: false, cursor: 0},
@@ -142,6 +142,5 @@ export default new Vuex.Store({
 
             commit("dragToSort", payload)
         },
-    }})
-
-</script>
+    }
+})
