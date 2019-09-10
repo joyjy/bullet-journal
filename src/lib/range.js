@@ -17,15 +17,17 @@ export default {
             return offset;
         }
 
-        let childLength = container.textContent.length;
-        while(!container.isSameNode(el)){
-            container = container.parentNode;
-            offset += container.textContent.length;
-            offset -= childLength;
-            childLength = container.textContent.length;
+        for (let i = 0; i < el.childNodes.length; i++) {
+            const child = el.childNodes[i];
+            if(child.nodeType == Node.ELEMENT_NODE && child.firstChild.isSameNode(container)){
+                return offset;
+            }else if(child.isSameNode(container)){
+                return offset;
+            }
+            offset += child.textContent.length;
         }
 
-        return offset;
+        return undefined;
     },
     focus(el, position){
         //console.log("focus", el, position)

@@ -1,6 +1,13 @@
 <template>
     <div>
-        <v-navigation-drawer app clipped right>
+        <v-navigation-drawer app clipped right class="px-2">
+            <v-chip-group column>
+                <v-chip v-for="(count, text) in $store.state.tag.flattern" :key="text"
+                    label small>
+                    <span class="font-weight-bold">{{ text }}</span>
+                    <span>({{ count }})</span>
+                </v-chip>
+            </v-chip-group>
         </v-navigation-drawer>
 
         <v-app-bar app flat dense clipped-right color="grey lighten-5">
@@ -46,6 +53,9 @@
 import NoteTreeItem from './NoteTreeItem.vue'
 import range from '@/lib/range'
 
+import _ from "lodash"
+import traversal from "@/lib/tree"
+
 import draggable from "vuedraggable"
 
 export default {
@@ -55,6 +65,7 @@ export default {
             notes: [],
             breadsrumbs: [],
             collapseLevel: -1,
+            depth: 0,
         }
     },
     components:{
@@ -89,21 +100,26 @@ export default {
             if(!id){
                 this.breadsrumbs = []
                 this.notes = this.$store.state.notes;
-                return;
+            }else {
+                let stack = this.$store.getters.findNoteStackById(id)
+                if(stack){
+                    stack.unshift("Root");
+                    this.breadsrumbs = stack;
+                    this.notes = stack.slice(-1)
+                }else{
+                    this.notes = [] // todo
+                }
             }
 
-            let stack = this.$store.getters.findNoteStackById(id)
-            if(stack){
-                stack.unshift("Root");
-                this.breadsrumbs = stack;
-                this.notes = stack.slice(-1)
-            }else{
-                this.notes = [] // todo
-            }
+            this.depth = traversal.depth(this.notes);
         },
         switchCollapse(){
             this.collapseLevel++;
-            if(this.collapseLevel > 2){
+            let maxLevel = this.depth-2;
+            if(maxLevel > 2){
+                maxLevel = 2;
+            }
+            if(this.collapseLevel > maxLevel){
                 this.collapseLevel = -1;
             }
             this.$store.commit("switchOutline", { notes: this.notes, level: this.collapseLevel });

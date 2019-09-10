@@ -1,43 +1,33 @@
 import Vue from 'vue'
-import Vuex from 'vuex'
-import VuexPersist from 'vuex-persist'
 
+import Vuex from 'vuex'
+Vue.use(Vuex)
+
+import VuexPersist from 'vuex-persist'
 const vuexPersist = new VuexPersist({
   key: 'bullet-note',
   storage: window.localStorage
 })
-
-Vue.use(Vuex)
 
 import _ from "lodash"
 
 import traversal from "@/lib/tree"
 import parser from "@/lib/parser"
 
+import undoRedoPlugin, {undoRedoHistory} from "./plugins/undo"
+
+import noteTreeDisplayModule from "./display"
+import tagModule from "./tag"
+
 export default new Vuex.Store({
     strict: true,
-    plugins: [vuexPersist.plugin],
+    plugins: [vuexPersist.plugin, undoRedoPlugin],
+    modules: {
+        display: noteTreeDisplayModule,
+        tag: tagModule,
+    },
     state: {
-        notes: [
-                // {
-                //     id: 1,
-                //     text: 'hello',
-                //     tokens: [],
-                //     display: { collapse: false, cursor: -1},
-                //     notes: [
-                //         {
-                //             id:2,
-                //             text:'world',
-                //             display: { collapse: false, cursor: -1},
-                //             tokens: [],
-                //             notes: []
-                //         }
-                //     ]
-                // }
-            ],
-        tagHierarchy: {},
-        user: {},
-        settings: {}
+        notes: []
     },
     getters: {
         findNoteById: (state) => (id) => {
@@ -49,12 +39,31 @@ export default new Vuex.Store({
     },
     mutations: {
         saveNote(state, payload){
+            payload.before = _.clone(payload.note);
+
             payload.note.text = payload.text;
             payload.note.tokens = payload.tokens;
             payload.note.display.cursor = payload.position;
         },
         newNote(state, payload){
-            payload.parent.notes.splice(payload.index, 0, payload.note)
+            let note = { 
+                id: _.now(),
+                text: "" ,
+                tokens: [],
+                display: { collapse: false, cursor: 0},
+                notes:[],
+            };
+            if(payload.text){
+                note.text = payload.text;
+                note.tokens = parser.parse(payload.text);
+            }
+            
+            let index = payload.index || 0;
+            if(payload.parent){
+                payload.parent.notes.splice(index, 0, note)
+            }else{
+                state.notes.splice(index, 0, note)
+            }
         },
         deleteNote(state, payload){
             payload.parent.notes.splice(payload.index, 1);
@@ -78,50 +87,27 @@ export default new Vuex.Store({
                 Vue.set(state, "notes", payload.notes);
             }
         },
-        collapse(state, note){
-            note.display.collapse = !note.display.collapse
-        },
-        focus(state, payload){
-            payload.note.display.cursor = payload.position;
-        },
-        unfocus(state, note){
-            note.display.cursor = -1;
-        },
-        switchOutline(state, payload){
-            traversal.each(payload.notes, payload.level, (note, deepth) => { note.display.collapse = deepth == payload.level})
+        undo(state){
+            undoRedoHistory.undo(state)
         }
     },
     actions: {
         saveNote({commit}, payload){
             payload.tokens = parser.parse(payload.text);
+
+            let oldTags = _.filter(payload.note.tokens, ['type','tag']);
+            let newTags = _.filter(payload.tokens, ['type','tag'])
+
             commit("saveNote", payload)
+            commit("replaceTag", {oldTags, newTags})
         },
         addNote({commit}, payload){
-            let note = { 
-                id: _.now(),
-                text: "" ,
-                tokens: [],
-                display: { collapse: false, cursor: 0},
-                notes:[],
-            };
-            if(payload.text){
-                note.text = payload.text;
-                note.tokens = parser.parse(payload.text);
-            }
-            if(payload.parent.id){
-                note.parent = { id: payload.parent.id, text: payload.parent.text }
-            }
-
-            payload.note = note;
-
             commit("newNote", payload)
         },
         deleteNote({commit}, payload){
-
             commit("deleteNote", payload)
         },
         downgradeNote({commit}, payload){
-
             commit("downgradeNote", payload)
         },
         upgradeNote({state, commit, getters}, payload){
@@ -130,7 +116,6 @@ export default new Vuex.Store({
             if(stack.length > 1){
                 payload.grandParent = stack[stack.length - 2];
                 payload.grandIndex = _.indexOf(payload.grandParent.notes, payload.parent) + 1
-            
             }else{
                 payload.grandParent = state;
                 payload.grandIndex = _.indexOf(state.notes, payload.parent) + 1
@@ -139,8 +124,7 @@ export default new Vuex.Store({
             commit("upgradeNote", payload)
         },
         dragToSort({commit}, payload){
-
             commit("dragToSort", payload)
-        },
+        }
     }
 })

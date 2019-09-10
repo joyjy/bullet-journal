@@ -18,6 +18,22 @@ export default {
   components: {
     AppNavBar,
     AppFab,
+  },
+  mounted: function () {
+    this.$el.ownerDocument.addEventListener('keydown', this.onKey, {capture: true})
+  },
+  beforeDestroy: function () {
+    this.$el.ownerDocument.removeEventListener('keydown', this.onKey)
+  },
+  methods: {
+    onKey: function(e){
+      if(e.keyCode == 90){
+        if(navigator.platform.indexOf('Mac') > -1 && event.metaKey || event.ctrlKey){
+          this.$store.commit("undo")
+          e.stopPropagation();
+        }
+      }
+    }
   }
 }
 </script>

@@ -1,6 +1,19 @@
 
 export default {
-
+    depth: function(notes, currentDepth){
+        if(!currentDepth){
+            currentDepth = 0;
+        }
+        let maxDepth = currentDepth;
+        for (let i = 0; i < notes.length; i++) {
+            let note = notes[i];
+            let childDepth = this.depth(note.notes, currentDepth+1);
+            if(childDepth > maxDepth){
+                maxDepth = childDepth;
+            }
+        }
+        return maxDepth;
+    },
     find: function(notes, predicate){
         if(notes.length == 0){
             return;
@@ -42,17 +55,17 @@ export default {
         }
         return stack;
     },
-    each: function(notes, level, iteratee, deepth){
-        if(!deepth){
-            deepth = 0;
+    each: function(notes, level, iteratee, depth){
+        if(!depth){
+            depth = 0;
         }
-        if(level > 0 && deepth > level || notes.length == 0){
+        if(level > 0 && depth > level || notes.length == 0){
             return;
         }
         for (let i = 0; i < notes.length; i++) {
             let note = notes[i];
-            iteratee(note, deepth);
-            this.each(note.notes, level, iteratee, deepth+1)
+            iteratee(note, depth);
+            this.each(note.notes, level, iteratee, depth+1)
         }
     }
 }

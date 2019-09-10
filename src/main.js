@@ -7,9 +7,20 @@ import store from './store'
 
 Vue.config.productionTip = false
 
+const waitForStorageToBeReady = async (next) => {
+  await store.restored
+  next()
+}
+
 new Vue({
   vuetify,
   router,
   store,
   render: h => h(App),
 }).$mount('#app')
+
+waitForStorageToBeReady(() => { 
+  if(store.state.notes.length == 0){
+    store.commit("newNote", {init: true})
+  }
+})

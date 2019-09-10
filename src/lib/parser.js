@@ -1,18 +1,3 @@
-const noteSpec = {
-    id: 1,
-    text: "text",
-    parent: { id: 1, text: "text"},
-    notes: [],
-    state: {},
-    tags: [{
-        id: 1,
-        text: "tag",
-        start: 1,
-        end: 1,
-    }],
-    scheduld: {}
-}
-
 const tokenize = function(text){
     let tokens = [];
 
@@ -24,8 +9,12 @@ const tokenize = function(text){
         switch (ch) {
             case ' ':
             case '\xa0':
-                if(state != 'empty'){
+                if(state == 'tag' || state == 'text'){
                     tokens.push({ type: state, text: text.substring(start, end)})
+                    start = end;
+                    state = "empty";
+                }else if(state == 'state'){
+                    tokens.push({ type: 'text', text: text.substring(start, end)})
                     start = end;
                     state = "empty";
                 }
@@ -37,12 +26,24 @@ const tokenize = function(text){
                     state = 'tag';
                 }
                 break;
+            case '[':
+                if(state == 'start'){
+                    state = 'state'
+                }
+                break;
+            case ']':
+                if(state == 'state'){
+                    tokens.push({ type: state, text: text.substring(start, end+1)})
+                    start = end+1;
+                    state = 'split'
+                }
+                break;
             default:
                 if(state == 'empty'){ // text start
                     tokens.push({ type: state, text: text.substring(start, end)})
                     start = end;
                     state = 'text'
-                }else if(state == 'start'){
+                }else if(state == 'start' || state == 'split'){
                     start = end;
                     state = 'text'
                 }
@@ -52,6 +53,9 @@ const tokenize = function(text){
     }
     
     if(start < end){
+        if(state == 'state'){
+            state = 'text'
+        }
         tokens.push({ type: state, text: text.substring(start, end)})
     }
 
@@ -73,7 +77,8 @@ export default {
             let token = note.tokens[i];
             switch (token.type) {
                 case "tag":
-                    htmlContent += '<span class="tag">' + token.text +'</span>'
+                case "state":
+                    htmlContent += '<span class="'+token.type+'">' + token.text +'</span>'
                     break;
                 case "text":
                 case "empty":

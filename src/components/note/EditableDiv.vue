@@ -64,19 +64,22 @@ export default {
                 })
             }
         },
-        cursor: function(cursor, old){
-            if(cursor >= 0){
-                range.focus(this.$el, cursor)
+        cursor: function(){
+            if(this.cursor >= 0){
+                range.focus(this.$el, this.cursor)
             }
         },
         editing(){
             if(!this.editing){
-                this.$store.commit("unfocus", this.note);
+                this.$store.commit("unfocus", { note: this.note});
             }
         }
     },
     methods: {
         inputText(e){
+            if(e.inputType == "historyUndo"){
+                return; // document will handle this
+            }
             // console.log(e);
             if(e.isComposing && e.data == "　"){ // ime hasn't submit 
                 return;
@@ -161,6 +164,15 @@ export default {
 }
 span.tag{
     color:#78909C; /*blue-grey lighten-1*/
+    cursor: pointer;
+}
+span.state{
+    padding: 0 .2rem;
+    margin-right: .1rem;
+    border-radius: 5%;
+    background-color: #757575; /*grey darken-1*/
+    font-weight: 700; /*.font-weight-bold */
+    color: #ffffff;
     cursor: pointer;
 }
 </style>
