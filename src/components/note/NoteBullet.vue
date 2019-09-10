@@ -1,30 +1,14 @@
 <template>
     <div class="note-control">
-        <v-menu offset-y nudge-left="25%" nudge-top="1%" open-delay="100">
-            <template v-slot:activator="{ on }">
-                <div class="note-bullet" v-on="on" :class="{collapsed: collapsed}"></div>
-            </template>
+        <div class="note-bullet" @click="onClick" @dblclick="onDoubleClick" @contextmenu.prevent="toggleMenu"
+            :class="{collapsed: collapsed}">
+        </div>
+        <v-menu v-model="menu" absolute :position-x="x" :position-y="y" offset-y nudge-left="30%" open-delay="800">
             <v-list subheader dense>
-                <v-list-item :to="{ name:'note', params:{ id: note.id }}">
-                    <v-list-item-title>
-                        Focus
-                    </v-list-item-title>
-                </v-list-item>
-                <v-list-item @click="$emit('collapse-note')">
-                    <v-list-item-title>
-                        Collapse
-                    </v-list-item-title>
-                </v-list-item>
                 <v-list-item @click="$emit('del-note')">
                     <v-list-item-title>
                         Delete
                     </v-list-item-title>
-                </v-list-item>
-                <v-subheader>debug</v-subheader>
-                <v-list-item>
-                    <v-list-item-content>
-                        <pre class="caption">{{ debug }}</pre>
-                    </v-list-item-content>
                 </v-list-item>
             </v-list>
         </v-menu>
@@ -37,12 +21,38 @@ import _ from 'lodash'
 export default {
     props:['note', 'collapsed'],
     data: () => ({
+        menu: false,
+        x: 0,
+        y: 0,
+        timer: null
     }),
     computed:{
         debug(){
             let clone = _.clone(this.note);
             clone.notes = undefined;
             return JSON.stringify(clone, null, 4);
+        }
+    },
+    methods: {
+        onClick: function(){
+            clearTimeout(this.timer);
+            this.timer = setTimeout(() => {
+                this.$emit('collapse-note');
+            }, 300);   //大概时间300ms
+        },
+        onDoubleClick: function(){
+            clearTimeout(this.timer);
+            this.$router.push({ name:'note', params:{ id: this.note.id }})
+        },
+        toggleMenu: function(){
+            if(!this.menu){
+                var rect = this.$el.getBoundingClientRect();
+                this.x = rect.right;
+                this.y = rect.bottom;
+                this.menu = true;
+            }else{
+                this.menu = false;
+            }
         }
     }
 }

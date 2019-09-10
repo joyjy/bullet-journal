@@ -21,6 +21,6 @@ new Vue({
 
 waitForStorageToBeReady(() => { 
   if(store.state.notes.length == 0){
-    store.commit("newNote", {init: true})
+    store.dispatch("newNote", {init: true})
   }
 })

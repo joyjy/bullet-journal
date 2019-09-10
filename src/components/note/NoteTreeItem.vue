@@ -60,7 +60,7 @@ export default {
             this.$store.dispatch('saveNote', payload)
         },
         newNote: function(text){
-            this.$store.dispatch('addNote', {
+            this.$store.dispatch('newNote', {
                 parent: this.parent, 
                 index: this.index+1, 
                 text: text
@@ -79,6 +79,7 @@ export default {
             }
             this.$store.dispatch('deleteNote', {
                 parent: this.parent,
+                note: this.note,
                 index: this.index
             }).then(() => {
                 if(payload && payload.keyboard){
@@ -107,7 +108,11 @@ export default {
                     this.$store.commit("focus", {note: last, position: position})
                 })
             })
-            this.$store.dispatch('deleteNote', { parent: this.parent, index: this.index})
+            this.$store.dispatch('deleteNote', { 
+                parent: this.parent, 
+                note: this.note,
+                index: this.index
+            })
         },
         downgradeNote: function(payload){
             if(this.index == 0){

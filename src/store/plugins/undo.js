@@ -6,6 +6,7 @@ class UndoRedoHistory {
     constructor(){
         this.history = [];
         this.currentIndex = -1;
+        this.record = true;
     }
 
     init(store){
@@ -33,19 +34,23 @@ class UndoRedoHistory {
         return;
       }
 
-      this.recordMutation = false;
+      this.record = false;
 
       const prevState = this.history[this.currentIndex];
       switch(prevState.type){
         case "saveNote":
             prevState.payload.note.text = prevState.payload.before.text;
             prevState.payload.note.tokens = prevState.payload.before.tokens;
-            prevState.payload.note.display.cursor = -1; // todo
           break;
+        case "addNote":
+          this.store.commit("deleteNote", prevState.payload)
+          break;
+        case "deleteNote":
+          this.store.commit("addNote", prevState.payload)
       }
       this.currentIndex--;
 
-      this.recordMutation = true;
+      this.record = true;
       console.log("undo", this.history, this.currentIndex)
     }
   
@@ -64,16 +69,19 @@ const undoRedoPlugin = (store) => {
   
     store.subscribe((mutation, state) => {
 
+      if(!undoRedoHistory.record){
+        return;
+      }
+      
       switch(mutation.type){
-        case "undo":
-        case "focus":
-        case "unfocus":
-        case "replaceTag":
+        case "replaceTag": // todo with saveNote
           break;
-        default:
-            console.log(mutation)
+        case "saveNote":
+        case "addNote":
+        case "deleteNote":
             undoRedoHistory.addState(mutation);
       }
+
       if(mutation.payload && mutation.payload.init){
         undoRedoHistory.reset()
       }

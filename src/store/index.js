@@ -45,24 +45,12 @@ export default new Vuex.Store({
             payload.note.tokens = payload.tokens;
             payload.note.display.cursor = payload.position;
         },
-        newNote(state, payload){
-            let note = { 
-                id: _.now(),
-                text: "" ,
-                tokens: [],
-                display: { collapse: false, cursor: 0},
-                notes:[],
-            };
-            if(payload.text){
-                note.text = payload.text;
-                note.tokens = parser.parse(payload.text);
-            }
-            
+        addNote(state, payload){
             let index = payload.index || 0;
             if(payload.parent){
-                payload.parent.notes.splice(index, 0, note)
+                payload.parent.notes.splice(index, 0, payload.note)
             }else{
-                state.notes.splice(index, 0, note)
+                state.notes.splice(index, 0, payload.note)
             }
         },
         deleteNote(state, payload){
@@ -101,8 +89,22 @@ export default new Vuex.Store({
             commit("saveNote", payload)
             commit("replaceTag", {oldTags, newTags})
         },
-        addNote({commit}, payload){
-            commit("newNote", payload)
+        newNote({commit}, payload){
+            let note = { 
+                id: _.now(),
+                text: "" ,
+                tokens: [],
+                display: { collapse: false, cursor: 0},
+                notes:[],
+            };
+            if(payload.text){
+                note.text = payload.text;
+                note.tokens = parser.parse(payload.text);
+            }
+
+            payload.note = note;
+
+            commit("addNote", payload)
         },
         deleteNote({commit}, payload){
             commit("deleteNote", payload)
