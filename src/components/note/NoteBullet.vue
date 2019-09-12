@@ -10,6 +10,12 @@
                         Delete
                     </v-list-item-title>
                 </v-list-item>
+                <v-subheader>debug</v-subheader>
+                <v-list-item>
+                    <v-list-item-content>
+                        <pre class="caption">{{ debug }}</pre>
+                    </v-list-item-content>
+                </v-list-item>
             </v-list>
         </v-menu>
     </div>

@@ -15,7 +15,9 @@ export default {
         },
         switchOutline(state, payload){
             traversal.each(payload.notes, payload.level, (note, depth) => {
-                 note.display.collapse = depth == payload.level
+                if(note.notes.length > 0){
+                    note.display.collapse = depth == payload.level
+                }
             })
         },
     }

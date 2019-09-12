@@ -35,6 +35,9 @@ export default new Vuex.Store({
         },
         findNoteStackById: (state) => (id) => {
             return traversal.path(state.notes, (note) => note.id == parseInt(id))
+        },
+        findNoteByText: (state) => (text) => {
+            return traversal.find(state.notes, (note) => note.text == text);
         }
     },
     mutations: {

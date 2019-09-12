@@ -134,21 +134,21 @@ export default {
             //right arrow         39
             //down arrow          40
             // console.log(e);
-            if(e.keyCode == 37){
-                let position = range.position(this.$el)
-                if(position == 0){
-                    this.$emit("nav-between-note", "left");
-                }
-            }else if(e.keyCode == 39){
-                let position = range.position(this.$el)
-                if(position == this.beforeDelete.length){ // todo
-                    this.$emit("nav-between-note", "right");
-                }
-            }else if(e.keyCode == 38){
-                this.$emit("nav-between-note", { direction: "up", position: range.position(this.$el) });
-            }else if(e.keyCode == 40){
-                this.$emit("nav-between-note", { direction: "down", position: range.position(this.$el) })
-            }
+            // if(e.keyCode == 37){
+            //     let position = range.position(this.$el)
+            //     if(position == 0){
+            //         this.$emit("nav-between-note", "left");
+            //     }
+            // }else if(e.keyCode == 39){
+            //     let position = range.position(this.$el)
+            //     if(position == this.beforeDelete.length){ // todo
+            //         this.$emit("nav-between-note", "right");
+            //     }
+            // }else if(e.keyCode == 38){
+            //     this.$emit("nav-between-note", { direction: "up", position: range.position(this.$el) });
+            // }else if(e.keyCode == 40){
+            //     this.$emit("nav-between-note", { direction: "down", position: range.position(this.$el) })
+            // }
         }
     }
 }
@@ -169,10 +169,20 @@ span.tag{
 span.state{
     padding: 0 .2rem;
     margin-right: .1rem;
-    border-radius: 5%;
+    border-radius: 10%;
     background-color: #757575; /*grey darken-1*/
     font-weight: 700; /*.font-weight-bold */
     color: #ffffff;
     cursor: pointer;
+}
+span.state.todo{
+    background-color: #FDD835 /* yellow darken-1 */
+}
+span.state.done{
+    background-color: #7CB342 /* light-green darken-1 */
+}
+span.state.time{
+    color: #78909C; /*blue-grey lighten-1*/
+    background-color: inherit;
 }
 </style>

@@ -11,16 +11,18 @@
         </v-navigation-drawer>
 
         <v-app-bar app flat dense clipped-right color="grey lighten-5">
-            <v-breadcrumbs :items="breadsrumbs" divider=">">
-                <template v-slot:item="props">
-                    <v-breadcrumbs-item v-if="props.item.id" :to="{ name:'note', params:{ id: props.item.id }}">
-                        {{ props.item.text }}
-                    </v-breadcrumbs-item>
-                    <v-breadcrumbs-item v-else to="/">
-                        {{ props.item }}
-                    </v-breadcrumbs-item>
-                </template>
-            </v-breadcrumbs>
+            <slot name="toolbar">
+                <v-breadcrumbs :items="breadsrumbs" divider=">">
+                    <template v-slot:item="props">
+                        <v-breadcrumbs-item v-if="props.item.id" :to="{ name:'note', params:{ id: props.item.id }}">
+                            {{ props.item.text }}
+                        </v-breadcrumbs-item>
+                        <v-breadcrumbs-item v-else to="/">
+                            {{ props.item }}
+                        </v-breadcrumbs-item>
+                    </template>
+                </v-breadcrumbs>
+            </slot>
 
             <div class="flex-grow-1"></div>
 
@@ -60,6 +62,7 @@ import draggable from "vuedraggable"
 
 export default {
     name: "note-tree",
+    props: ['root'],
     data: function(){
         return {
             notes: [],
@@ -73,7 +76,11 @@ export default {
         NoteTreeItem
     },
     created: function(){
-        this.setRoot(this.$route.params.id)
+        if(!this.root){
+            this.setRoot(this.$route.params.id)
+        }else{
+            this.notes = this.root.notes;
+        }
     },
     mounted: function(){
     },
@@ -116,8 +123,8 @@ export default {
         switchCollapse(){
             this.collapseLevel++;
             let maxLevel = this.depth-2;
-            if(maxLevel > 2){
-                maxLevel = 2;
+            if(maxLevel > 3){
+                maxLevel = 3;
             }
             if(this.collapseLevel > maxLevel){
                 this.collapseLevel = -1;
@@ -133,7 +140,7 @@ button.nofocus:focus:before{
     opacity: 0 !important;
 }
 #app-bar-divider{
-    position: absolute;
+    position: fixed;
     width: 100%;
     top: 48px;
     z-index: 5;

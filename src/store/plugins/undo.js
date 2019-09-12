@@ -20,7 +20,6 @@ class UndoRedoHistory {
       }
       this.history.push(state);
       this.currentIndex++;
-      console.log("addState", this.history, this.currentIndex)
     }
 
     reset(){
