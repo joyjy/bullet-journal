@@ -157,7 +157,7 @@ const tokenize = function(text){
 }
 
 const addMatchTag = function(text, match, textOffset){
-    if(!match || !match.matched){
+    if(!match || !match.matched || match.length == 0){
         return text;
     }
 
@@ -192,7 +192,7 @@ export default {
 
             switch (token.type) {
                 case "tag":
-                    htmlContent += '<span class="'+token.type+'">' + addMatchTag(token.text, match, textOffset); +'</span>'
+                    htmlContent += '<span class="'+token.type+'">' + addMatchTag(token.text, match, textOffset) +'</span>'
                     break
                 case "state":
                     let elClass = "state";
@@ -203,7 +203,7 @@ export default {
                     }else if(token.text == '[x]' || token.text == '[DONE]'){
                         elClass += " done"
                     }
-                    htmlContent += '<span class="'+elClass+'">' + token.text +'</span>'
+                    htmlContent += '<span class="'+elClass+'">' + addMatchTag(token.text, match, textOffset) +'</span>'
                     break;
                 case "text":
                 case "empty":

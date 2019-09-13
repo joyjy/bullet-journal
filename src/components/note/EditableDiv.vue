@@ -47,6 +47,9 @@ export default {
         }
     },
     watch: {
+        match: function(){
+            this.innerHtml = parser.html(this.note, this.match);
+        },
         text: function(){
             this.innerHtml = parser.html(this.note, this.match);
             if(this.editing){
@@ -188,5 +191,8 @@ span.state.time{
 span.matched{
     background-color: #FFF9C4;  /* yellow lighten-4 */
     border: 1px solid #E0E0E0; /* grey lighten-2 */
+}
+span.state > .matched{
+    color: #424242;
 }
 </style>

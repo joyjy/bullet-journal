@@ -48,6 +48,7 @@ export default {
         EditableDiv
     },
     created: function(){
+        this.childrenMatch = false;
         this.match = filter.match(this.note, this.query);
     },
     computed: {
@@ -70,6 +71,10 @@ export default {
         }
     },
     watch: {
+        query: function(){
+            this.childrenMatch = false;
+            this.match = filter.match(this.note, this.query);
+        },
         selfMatch: function(){
             this.$emit('matched', this.selfMatch)
         }

@@ -13,7 +13,6 @@ import AppNavBar from "@/components/app/NavBar.vue"
 import AppFab from "@/components/app/Fab.vue"
 
 export default {
-  name: 'app',
   data: () => ({}),
   components: {
     AppNavBar,
@@ -44,5 +43,10 @@ export default {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   color: #424242; /*grey darken-3*/
+}
+
+.compact-form {
+    transform: scale(0.75);
+    transform-origin: 80% center;
 }
 </style>

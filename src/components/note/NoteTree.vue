@@ -21,6 +21,15 @@
             <div class="flex-grow-1"></div>
 
             <v-toolbar-items>
+                <slot name="toolbar-items">
+                    <v-text-field prepend-inner-icon="mdi-magnify" class="compact-form"
+                        clearable solo rounded flat :value="$route.query.q"
+                        @change="search" @click:clear="search('')">
+                    </v-text-field>
+                </slot>
+            </v-toolbar-items>
+
+            <v-toolbar-items>
                 <v-tooltip bottom>
                     <template v-slot:activator="{ on }">
                         <v-btn icon @click="switchCollapse" v-on="on" :class="{nofocus:true}">
@@ -81,20 +90,13 @@ export default {
         "tag-all": AllTag,
     },
     created: function(){
-        if(this.$route.name == 'filter'){
-            this.breadsrumbs = []
-            this.notes = this.$store.state.notes;
-            this.query = undefined;
-            this.setFilter();
-        }else{
-            this.setRoot();
-        }
+        this.refresh();
     },
     mounted: function(){
     },
     watch: {
         '$route' (to, from) {
-            this.created();
+            this.refresh();
         }
     },
     computed: {
@@ -111,6 +113,14 @@ export default {
         },
     },
     methods:{
+        refresh: function(){
+            this.setRoot();
+            if(this.$route.query.q){
+                this.setFilter();
+            }else{
+                this.query = undefined;
+            }
+        },
         setRoot: function(){
             let id;
             if(this.root){
@@ -145,6 +155,10 @@ export default {
         setFilter(){
             this.query = filter.parse(this.$route.query.q);
         },
+        search(payload){
+            console.log(payload)
+            this.$router.push({ name:'note', params:{ id: this.$route.params.id }, query: {q: payload}});
+        }
     }
 }
 </script>
@@ -158,5 +172,10 @@ button.nofocus:focus:before{
     width: 100%;
     top: 48px;
     z-index: 5;
+}
+#note-tree ul{
+    padding-left: 16px;
+    margin-left: 8px;
+    border-left: 1px solid #EEEEEE;
 }
 </style>
