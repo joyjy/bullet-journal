@@ -101,7 +101,8 @@ const tokenize = function(text){
             case ')':
                 if(state == 'state'){
                     let peeked = symbols.peek();
-                    if(peeked.is('[') || peeked.is('(') && peeked.index == end-1){ // [] no content is not state
+                    if((ch == ']' && peeked.is('[') || ch == ')' && peeked.is('('))
+                        && peeked.index == end-1){ // [] no content is not state
                         state = 'text';
                     }
                     tokens.push(new Token(state, text, start, end+1)) // close symbol contains self
@@ -118,7 +119,7 @@ const tokenize = function(text){
             case '+':
             case '_':
                 let symbol = _.last(symbols);
-                if(symbol.ch == ch){
+                if(symbol && symbol.ch == ch){
 
                 }
             default:

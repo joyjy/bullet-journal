@@ -67,5 +67,17 @@ export default {
             iteratee(note, depth);
             this.each(note.notes, level, iteratee, depth+1)
         }
+    },
+    flattern: function(notes){
+        let array = [];
+        if(notes.length == 0){
+            return array;
+        }
+        for (let i = 0; i < notes.length; i++) {
+            let note = notes[i];
+            array.push(note);
+            array = array.concat(this.flattern(note.notes));
+        }
+        return array;
     }
 }

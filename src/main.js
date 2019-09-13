@@ -20,7 +20,5 @@ new Vue({
 }).$mount('#app')
 
 waitForStorageToBeReady(() => { 
-  if(store.state.notes.length == 0){
-    store.dispatch("newNote", {init: true})
-  }
+    store.dispatch("init");
 })

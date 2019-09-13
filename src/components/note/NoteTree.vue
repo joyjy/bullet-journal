@@ -1,13 +1,7 @@
 <template>
     <div>
         <v-navigation-drawer app clipped right class="px-2">
-            <v-chip-group column>
-                <v-chip v-for="(count, text) in $store.state.tag.flattern" :key="text"
-                    label small>
-                    <span class="font-weight-bold">{{ text }}</span>
-                    <span>({{ count }})</span>
-                </v-chip>
-            </v-chip-group>
+            <tag-all></tag-all>
         </v-navigation-drawer>
 
         <v-app-bar app flat dense clipped-right color="grey lighten-5">
@@ -35,6 +29,12 @@
                     </template>
                     <span>Toggle Outline Level</span>
                 </v-tooltip>
+                <v-btn text @click="$store.commit('backup')">
+                    Backup
+                </v-btn>
+                <v-btn text @click="$store.commit('restore')">
+                    Restore
+                </v-btn>
             </v-toolbar-items>
         </v-app-bar>
 
@@ -53,6 +53,8 @@
 
 <script>
 import NoteTreeItem from './NoteTreeItem.vue'
+import AllTag from '../tag/AllTag'
+
 import range from '@/lib/range'
 
 import _ from "lodash"
@@ -61,7 +63,6 @@ import traversal from "@/lib/tree"
 import draggable from "vuedraggable"
 
 export default {
-    name: "note-tree",
     props: ['root'],
     data: function(){
         return {
@@ -73,7 +74,8 @@ export default {
     },
     components:{
         draggable,
-        NoteTreeItem
+        NoteTreeItem,
+        "tag-all": AllTag,
     },
     created: function(){
         if(!this.root){

@@ -9,10 +9,11 @@
                 @input="saveNote"
                 @new-note="newNote"
                 @del-note="deleteNote"
-                @merge-note="mergeNoteToLast"
                 @downgrade-note="downgradeNote"
                 @upgrade-note="upgradeNote"
-                @nav-between-note="navigationNote($event)">
+                @up-note="upNote" 
+                @down-note="downNote" 
+                @nav-between-note="navigationNote">
             </editable-div>
         </div>
         <draggable tag="ul" v-model="noteList" :group="{ name: 'note-tree' }" ghost-class="moving-ghost"
@@ -59,55 +60,36 @@ export default {
             payload.note = this.note;
             this.$store.dispatch('saveNote', payload)
         },
-        newNote: function(text){
-            this.$store.dispatch('newNote', {
-                parent: this.parent, 
-                index: this.index+1, 
-                text: text
-            })
+        newNote: function(payload){
+            payload.index = payload.last ? this.index : this.index+1;
+            payload.parent = this.parent;
+            this.$store.dispatch('newNote', payload)
         },
         deleteNote: function(payload){
             // first node can't be remove, only empty
             if(this.index == 0 && this.parent.notes.length == 1 && !this.parent.id){
                 return;
             }
-            let last;
-            if(this.index == 0){
-                last = this.parent;
-            }else{
-                last = this.parent.notes[this.index-1];
-            }
-            this.$store.dispatch('deleteNote', {
-                parent: this.parent,
-                note: this.note,
-                index: this.index
-            }).then(() => {
-                if(payload && payload.keyboard){
-                    this.$store.commit("focus", {note: last, position: last.text.length})
+
+            if(payload && payload.keyboard){
+                let text = this.note.text;
+                let notes = this.note.notes;
+
+                let prev = this.$store.getters.findPrevNote(this.note)
+
+                if(!prev){
+                    throw "prev undefined"
                 }
-            })
-        },
-        mergeNoteToLast: function(){
-            if(this.index == 0 && !this.parent.id){ // first node can't be remove
-                return;
-            }
 
-            let last;
-            if(this.index == 0){
-                last = this.parent;
-            }else{
-                last = this.parent.notes[this.index-1];
-            }
-            let position = last.text.length;
-
-            this.$store.dispatch('saveNote', { 
-                note: last, 
-                text: last.text + this.note.text
-            }).then(() => {
-                this.$nextTick(() => {
-                    this.$store.commit("focus", {note: last, position: position})
+                let position = prev.text.length;
+                this.$store.dispatch('saveNote', { 
+                    note: prev, 
+                    text: prev.text + text,
+                    notes: prev.notes.concat(notes)
+                }).then(() => {
+                    this.$store.commit("focus", {note: prev, position: position})
                 })
-            })
+            }
             this.$store.dispatch('deleteNote', { 
                 parent: this.parent, 
                 note: this.note,
@@ -123,6 +105,16 @@ export default {
             payload.note = this.note;
             this.$store.dispatch('downgradeNote', payload)
         },
+        downNote: function(payload){
+            // last node can't down
+            if(this.index == this.parent.notes.length-1){
+                return;
+            }
+            payload.parent = this.parent;
+            payload.index = this.index;
+            payload.note = this.note;
+            this.$store.dispatch('downNote', payload)
+        },
         upgradeNote: function(payload){
             if(!this.parent.id){
                 return;
@@ -131,6 +123,16 @@ export default {
             payload.index = this.index;
             payload.note = this.note;
             this.$store.dispatch('upgradeNote', payload)
+        },
+        upNote: function(payload){
+            // first node can't up
+            if(this.index == 0){
+                return;
+            }
+            payload.parent = this.parent;
+            payload.index = this.index;
+            payload.note = this.note;
+            this.$store.dispatch('upNote', payload)
         },
         navigationNote: function(payload){
             let target;

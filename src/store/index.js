@@ -27,7 +27,8 @@ export default new Vuex.Store({
         tag: tagModule,
     },
     state: {
-        notes: []
+        notes: [],
+        flattern: []
     },
     getters: {
         findNoteById: (state) => (id) => {
@@ -38,6 +39,13 @@ export default new Vuex.Store({
         },
         findNoteByText: (state) => (text) => {
             return traversal.find(state.notes, (note) => note.text == text);
+        },
+        findPrevNote: (state) => (note) => {
+            let index = _.indexOf(state.flattern, note);
+            if(index == 0 || index == -1){
+                return undefined;
+            }
+            return state.flattern[index-1];
         }
     },
     mutations: {
@@ -47,6 +55,9 @@ export default new Vuex.Store({
             payload.note.text = payload.text;
             payload.note.tokens = payload.tokens;
             payload.note.display.cursor = payload.position;
+            if(payload.notes){
+                payload.note.notes = payload.notes
+            }
         },
         addNote(state, payload){
             let index = payload.index || 0;
@@ -71,6 +82,11 @@ export default new Vuex.Store({
             payload.parent.notes.splice(payload.index, 1);
             payload.note.display.cursor = payload.position;
         },
+        swapNote(state, payload){
+            let last = _.clone(payload.parent.notes[payload.toIndex]);
+            Vue.set(payload.parent.notes, payload.toIndex, payload.note);
+            Vue.set(payload.parent.notes, payload.fromIndex, last);
+        },
         dragToSort(state, payload){
             if(payload.note){
                 Vue.set(payload.note, "notes", payload.notes);
@@ -80,10 +96,24 @@ export default new Vuex.Store({
         },
         undo(state){
             undoRedoHistory.undo(state)
+        },
+        flattern(state, flattern){
+            state.flattern = flattern;
+        },
+        backup(state){
+            let snap = _.cloneDeep(state);
+            let value = JSON.stringify(snap)
+            window.localStorage.setItem("backup", value);
+        },
+        restore(){
+            let value = window.localStorage.getItem("backup");
+            if(value){
+                this.replaceState(JSON.parse(value));
+            }
         }
     },
     actions: {
-        saveNote({commit}, payload){
+        saveNote({state, commit}, payload){
             payload.tokens = parser.parse(payload.text);
 
             let oldTags = _.filter(payload.note.tokens, ['type','tag']);
@@ -92,7 +122,7 @@ export default new Vuex.Store({
             commit("saveNote", payload)
             commit("replaceTag", {oldTags, newTags})
         },
-        newNote({commit}, payload){
+        newNote({state, commit}, payload){
             let note = { 
                 id: _.now(),
                 text: "" ,
@@ -108,12 +138,21 @@ export default new Vuex.Store({
             payload.note = note;
 
             commit("addNote", payload)
+            commit("flattern", traversal.flattern(state.notes))
         },
-        deleteNote({commit}, payload){
+        deleteNote({state, commit}, payload){
             commit("deleteNote", payload)
+            commit("flattern", traversal.flattern(state.notes))
         },
-        downgradeNote({commit}, payload){
+        downgradeNote({state, commit}, payload){
             commit("downgradeNote", payload)
+            commit("flattern", traversal.flattern(state.notes))
+        },
+        downNote({state, commit}, payload){
+            payload.fromIndex = payload.index;
+            payload.toIndex = payload.index+1;
+            commit("swapNote", payload)
+            commit("flattern", traversal.flattern(state.notes))
         },
         upgradeNote({state, commit, getters}, payload){
 
@@ -127,9 +166,23 @@ export default new Vuex.Store({
             }
 
             commit("upgradeNote", payload)
+            commit("flattern", traversal.flattern(state.notes))
         },
-        dragToSort({commit}, payload){
+        upNote({state, commit}, payload){
+            payload.fromIndex = payload.index;
+            payload.toIndex = payload.index-1;
+            commit("swapNote", payload)
+            commit("flattern", traversal.flattern(state.notes))
+        },
+        dragToSort({state, commit}, payload){
             commit("dragToSort", payload)
+            commit("flattern", traversal.flattern(state.notes))
+        },
+        async init({commit, state}){
+            if(state.notes.length == 0){
+                await context.dispatch("newNote", {init: true})
+            }
+            commit("flattern", traversal.flattern(state.notes))
         }
     }
 })

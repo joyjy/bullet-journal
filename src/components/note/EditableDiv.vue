@@ -18,16 +18,7 @@
 import range from "@/lib/range"
 import parser from "@/lib/parser"
 
-// keyboard events' $emit
-// - [x] new-note(with optional text arg)
-// - [x] del-note
-// - [x] merge-note(delete self, content merge to prev)
-// - [x] downgrade-note
-// - [x] upgrade-note
-// - [ ] nav-between-note
-
 export default {
-    name: "editable-div",
     props: ['note'],
     data(){
         return {
@@ -77,10 +68,10 @@ export default {
     },
     methods: {
         inputText(e){
+            //console.log(e);
             if(e.inputType == "historyUndo"){
-                return; // document will handle this
+                return; // document will handle ctrl+z
             }
-            // console.log(e);
             if(e.isComposing && e.data == "　"){ // ime hasn't submit 
                 return;
             }
@@ -99,24 +90,26 @@ export default {
             let position = range.position(this.$el);
             if (position < text.length) {
                 let left = text.substring(0, position);
-                this.$emit('input', left)
-                this.$emit('new-note', text.substring(position))
-            } else{
-                this.$emit('new-note');
+                let right = text.substring(position);
+                this.$emit('new-note', {text:left, last: true})
+                this.$nextTick(() => {
+                    this.$emit('input', { text:right, position: -1})
+                    this.$store.commit("focus", { note: this.note, position: 0});
+                })
+            } else { // new at last
+                this.$emit('new-note', {});
             }
         },
         pressDelete(e){
-            //console.log(e, e.target.innerText, this.beforeDelete, range.position(this.$el));
+            console.log(e, e.target.innerText, this.beforeDelete, range.position(this.$el));
             if(e.isComposing){ // ime hasn't submit 
                 return;
             }
             let text = e.target.innerText;
             let position = range.position(this.$el);
 
-            if(this.beforeDelete == ""){
+            if(this.beforeDelete == "" || text == this.beforeDelete && position == 0){
                 this.$emit('del-note', {keyboard:true})
-            }else if(text == this.beforeDelete && position == 0){
-                this.$emit('merge-note')
             }
             this.beforeDelete = text;
         },
@@ -129,26 +122,33 @@ export default {
             }
         },
         pressNav(e){
-            //left arrow          37
-            //up arrow            38
-            //right arrow         39
-            //down arrow          40
-            // console.log(e);
-            // if(e.keyCode == 37){
-            //     let position = range.position(this.$el)
-            //     if(position == 0){
-            //         this.$emit("nav-between-note", "left");
-            //     }
-            // }else if(e.keyCode == 39){
-            //     let position = range.position(this.$el)
-            //     if(position == this.beforeDelete.length){ // todo
-            //         this.$emit("nav-between-note", "right");
-            //     }
-            // }else if(e.keyCode == 38){
-            //     this.$emit("nav-between-note", { direction: "up", position: range.position(this.$el) });
-            // }else if(e.keyCode == 40){
-            //     this.$emit("nav-between-note", { direction: "down", position: range.position(this.$el) })
-            // }
+            // left arrow          37
+            // up arrow            38
+            // right arrow         39
+            // down arrow          40
+            console.log(e);
+            let position = range.position(this.$el)
+            if(e.keyCode == 37){
+                if(position == 0){
+                    this.$emit("nav-between-note", "left");
+                }
+            }else if(e.keyCode == 39){
+                if(position == this.beforeDelete.length){
+                    this.$emit("nav-between-note", "right");
+                }
+            }else if(e.keyCode == 38){
+                if(navigator.platform.indexOf('Mac') > -1 && event.metaKey || event.ctrlKey){
+                    this.$emit("up-note", { position: position });
+                }else{
+                    this.$emit("nav-between-note", { direction: "up", position: position });
+                }
+            }else if(e.keyCode == 40){
+                if(navigator.platform.indexOf('Mac') > -1 && event.metaKey || event.ctrlKey){
+                    this.$emit("down-note", { position: position });
+                }else{
+                    this.$emit("nav-between-note", { direction: "down", position: position })
+                }
+            }
         }
     }
 }
