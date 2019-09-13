@@ -19,7 +19,7 @@ import range from "@/lib/range"
 import parser from "@/lib/parser"
 
 export default {
-    props: ['note'],
+    props: ['note', 'match'],
     data(){
         return {
             innerHtml: "",
@@ -28,7 +28,7 @@ export default {
         }
     },
     created: function() {
-        this.innerHtml = parser.html(this.note)
+        this.innerHtml = parser.html(this.note, this.match)
         this.beforeDelete = this.note.text;
     },
     mounted: function(){
@@ -48,7 +48,7 @@ export default {
     },
     watch: {
         text: function(){
-            this.innerHtml = parser.html(this.note)
+            this.innerHtml = parser.html(this.note, this.match);
             if(this.editing){
                 this.$nextTick(() => {
                     range.focus(this.$el, this.note.display.cursor)
@@ -184,5 +184,9 @@ span.state.done{
 span.state.time{
     color: #78909C; /*blue-grey lighten-1*/
     background-color: inherit;
+}
+span.matched{
+    background-color: #FFF9C4;  /* yellow lighten-4 */
+    border: 1px solid #E0E0E0; /* grey lighten-2 */
 }
 </style>

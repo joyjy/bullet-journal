@@ -43,7 +43,8 @@
         <v-content>
             <v-container fluid>
                 <draggable tag="ul" id="note-tree" class="body-2" v-model="noteList" :group="{ name: 'note-tree' }">
-                    <note-tree-item v-for="(note,i) in notes" :key="note.id" :note="note" :index="i" :parent="$data">
+                    <note-tree-item v-for="(note,i) in notes" :key="note.id"
+                        :note="note" :index="i" :parent="$data" :query="query">
                     </note-tree-item>
                 </draggable>
             </v-container>
@@ -59,6 +60,7 @@ import range from '@/lib/range'
 
 import _ from "lodash"
 import traversal from "@/lib/tree"
+import filter from "@/lib/filter"
 
 import draggable from "vuedraggable"
 
@@ -70,6 +72,7 @@ export default {
             breadsrumbs: [],
             collapseLevel: -1,
             depth: 0,
+            query: undefined,
         }
     },
     components:{
@@ -78,17 +81,20 @@ export default {
         "tag-all": AllTag,
     },
     created: function(){
-        if(!this.root){
-            this.setRoot(this.$route.params.id)
+        if(this.$route.name == 'filter'){
+            this.breadsrumbs = []
+            this.notes = this.$store.state.notes;
+            this.query = undefined;
+            this.setFilter();
         }else{
-            this.notes = this.root.notes;
+            this.setRoot();
         }
     },
     mounted: function(){
     },
     watch: {
         '$route' (to, from) {
-            this.setRoot(to.params.id)
+            this.created();
         }
     },
     computed: {
@@ -97,15 +103,21 @@ export default {
                 return this.notes;
             },
             set(value){
-                this.$store.dispatch("dragToSort", { notes: value})
-                    .then(() => {
-                        this.setRoot(this.$route.params.id)
-                    })
+                // this.$store.dispatch("dragToSort", { notes: value})
+                //     .then(() => {
+                //         this.setRoot(this.$route.params.id)
+                //     })
             }
         },
     },
     methods:{
-        setRoot: function(id){
+        setRoot: function(){
+            let id;
+            if(this.root){
+                id = this.root.id;
+            }else{
+                id = this.$route.params.id
+            }
             if(!id){
                 this.breadsrumbs = []
                 this.notes = this.$store.state.notes;
@@ -125,14 +137,14 @@ export default {
         switchCollapse(){
             this.collapseLevel++;
             let maxLevel = this.depth-2;
-            if(maxLevel > 3){
-                maxLevel = 3;
-            }
             if(this.collapseLevel > maxLevel){
                 this.collapseLevel = -1;
             }
             this.$store.commit("switchOutline", { notes: this.notes, level: this.collapseLevel });
-        }
+        },
+        setFilter(){
+            this.query = filter.parse(this.$route.query.q);
+        },
     }
 }
 </script>

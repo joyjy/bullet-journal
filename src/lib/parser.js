@@ -156,22 +156,43 @@ const tokenize = function(text){
     return tokens;
 }
 
+const addMatchTag = function(text, match, textOffset){
+    if(!match || !match.matched){
+        return text;
+    }
+
+    let start = match.start - textOffset;
+
+    if(start >= 0 && start < text.length && match.length <= text.length - start){
+        let left = text.substring(0, start);
+        let center = text.substring(start, start+match.length);
+        let right = text.substring(start+match.length, text.length);
+
+        return left + '<span class="matched">' + center + '</span>' + right;
+    }
+
+    return text;
+}
+
 export default {
     parse: function(text) {
         let tokens = tokenize(text)
         return tokens;
     },
-    html: function(note){
+    html: function(note, match){
         if(!note.tokens || note.tokens.length == 0){
             return note.text;
         }
 
         let htmlContent = "";
+        let textOffset = 0;
         for (let i = 0; i < note.tokens.length; i++) {
+
             let token = note.tokens[i];
+
             switch (token.type) {
                 case "tag":
-                    htmlContent += '<span class="'+token.type+'">' + token.text +'</span>'
+                    htmlContent += '<span class="'+token.type+'">' + addMatchTag(token.text, match, textOffset); +'</span>'
                     break
                 case "state":
                     let elClass = "state";
@@ -187,9 +208,11 @@ export default {
                 case "text":
                 case "empty":
                 default:
-                    htmlContent += token.text;
+                    htmlContent += addMatchTag(token.text, match, textOffset);
                     break;
             }
+
+            textOffset += token.text.length;
         }
 
         return htmlContent;

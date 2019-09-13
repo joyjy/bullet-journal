@@ -86,6 +86,7 @@ export default new Vuex.Store({
             let last = _.clone(payload.parent.notes[payload.toIndex]);
             Vue.set(payload.parent.notes, payload.toIndex, payload.note);
             Vue.set(payload.parent.notes, payload.fromIndex, last);
+            payload.note.display.cursor = payload.position;
         },
         dragToSort(state, payload){
             if(payload.note){
@@ -183,6 +184,7 @@ export default new Vuex.Store({
                 await context.dispatch("newNote", {init: true})
             }
             commit("flattern", traversal.flattern(state.notes))
+            commit("resetTag", state.notes)
         }
     }
 })

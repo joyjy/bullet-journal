@@ -1,11 +1,11 @@
 <template>
     <li class="note-item">
-        <div class="note-wrapper"> 
+        <div v-show="filtered" class="note-wrapper"> 
             <note-bullet :note="note" :collapsed="collapsed"
                 @collapse-note="$store.commit('collapse', note)"
                 @del-note="deleteNote">
             </note-bullet>
-            <editable-div :note="note"
+            <editable-div :note="note" :match="match"
                 @input="saveNote"
                 @new-note="newNote"
                 @del-note="deleteNote"
@@ -19,7 +19,8 @@
         <draggable tag="ul" v-model="noteList" :group="{ name: 'note-tree' }" ghost-class="moving-ghost"
             v-show="note.notes.length > 0 && !note.display.collapse">
             <note-tree-item v-for="(child,i) in note.notes" :key="child.id"
-                :note="child" :index="i" :parent="note">
+                :note="child" :index="i" :parent="note"
+                :query="query" @matched = "childrenMatch = childrenMatch || $event; $emit('matched', filtered)">
             </note-tree-item>
         </draggable>
     </li>
@@ -30,17 +31,24 @@ import NoteBullet from "./NoteBullet.vue"
 import EditableDiv from "./EditableDiv.vue"
 import range from "@/lib/range"
 
+import filter from "@/lib/filter"
+
 import draggable from "vuedraggable"
 
 export default {
     name: "note-tree-item",
-    props: ["parent", 'note', 'index'],
+    props: ["parent", 'note', 'index', 'query'],
     data: () => ({
+        match: {},
+        childrenMatch: false,
     }),
     components:{
         draggable,
         NoteBullet,
         EditableDiv
+    },
+    created: function(){
+        this.match = filter.match(this.note, this.query);
     },
     computed: {
         noteList: {
@@ -48,11 +56,22 @@ export default {
                 return this.note.notes;
             },
             set(value){
-                this.$store.dispatch("dragToSort", { notes: value, note: this.note})
+                // this.$store.dispatch("dragToSort", { notes: value, note: this.note})
             }
         },
         collapsed: function(){
             return this.note.display.collapse && this.note.notes.length > 0
+        },
+        filtered: function(){
+            return this.selfMatch || this.childrenMatch;
+        },
+        selfMatch: function(){
+            return this.match && this.match.matched
+        }
+    },
+    watch: {
+        selfMatch: function(){
+            this.$emit('matched', this.selfMatch)
         }
     },
     methods:{
