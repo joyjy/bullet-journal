@@ -18,7 +18,7 @@
         </div>
         <draggable tag="ul" v-model="noteList" :group="{ name: 'note-tree' }" ghost-class="moving-ghost"
             v-show="note.notes.length > 0 && !note.display.collapse">
-            <note-tree-item v-for="(child,i) in note.notes" :key="child.id"
+            <note-tree-item v-for="(child,i) in noteList" :key="child.id"
                 :note="child" :index="i" :parent="note"
                 :query="query" @matched = "childrenMatch = childrenMatch || $event; $emit('matched', filtered)">
             </note-tree-item>

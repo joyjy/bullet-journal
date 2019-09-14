@@ -1,30 +1,40 @@
 <template>
-  <NoteTree :root="note">
-      <template v-slot:toolbar>
-        {{ title }}
-      </template>
-  </NoteTree>
+  <app-layout>
+        <template v-slot:toolbar>
+            {{ title }}
+        </template>
+
+        <template v-slot:toolbar-items>
+            
+        </template>
+        
+        <v-row>
+            <note-tree-root :notes="note.notes" :parent="note"></note-tree-root>
+        </v-row>
+    </app-layout>
 </template>
 
 <script>
 import _ from "lodash"
 
-import NoteTree from "../note/NoteTree"
+import AppLayout from "../app/Layout"
+import NoteTreeRoot from "../note/NoteTreeRoot"
 
 export default {
     data: () => ({
         title: "",
-        note: {},
+        note: { notes: []},
         weekdays: ["Sun", "Mon", "Tus", "Wen", "Thu", "Fri", "Sat"]
     }),
     components:{
-        NoteTree
+        AppLayout,
+        NoteTreeRoot
     },
     created: async function(){
         let now = new Date();
-        let root = this.$store.getters.findNoteByText('Jibun');
+        let root = this.$store.getters.findNoteByText('Diary');
         if(!root){
-            await this.$store.dispatch("newNote", { text: 'Jibun'});
+            await this.$store.dispatch("newNote", { text: 'Diary'});
         }
 
         let year = now.getFullYear().toString();

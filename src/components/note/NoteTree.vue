@@ -1,77 +1,58 @@
 <template>
-    <div>
-        <v-navigation-drawer app clipped right class="px-2">
+    <app-layout :right-drawer="true">
+        <template v-slot:right-drawer>
             <tag-all></tag-all>
-        </v-navigation-drawer>
+        </template>
 
-        <v-app-bar app flat dense clipped-right color="grey lighten-5">
-            <slot name="toolbar">
-                <v-breadcrumbs :items="breadsrumbs" divider=">">
-                    <template v-slot:item="props">
-                        <v-breadcrumbs-item v-if="props.item.id" :to="{ name:'note', params:{ id: props.item.id }}">
-                            {{ props.item.text }}
-                        </v-breadcrumbs-item>
-                        <v-breadcrumbs-item v-else to="/">
-                            {{ props.item }}
-                        </v-breadcrumbs-item>
-                    </template>
-                </v-breadcrumbs>
-            </slot>
+        <template v-slot:toolbar>
+            <v-breadcrumbs :items="breadsrumbs" divider=">">
+                <template v-slot:item="props">
+                    <v-breadcrumbs-item v-if="props.item.id" :to="{ name:'note', params:{ id: props.item.id }}">
+                        {{ props.item.text }}
+                    </v-breadcrumbs-item>
+                    <v-breadcrumbs-item v-else to="/">
+                        {{ props.item }}
+                    </v-breadcrumbs-item>
+                </template>
+            </v-breadcrumbs>
+        </template>
 
-            <div class="flex-grow-1"></div>
+        <template v-slot:toolbar-items>
+            <v-text-field prepend-inner-icon="mdi-magnify" class="compact-form"
+                clearable solo rounded flat :value="$route.query.q"
+                @change="search" @click:clear="search('')">
+            </v-text-field>
 
-            <v-toolbar-items>
-                <slot name="toolbar-items">
-                    <v-text-field prepend-inner-icon="mdi-magnify" class="compact-form"
-                        clearable solo rounded flat :value="$route.query.q"
-                        @change="search" @click:clear="search('')">
-                    </v-text-field>
-                </slot>
-            </v-toolbar-items>
-
-            <v-toolbar-items>
-                <v-tooltip bottom>
-                    <template v-slot:activator="{ on }">
-                        <v-btn icon @click="switchCollapse" v-on="on" :class="{nofocus:true}">
-                            <v-icon>mdi-arrow-expand-vertical</v-icon>
-                        </v-btn>
-                    </template>
-                    <span>Toggle Outline Level</span>
-                </v-tooltip>
-                <v-btn text @click="$store.commit('backup')">
-                    Backup
-                </v-btn>
-                <v-btn text @click="$store.commit('restore')">
-                    Restore
-                </v-btn>
-            </v-toolbar-items>
-        </v-app-bar>
-
-        <v-divider id="app-bar-divider"></v-divider>
+            <v-tooltip bottom>
+                <template v-slot:activator="{ on }">
+                    <v-btn icon @click="switchCollapse" v-on="on">
+                        <v-icon>mdi-arrow-expand-vertical</v-icon>
+                    </v-btn>
+                </template>
+                <span>Toggle Outline Level</span>
+            </v-tooltip>
+            <v-btn text @click="$store.commit('backup')">
+                Backup
+            </v-btn>
+            <v-btn text @click="$store.commit('restore')">
+                Restore
+            </v-btn>
+        </template>
         
-        <v-content>
-            <v-container fluid>
-                <draggable tag="ul" id="note-tree" class="body-2" v-model="noteList" :group="{ name: 'note-tree' }">
-                    <note-tree-item v-for="(note,i) in notes" :key="note.id"
-                        :note="note" :index="i" :parent="$data" :query="query">
-                    </note-tree-item>
-                </draggable>
-            </v-container>
-        </v-content>
-    </div>
+        <note-tree-root :notes="notes" :query="query" :parent="$data"></note-tree-root>
+    </app-layout>
 </template>
 
 <script>
-import NoteTreeItem from './NoteTreeItem.vue'
+import AppLayout from '../app/Layout'
 import AllTag from '../tag/AllTag'
+import NoteTreeRoot from './NoteTreeRoot'
 
 import range from '@/lib/range'
 
 import _ from "lodash"
 import traversal from "@/lib/tree"
 import filter from "@/lib/filter"
-
-import draggable from "vuedraggable"
 
 export default {
     props: ['root'],
@@ -85,8 +66,8 @@ export default {
         }
     },
     components:{
-        draggable,
-        NoteTreeItem,
+        AppLayout,
+        NoteTreeRoot,
         "tag-all": AllTag,
     },
     created: function(){
@@ -164,18 +145,4 @@ export default {
 </script>
 
 <style>
-button.nofocus:focus:before{
-    opacity: 0 !important;
-}
-#app-bar-divider{
-    position: fixed;
-    width: 100%;
-    top: 48px;
-    z-index: 5;
-}
-#note-tree ul{
-    padding-left: 16px;
-    margin-left: 8px;
-    border-left: 1px solid #EEEEEE;
-}
 </style>
