@@ -1,11 +1,13 @@
 <template>
-  <app-layout>
+  <app-layout :right-drawer="true">
         <template v-slot:toolbar>
             {{ today.text }}
         </template>
 
         <template v-slot:toolbar-items>
-            <v-btn-toggle class="align-center" mandatory @change="view = views[$event]">
+            <v-btn-toggle class="align-center" mandatory
+                :value="$store.state.display.view['diary']" 
+                @change="$store.commit('switchView', {key:'diary', value:$event})">
                 <v-btn text small>
                     <v-icon>mdi-view-list</v-icon>
                 </v-btn>
@@ -22,8 +24,16 @@
         </template>
         
         <v-row no-gutters>
-            <v-col v-if="view == 'morning-diary' || view == 'day-column'" cols='3' class="border-right" no-gutters>
-                <v-subheader>{{ todo.text }}</v-subheader>
+            <v-col v-if="view == 'morning-diary' || view == 'day-column'" cols='2' class="border-right" no-gutters>
+                <v-subheader>
+                    {{ todo.text }}
+
+                    <div class="flex-grow-1"></div>
+                    <v-btn x-small text icon>
+                        <v-icon color="grey lighten-2">mdi-settings-outline</v-icon>
+                    </v-btn>
+                </v-subheader>
+
                 <note-tree-root :notes="todo.notes" :parent="todo"></note-tree-root>
             </v-col>
             <v-col no-gutters>
@@ -34,12 +44,24 @@
                     </v-col>
                 </v-row>
                 <v-row v-if="view == 'morning-diary'" class="border-top" no-gutters>
-                    <v-col cols="7" class="border-right">
-                        <v-subheader>{{ yesterday&&yesterday.text || '"Yesterday"'}}</v-subheader>
+                    <v-col class="border-right">
+                        <v-subheader>{{ yesterday&&yesterday.text || '"Yesterday"'}}
+
+                            <div class="flex-grow-1"></div>
+                            <v-btn x-small text icon>
+                                <v-icon color="grey lighten-2">mdi-settings-outline</v-icon>
+                            </v-btn>
+                        </v-subheader>
                         <note-tree-root v-if="yesterday" :notes="yesterday.notes" :parent="yesterday"></note-tree-root>
                     </v-col>
                     <v-col>
-                        <v-subheader>{{ lastYear&&lastYear.text || '"Last year"'}}</v-subheader>
+                        <v-subheader>{{ lastYear&&lastYear.text || '"Last year"'}}
+
+                            <div class="flex-grow-1"></div>
+                            <v-btn x-small text icon>
+                                <v-icon color="grey lighten-2">mdi-settings-outline</v-icon>
+                            </v-btn>
+                        </v-subheader>
                         <note-tree-root v-if="lastYear" :notes="lastYear.notes" :parent="lastYear"></note-tree-root>
                     </v-col>
                 </v-row>
@@ -62,7 +84,6 @@ export default {
         lastYear: null,
         yesterday: null,
         weekdays: ["Sun", "Mon", "Tus", "Wen", "Thu", "Fri", "Sat"],
-        view: 'day',
         views: ['day','day-column','morning-diary', 'jibun-week']
     }),
     components:{
@@ -95,6 +116,11 @@ export default {
         this.lastYear = this.$store.getters.findNoteBy(note => note.text == this.depart(this.prevDate(now, "year")).title);
         this.yesterday = this.$store.getters.findNoteBy(note => note.text == this.depart(this.prevDate(now, "day")).title);
         
+    },
+    computed: {
+        view(){
+            return this.views[this.$store.state.display.view['diary']]
+        }
     },
     methods: {
         depart(date){

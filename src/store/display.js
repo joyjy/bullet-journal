@@ -3,6 +3,12 @@ import traversal from "@/lib/tree"
 
 export default {
 
+    state: {
+        view:{
+            diary:0
+        }
+    },
+
     mutations: {
         collapse(state, note){
             note.display.collapse = !note.display.collapse
@@ -20,5 +26,8 @@ export default {
                 }
             })
         },
+        switchView(state, payload){
+            state.view[payload.key] = payload.value;
+        }
     }
 }

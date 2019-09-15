@@ -2,6 +2,7 @@
     <div>
         <v-navigation-drawer v-if="rightDrawer || false" app clipped right class="px-2">
             <slot name="right-drawer">
+                <tag-all-list></tag-all-list>
             </slot>
         </v-navigation-drawer>
 
@@ -30,8 +31,13 @@
 </template>
 
 <script>
+import AllTag from '../tag/AllTag'
+
 export default {
-    props: ['rightDrawer']
+    props: ['rightDrawer'],
+    components:{
+        "tag-all-list": AllTag,
+    }
 }
 </script>
 

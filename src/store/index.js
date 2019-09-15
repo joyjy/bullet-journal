@@ -184,7 +184,7 @@ export default new Vuex.Store({
         },
         async init({commit, state}){
             if(state.notes.length == 0){
-                await context.dispatch("newNote", {init: true})
+                await this.dispatch("newNote", {init: true})
             }
             commit("flattern", traversal.flattern(state.notes))
             commit("resetTag", state.notes)

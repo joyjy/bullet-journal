@@ -1,8 +1,5 @@
 <template>
     <app-layout :right-drawer="true">
-        <template v-slot:right-drawer>
-            <tag-all></tag-all>
-        </template>
 
         <template v-slot:toolbar>
             <v-breadcrumbs :items="breadsrumbs" divider=">">
@@ -45,7 +42,6 @@
 
 <script>
 import AppLayout from '../app/Layout'
-import AllTag from '../tag/AllTag'
 import NoteTreeRoot from './NoteTreeRoot'
 
 import range from '@/lib/range'
@@ -68,7 +64,6 @@ export default {
     components:{
         AppLayout,
         NoteTreeRoot,
-        "tag-all": AllTag,
     },
     created: function(){
         this.refresh();
