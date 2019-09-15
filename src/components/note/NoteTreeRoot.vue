@@ -1,5 +1,5 @@
 <template>
-    <draggable tag="ul" id="note-tree" class="body-2" v-model="noteList" :group="{ name: 'note-tree' }">
+    <draggable tag="ul" class="note-tree body-2" v-model="noteList" :group="{ name: 'note-tree' }">
         <note-tree-item v-for="(note,i) in noteList" :key="note.id"
             :note="note" :index="i" :parent="parent" :query="query">
         </note-tree-item>
@@ -39,10 +39,11 @@ export default {
 </script>
 
 <style>
-#note-tree {
+.note-tree {
     width: 100%;
+    margin-bottom: 1rem;
 }
-#note-tree ul{
+.note-tree ul{
     padding-left: 16px;
     margin-left: 8px;
     border-left: 1px solid #EEEEEE;

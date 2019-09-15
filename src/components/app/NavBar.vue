@@ -58,9 +58,9 @@
             </v-list-item-content>
           </template>
 
-          <v-list-item link>
+          <v-list-item :to="{name:'notebook', params:{name:'diary'}}">
             <v-list-item-content>
-              <v-list-item-title>Jibun</v-list-item-title>
+              <v-list-item-title>Diary</v-list-item-title>
             </v-list-item-content>
           </v-list-item>
 

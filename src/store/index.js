@@ -37,8 +37,9 @@ export default new Vuex.Store({
         findNoteStackById: (state) => (id) => {
             return traversal.path(state.notes, (note) => note.id == parseInt(id))
         },
-        findNoteByText: (state) => (text) => {
-            return traversal.find(state.notes, (note) => note.text == text);
+        findNoteBy: (state) => (predicate, parent) => {
+            let from = parent || state
+            return traversal.find(from.notes, (note) => predicate(note));
         },
         findPrevNote: (state) => (note) => {
             let index = _.indexOf(state.flattern, note);
@@ -140,6 +141,8 @@ export default new Vuex.Store({
 
             commit("addNote", payload)
             commit("flattern", traversal.flattern(state.notes))
+
+            return payload.note
         },
         deleteNote({state, commit}, payload){
             commit("deleteNote", payload)
@@ -185,6 +188,13 @@ export default new Vuex.Store({
             }
             commit("flattern", traversal.flattern(state.notes))
             commit("resetTag", state.notes)
+        },
+        async findByTextOrNewNote({state, commit, getters}, payload){
+            let found = getters.findNoteBy((note) => note.text == payload.text, payload.parent);
+            if(!found){
+                found = await this.dispatch("newNote", payload)
+            }
+            return found;
         }
     }
 })

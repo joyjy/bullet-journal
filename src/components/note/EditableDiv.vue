@@ -106,6 +106,7 @@ export default {
         pressDelete(e){
             console.log(e, e.target.innerText, this.beforeDelete, range.position(this.$el));
             if(e.isComposing){ // ime hasn't submit 
+                this.beforeDelete = text;
                 return;
             }
             let text = e.target.innerText;
