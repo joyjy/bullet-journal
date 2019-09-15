@@ -41,6 +41,9 @@ export default new Vuex.Store({
             let from = parent || state
             return traversal.find(from.notes, (note) => predicate(note));
         },
+        filterNoteBy: (state) => (predicate) => {
+            return _.filter(state.flattern, (note) => predicate(note));
+        },
         findPrevNote: (state) => (note) => {
             let index = _.indexOf(state.flattern, note);
             if(index == 0 || index == -1){

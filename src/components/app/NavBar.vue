@@ -44,7 +44,7 @@
           <v-list-item-title>Filter</v-list-item-title>
         </v-list-item>
 
-        <v-list-item link>
+        <v-list-item :to="{name:'agenda'}">
           <v-list-item-icon>
             <v-icon>mdi-calendar</v-icon>
           </v-list-item-icon>

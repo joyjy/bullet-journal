@@ -23,14 +23,14 @@
             </v-btn-toggle>
         </template>
         
-        <v-row no-gutters>
+        <v-row no-gutters class="fill-height">
             <v-col v-if="view == 'morning-diary' || view == 'day-column'" cols='2' class="border-right" no-gutters>
                 <v-subheader>
                     {{ todo.text }}
 
                     <div class="flex-grow-1"></div>
-                    <v-btn x-small text icon>
-                        <v-icon color="grey lighten-2">mdi-settings-outline</v-icon>
+                    <v-btn small text icon>
+                        <v-icon small color="grey lighten-2">mdi-settings-outline</v-icon>
                     </v-btn>
                 </v-subheader>
 
@@ -39,7 +39,6 @@
             <v-col no-gutters>
                 <v-row no-gutters>
                     <v-col>
-                        <v-subheader>"Today"</v-subheader>
                         <note-tree-root :notes="today.notes" :parent="today"></note-tree-root>
                     </v-col>
                 </v-row>
@@ -48,8 +47,8 @@
                         <v-subheader>{{ yesterday&&yesterday.text || '"Yesterday"'}}
 
                             <div class="flex-grow-1"></div>
-                            <v-btn x-small text icon>
-                                <v-icon color="grey lighten-2">mdi-settings-outline</v-icon>
+                            <v-btn small text icon>
+                                <v-icon small color="grey lighten-2">mdi-settings-outline</v-icon>
                             </v-btn>
                         </v-subheader>
                         <note-tree-root v-if="yesterday" :notes="yesterday.notes" :parent="yesterday"></note-tree-root>
@@ -58,8 +57,8 @@
                         <v-subheader>{{ lastYear&&lastYear.text || '"Last year"'}}
 
                             <div class="flex-grow-1"></div>
-                            <v-btn x-small text icon>
-                                <v-icon color="grey lighten-2">mdi-settings-outline</v-icon>
+                            <v-btn small text icon>
+                                <v-icon small color="grey lighten-2">mdi-settings-outline</v-icon>
                             </v-btn>
                         </v-subheader>
                         <note-tree-root v-if="lastYear" :notes="lastYear.notes" :parent="lastYear"></note-tree-root>

@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div class="fill-height">
         <v-navigation-drawer v-if="rightDrawer || false" app clipped right class="px-2">
             <slot name="right-drawer">
                 <tag-all-list></tag-all-list>
@@ -13,16 +13,15 @@
 
             <div class="flex-grow-1"></div>
 
-            <v-toolbar-items>
-                <slot name="toolbar-items">
-                </slot>
-            </v-toolbar-items>
+            <slot name="toolbar-items">
+            
+            </slot>
         </v-app-bar>
 
         <v-divider id="app-bar-divider"></v-divider>
         
-        <v-content>
-            <v-container fluid>
+        <v-content class="fill-height">
+            <v-container fluid fill-height :style="{'background-color':color}">
                 <slot name="default">
                 </slot>
             </v-container>
@@ -34,7 +33,7 @@
 import AllTag from '../tag/AllTag'
 
 export default {
-    props: ['rightDrawer'],
+    props: ['rightDrawer', 'color'],
     components:{
         "tag-all-list": AllTag,
     }
