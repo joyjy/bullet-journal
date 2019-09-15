@@ -63,6 +63,12 @@ export default new Vuex.Store({
                 payload.note.notes = payload.notes
             }
         },
+        saveContent(state, payload){
+            payload.before = _.clone(payload.note);
+
+            payload.note.content = payload.text;
+            payload.note.display.cursor = payload.position;
+        },
         addNote(state, payload){
             let index = payload.index || 0;
             if(payload.parent){

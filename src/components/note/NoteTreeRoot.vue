@@ -1,5 +1,5 @@
 <template>
-    <draggable tag="ul" class="note-tree body-2" v-model="noteList" :group="{ name: 'note-tree' }">
+    <draggable tag="ul" class="note-tree body-2 align-self-start" v-model="noteList" :group="{ name: 'note-tree' }">
         <note-tree-item v-for="(note,i) in noteList" :key="note.id"
             :note="note" :index="i" :parent="parent" :query="query">
         </note-tree-item>

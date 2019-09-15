@@ -5,16 +5,21 @@
                 @collapse-note="$store.commit('collapse', note)"
                 @del-note="deleteNote">
             </note-bullet>
-            <editable-div :note="note" :match="match"
-                @input="saveNote"
-                @new-note="newNote"
-                @del-note="deleteNote"
-                @downgrade-note="downgradeNote"
-                @upgrade-note="upgradeNote"
-                @up-note="upNote" 
-                @down-note="downNote" 
-                @nav-between-note="navigationNote">
-            </editable-div>
+            <div class="d-flex flex-column flex-grow-1">
+                <editable-div :note="note" :match="match"
+                    @input="saveNote"
+                    @new-note="newNote"
+                    @del-note="deleteNote"
+                    @downgrade-note="downgradeNote"
+                    @upgrade-note="upgradeNote"
+                    @up-note="upNote" 
+                    @down-note="downNote" 
+                    @nav-between-note="navigationNote">
+                </editable-div>
+                <editable-div v-if="note.content != undefined" :type="'content'"
+                    :note="note" :match="match" @input="saveContent">
+                </editable-div>
+            </div>
         </div>
         <draggable tag="ul" v-model="noteList" :group="{ name: 'note-tree' }" ghost-class="moving-ghost"
             v-show="note.notes.length > 0 && !note.display.collapse">
@@ -191,6 +196,10 @@ export default {
             this.$nextTick(() => {
                 this.$store.commit("focus", {note: target, position: payload.position})
             })
+        },
+        saveContent(payload){
+            payload.note = this.note;
+            this.$store.commit("saveContent", payload)
         }
     }
 }

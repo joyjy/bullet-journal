@@ -1,5 +1,5 @@
 <template>
-    <div class="note-text" contenteditable="true" 
+    <div :class="'note-' + (type || 'text')" contenteditable="true" 
         v-html="innerHtml" 
         @focus="editing = true"
         @blur="editing = false"
@@ -15,11 +15,12 @@
 </template>
 
 <script>
+import Vue from "vue"
 import range from "@/lib/range"
 import parser from "@/lib/parser"
 
 export default {
-    props: ['note', 'match'],
+    props: ['note', 'match', 'type'],
     data(){
         return {
             innerHtml: "",
@@ -28,8 +29,8 @@ export default {
         }
     },
     created: function() {
-        this.innerHtml = parser.html(this.note, this.match)
-        this.beforeDelete = this.note.text;
+        this.innerHtml = parser.html(this.note, this.match, this.type)
+        this.beforeDelete = this.text;
     },
     mounted: function(){
         if(this.note.display.cursor > -1){ // new created or recreated(up/down)
@@ -40,6 +41,9 @@ export default {
     },
     computed: {
         text(){
+            if(this.type == 'content'){
+                return this.note.content;
+            }
             return this.note.text;
         },
         cursor(){
@@ -48,10 +52,10 @@ export default {
     },
     watch: {
         match: function(){
-            this.innerHtml = parser.html(this.note, this.match);
+            this.innerHtml = parser.html(this.note, this.match, this.type);
         },
         text: function(){
-            this.innerHtml = parser.html(this.note, this.match);
+            this.innerHtml = parser.html(this.note, this.match, this.type);
             if(this.editing){
                 this.$nextTick(() => {
                     range.focus(this.$el, this.note.display.cursor)
@@ -59,6 +63,9 @@ export default {
             }
         },
         cursor: function(){
+            if(!this.editing){
+                return;
+            }
             if(this.cursor >= 0){
                 range.focus(this.$el, this.cursor)
             }
@@ -71,7 +78,7 @@ export default {
     },
     methods: {
         inputText(e){
-            //console.log(e);
+            // console.log(e);
             if(e.inputType == "historyUndo"){
                 return; // document will handle ctrl+z
             }
@@ -89,18 +96,26 @@ export default {
         },
         pressEnter(e){
             // console.log(e);
-            let text = e.target.innerText;
-            let position = range.position(this.$el);
-            if (position < text.length) {
-                let left = text.substring(0, position);
-                let right = text.substring(position);
-                this.$emit('new-note', {text:left, last: true})
-                this.$nextTick(() => {
-                    this.$emit('input', { text:right, position: -1})
-                    this.$store.commit("focus", { note: this.note, position: 0});
-                })
-            } else { // new at last
-                this.$emit('new-note', {});
+            switch(this.type){
+                case 'text':
+                    if(e.shiftKey){
+                        Vue.set(this.note, 'content', "");
+                        return;
+                    }
+                    let text = e.target.innerText;
+                    let position = range.position(this.$el);
+                    if (position < text.length) {
+                        let left = text.substring(0, position);
+                        let right = text.substring(position);
+                        this.$emit('new-note', {text:left, last: true})
+                        this.$nextTick(() => {
+                            this.$emit('input', { text:right, position: -1})
+                            this.$store.commit("focus", { note: this.note, position: 0});
+                        })
+                    } else { // new at last
+                        this.$emit('new-note', {});
+                    }
+                    break;
             }
         },
         pressDelete(e){
@@ -130,7 +145,7 @@ export default {
             // up arrow            38
             // right arrow         39
             // down arrow          40
-            console.log(e);
+            // console.log(e);
             let position = range.position(this.$el)
             if(e.keyCode == 37){
                 if(position == 0){
@@ -166,6 +181,10 @@ export default {
     border:none;
     outline:none;
 }
+.note-content{
+    font-size: 13px;
+    color: #757575; /* grey darken-1 */
+}
 span.tag{
     color:#78909C; /*blue-grey lighten-1*/
     cursor: pointer;
@@ -194,6 +213,6 @@ span.matched{
     border: 1px solid #E0E0E0; /* grey lighten-2 */
 }
 span.state > .matched{
-    color: #424242;
+    color: #424242; /* grey darken-3 */
 }
 </style>

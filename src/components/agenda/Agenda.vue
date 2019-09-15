@@ -96,6 +96,7 @@ export default {
             }
             this.start = start.date;
             this.end = end.date;
+            this.events = [];
             let day = moment(this.start);
             let endDay = moment(this.end).add(1, 'd');
             while(day.isBefore(endDay)){

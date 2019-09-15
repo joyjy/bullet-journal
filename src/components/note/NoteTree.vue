@@ -15,25 +15,27 @@
         </template>
 
         <template v-slot:toolbar-items>
-            <v-text-field prepend-inner-icon="mdi-magnify" class="compact-form"
-                clearable solo rounded flat :value="$route.query.q"
-                @change="search" @click:clear="search('')">
-            </v-text-field>
+            <v-toolbar-items>
+                <v-text-field prepend-inner-icon="mdi-magnify" class="compact-form"
+                    clearable solo rounded flat :value="$route.query.q"
+                    @change="search" @click:clear="search('')">
+                </v-text-field>
 
-            <v-tooltip bottom>
-                <template v-slot:activator="{ on }">
-                    <v-btn icon @click="switchCollapse" v-on="on">
-                        <v-icon>mdi-arrow-expand-vertical</v-icon>
-                    </v-btn>
-                </template>
-                <span>Toggle Outline Level</span>
-            </v-tooltip>
-            <v-btn text @click="$store.commit('backup')">
-                Backup
-            </v-btn>
-            <v-btn text @click="$store.commit('restore')">
-                Restore
-            </v-btn>
+                <v-tooltip bottom>
+                    <template v-slot:activator="{ on }">
+                        <v-btn icon @click="switchCollapse" v-on="on">
+                            <v-icon>mdi-arrow-expand-vertical</v-icon>
+                        </v-btn>
+                    </template>
+                    <span>Toggle Outline Level</span>
+                </v-tooltip>
+                <v-btn text @click="$store.commit('backup')">
+                    Backup
+                </v-btn>
+                <v-btn text @click="$store.commit('restore')">
+                    Restore
+                </v-btn>
+            </v-toolbar-items>
         </template>
         
         <note-tree-root :notes="notes" :query="query" :parent="$data"></note-tree-root>
@@ -132,7 +134,6 @@ export default {
             this.query = filter.parse(this.$route.query.q);
         },
         search(payload){
-            console.log(payload)
             this.$router.push({ name:'note', params:{ id: this.$route.params.id }, query: {q: payload}});
         }
     }

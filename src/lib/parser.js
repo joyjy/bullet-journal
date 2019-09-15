@@ -179,7 +179,11 @@ export default {
         let tokens = tokenize(text)
         return tokens;
     },
-    html: function(note, match){
+    html: function(note, match, type){
+        if(type == 'content'){
+            return note.content;
+        }
+
         if(!note.tokens || note.tokens.length == 0){
             return note.text;
         }

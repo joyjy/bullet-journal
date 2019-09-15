@@ -42,7 +42,7 @@ export default {
   font-family: 'Avenir', Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  color: #424242; /*grey darken-3*/
+  color: #212121; /*grey darken-4*/
 }
 
 .compact-form {
