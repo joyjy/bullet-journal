@@ -1,8 +1,8 @@
 <template>
-    <div :class="'note-' + (type || 'text')" contenteditable="true" 
+    <div :class="'note-' + (type || 'text') + ' text-truncate'" contenteditable="true" 
         v-html="innerHtml" 
-        @focus="editing = true"
-        @blur="editing = false"
+        @focus="editing = true; $emit('editing', editing)"
+        @blur="editing = false; $emit('editing', editing)"
         @input="inputText" 
         @keypress.enter.prevent="pressEnter" 
         @keyup.delete="pressDelete" 
@@ -17,11 +17,12 @@
 
 <script>
 import Vue from "vue"
+import moment from "moment"
 import range from "@/lib/range"
 import parser from "@/lib/parser"
 
 export default {
-    props: ['note', 'match', 'type'],
+    props: ['note', 'match', 'type', 'focus'],
     data(){
         return {
             innerHtml: "",
@@ -39,6 +40,11 @@ export default {
                 range.focus(this.$el, this.note.display.cursor);
             })
         }
+        this.$eventbus.$on('timestamp', (id) => {
+            if(this.note.id == id && this.type == 'text'){
+                console.log(moment())
+            }
+        })
     },
     computed: {
         text(){
@@ -63,10 +69,10 @@ export default {
                 })
             }
         },
-        cursor: function(){
-            if(!this.editing){
-                return;
-            }
+        cursor: function(to, from){
+            // if(!this.editing){ // todo: 2 cursor
+            //     return
+            // }
             if(this.cursor >= 0){
                 range.focus(this.$el, this.cursor)
             }
@@ -74,6 +80,11 @@ export default {
         editing(){
             if(!this.editing){
                 this.$store.commit("unfocus", { note: this.note});
+            }
+        },
+        focus(){
+            if(this.focus){
+                range.focus(this.$el, this.cursor)
             }
         }
     },
@@ -98,11 +109,16 @@ export default {
         pressEnter(e){
             // console.log(e);
             switch(this.type){
-                case 'text':
-                    if(e.shiftKey){
-                        Vue.set(this.note, 'content', "");
-                        return;
-                    }
+                case 'content':
+                    this.$emit('input', {text: this.note.content + "\n", position: this.note.content.length})
+                    break;
+                default:
+                    // if(e.shiftKey){
+                    //     if(!this.note.content){
+                    //         this.$emit('new-content', { text:"", position: 0})
+                    //     }
+                    //     return;
+                    // }
                     let text = e.target.innerText;
                     let position = range.position(this.$el);
                     if (position < text.length) {
@@ -121,19 +137,28 @@ export default {
         },
         pressDelete(e){
             console.log(e, e.target.innerText, this.beforeDelete, range.position(this.$el));
-            if(e.isComposing){ // ime hasn't submit 
-                this.beforeDelete = text;
-                return;
-            }
-            let text = e.target.innerText;
-            let position = range.position(this.$el);
+            switch(this.type){
+                case 'content':
+                    break;
+                default:
+                    if(e.isComposing){ // ime hasn't submit 
+                        this.beforeDelete =  e.target.innerText;
+                        return;
+                    }
+                    let text = e.target.innerText;
+                    let position = range.position(this.$el);
 
-            if(this.beforeDelete == "" || text == this.beforeDelete && position == 0){
-                this.$emit('del-note', {keyboard:true})
+                    if(this.beforeDelete == "" || text == this.beforeDelete && position == 0){
+                        this.$emit('del-note', {keyboard:true})
+                    }
+                    this.beforeDelete = text;
+                    break;
             }
-            this.beforeDelete = text;
         },
         pressTab(e){
+            if(this.type == 'content'){
+                return;
+            }
             // console.log(e);
             if(e.shiftKey){
                 this.$emit("upgrade-note", {position: range.position(this.$el)})
@@ -147,6 +172,9 @@ export default {
             // right arrow         39
             // down arrow          40
             // console.log(e);
+            if(this.type == 'content'){
+                return;
+            }
             let position = range.position(this.$el)
             if(e.keyCode == 37){
                 if(position == 0){

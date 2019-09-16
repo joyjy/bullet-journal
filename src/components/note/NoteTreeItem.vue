@@ -1,13 +1,14 @@
 <template>
     <li class="note-item">
-        <div v-show="filtered" class="note-wrapper"> 
-            <note-bullet :note="note" :collapsed="collapsed"
-                @collapse-note="$store.commit('collapse', note)"
+        <div v-show="filtered || ignoreFiltered" class="note-wrapper"> 
+            <note-bullet :note="note" :collapsed = "collapsed"
+                @collapse-note="switchCollapse"
                 @del-note="deleteNote">
             </note-bullet>
             <div class="d-flex flex-column flex-grow-1" style="width:100%">
                 <editable-div :note="note" :match="match"
                     @input="saveNote"
+                    @new-content="saveContent"
                     @new-note="newNote"
                     @del-note="deleteNote"
                     @downgrade-note="downgradeNote"
@@ -16,16 +17,16 @@
                     @down-note="downNote" 
                     @nav-between-note="navigationNote">
                 </editable-div>
-                <editable-div v-if="note.content != undefined" :type="'content'"
-                    :note="note" :match="match" @input="saveContent">
+                <editable-div v-if="note.content || focusContent" :type="'content'" :focus="focusContent"
+                    :note="note" :match="match" @input="saveContent" @editing="focusContent = $event">
                 </editable-div>
             </div>
         </div>
         <draggable tag="ul" v-model="noteList" :group="{ name: 'note-tree' }" ghost-class="moving-ghost"
-            v-show="note.notes.length > 0 && !note.display.collapse">
+            v-show="collapsed == 'expand' || collapsed == 'filtered'">
             <note-tree-item v-for="(child,i) in noteList" :key="child.id"
                 :note="child" :index="i" :parent="note"
-                :query="query" @matched = "childrenMatch = childrenMatch || $event; $emit('matched', filtered)">
+                :query="subQuery" @matched = "childrenMatchChanged">
             </note-tree-item>
         </draggable>
     </li>
@@ -46,6 +47,8 @@ export default {
     data: () => ({
         match: {},
         childrenMatch: false,
+        focusContent: false,
+        ignoreFiltered: false,
     }),
     components:{
         draggable,
@@ -66,25 +69,48 @@ export default {
             }
         },
         collapsed: function(){
-            return this.note.display.collapse && this.note.notes.length > 0
+            if(this.note.notes.length == ''){
+                return 'none'
+            }
+
+            if(this.query && !this.ignoreFiltered && this.filtered){
+                return 'filtered'
+            }
+
+            return this.note.display.collapse ? 'collapsed' : 'expand';
         },
         filtered: function(){
             return this.selfMatch || this.childrenMatch;
         },
         selfMatch: function(){
             return this.match && this.match.matched
+        },
+        subQuery: function(){
+            if(this.ignoreFiltered){
+                return null;
+            }
+            return this.query;
         }
     },
     watch: {
-        query: function(){
-            this.childrenMatch = false;
-            this.match = filter.match(this.note, this.query);
+        query: function(){ // new query input
+            this.ignoreFiltered = false;
+            this.childrenMatch = false; // reset child match
+            this.match = filter.match(this.note, this.query); // search self
         },
-        selfMatch: function(){
+        match: function(){ // after searched, $emit result;
             this.$emit('matched', this.selfMatch)
         }
     },
     methods:{
+        switchCollapse: function(){
+            this.ignoreFiltered = true;
+            this.$store.commit('collapse', this.note)
+        },
+        childrenMatchChanged: function(childMatch){
+            this.childrenMatch = this.childrenMatch || childMatch;
+            this.$emit('matched', this.filtered); // up boardcast match to display path;
+        },
         saveNote: function(payload){
             payload.note = this.note;
             this.$store.dispatch('saveNote', payload)
@@ -200,6 +226,7 @@ export default {
         saveContent(payload){
             payload.note = this.note;
             this.$store.commit("saveContent", payload)
+            this.focusContent = true;
         }
     }
 }
