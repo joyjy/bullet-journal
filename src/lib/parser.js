@@ -76,7 +76,7 @@ const tokenize = function(text){
             case '#':
             case '@':
             case '¥':
-                if(state == '$start'){
+                if(state == '$start' || state=='$split'){
                     state = 'tag';
                     symbols.push(new Symbol(ch, end))
                 }else if(state == 'empty'){
@@ -158,7 +158,7 @@ const tokenize = function(text){
 
 const addMatchTag = function(text, match, textOffset){
     if(!match || !match.matched || match.length == 0){
-        return text;
+        return text.replace(/</g, '&lt;');
     }
 
     let start = match.start - textOffset;
@@ -168,10 +168,10 @@ const addMatchTag = function(text, match, textOffset){
         let center = text.substring(start, start+match.length);
         let right = text.substring(start+match.length, text.length);
 
-        return left + '<span class="matched">' + center + '</span>' + right;
+        return left.replace(/</g, '&lt;') + '<span class="matched">' + center.replace(/</g, '&lt;') + '</span>' + right.replace(/</g, '&lt;');
     }
 
-    return text;
+    return text.replace(/</g, '&lt;');
 }
 
 export default {
@@ -185,7 +185,7 @@ export default {
         }
 
         if(!note.tokens || note.tokens.length == 0){
-            return note.text;
+            return note.text.replace(/</g, '&lt;');
         }
 
         let htmlContent = "";

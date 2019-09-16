@@ -71,11 +71,7 @@ export default new Vuex.Store({
         },
         addNote(state, payload){
             let index = payload.index || 0;
-            if(payload.parent){
-                payload.parent.notes.splice(index, 0, payload.note)
-            }else{
-                state.notes.splice(index, 0, payload.note)
-            }
+            payload.parent.notes.splice(index, 0, payload.note)
         },
         deleteNote(state, payload){
             payload.parent.notes.splice(payload.index, 1);
@@ -99,11 +95,7 @@ export default new Vuex.Store({
             payload.note.display.cursor = payload.position;
         },
         dragToSort(state, payload){
-            if(payload.note){
-                Vue.set(payload.note, "notes", payload.notes);
-            }else{
-                Vue.set(state, "notes", payload.notes);
-            }
+            Vue.set(payload.note, "notes", payload.notes);
         },
         undo(state){
             undoRedoHistory.undo(state)
@@ -144,6 +136,13 @@ export default new Vuex.Store({
             if(payload.text){
                 note.text = payload.text;
                 note.tokens = parser.parse(payload.text);
+
+                let oldTags = []
+                let newTags = _.filter(note.tokens, ['type','tag'])
+                commit("replaceTag", {oldTags, newTags})
+            }
+            if(!payload.parent){
+                payload.parent = state;
             }
 
             payload.note = note;
@@ -154,6 +153,9 @@ export default new Vuex.Store({
             return payload.note
         },
         deleteNote({state, commit}, payload){
+            let oldTags = _.filter(payload.note.tokens, ['type','tag'])
+            let newTags = []
+            commit("replaceTag", {oldTags, newTags})
             commit("deleteNote", payload)
             commit("flattern", traversal.flattern(state.notes))
         },
@@ -188,12 +190,15 @@ export default new Vuex.Store({
             commit("flattern", traversal.flattern(state.notes))
         },
         dragToSort({state, commit}, payload){
+            if(!payload.note){
+                payload.note = state;
+            }
             commit("dragToSort", payload)
             commit("flattern", traversal.flattern(state.notes))
         },
         async init({commit, state}){
             if(state.notes.length == 0){
-                await this.dispatch("newNote", {init: true})
+                await this.dispatch("newNote", {})
             }
             commit("flattern", traversal.flattern(state.notes))
             commit("resetTag", state.notes)

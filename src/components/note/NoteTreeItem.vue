@@ -5,7 +5,7 @@
                 @collapse-note="$store.commit('collapse', note)"
                 @del-note="deleteNote">
             </note-bullet>
-            <div class="d-flex flex-column flex-grow-1">
+            <div class="d-flex flex-column flex-grow-1" style="width:100%">
                 <editable-div :note="note" :match="match"
                     @input="saveNote"
                     @new-note="newNote"

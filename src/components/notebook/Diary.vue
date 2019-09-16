@@ -24,7 +24,7 @@
         </template>
         
         <v-row no-gutters class="fill-height">
-            <v-col v-if="view == 'morning-diary' || view == 'day-column'" cols='2' class="border-right" no-gutters>
+            <v-col v-if="view == 'morning-diary' || view == 'day-column'" cols='3' class="border-right" no-gutters>
                 <v-subheader>
                     {{ todo.text }}
 

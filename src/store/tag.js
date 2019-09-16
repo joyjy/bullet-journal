@@ -4,37 +4,45 @@ import parser from "@/lib/parser"
 
 export default {
     state: {
-        flattern: {},
+        '#': {},
+        '@': {},
+        '¥': {},
     },
     mutations: {
         resetTag(state, notes){
-            Vue.set(state, "flattern", {})
+            Vue.set(state, "#", {})
+            Vue.set(state, "@", {})
+            Vue.set(state, "¥", {})
+            Vue.delete(state, 'flattern')
             traversal.each(notes, -1, (n) => {
                 n.tokens = parser.parse(n.text);
                 _.each(n.tokens, (token) => {
                     if(token.type == 'tag'){
-                        if(!state.flattern[token.text]){
-                            Vue.set(state.flattern, token.text, 0);
+                        let group = token.text.charAt(0);
+                        if(!state[group][token.text]){
+                            Vue.set(state[group], token.text, 0);
                         }
-                        state.flattern[token.text]++;
+                        state[group][token.text]++;
                     }
                 })
             })
         },
         replaceTag(state, payload){
             _.each(payload.oldTags, tag => {
-                if(state.flattern[tag.text]){
-                    state.flattern[tag.text]--;
-                    if(state.flattern[tag.text] <= 0){
-                        delete state.flattern[tag.text];
+                let group = tag.text.charAt(0);
+                if(state[group][tag.text]){
+                    state[group][tag.text]--;
+                    if(state[group][tag.text] <= 0){
+                        delete state[group][tag.text];
                     }
                 }
             })
             _.each(payload.newTags, tag => {
-                if(!state.flattern[tag.text]){
-                    Vue.set(state.flattern, tag.text, 0);
+                let group = tag.text.charAt(0);
+                if(!state[group][tag.text]){
+                    Vue.set(state[group], tag.text, 0);
                 }
-                state.flattern[tag.text]++;
+                state[group][tag.text]++;
             })
         },
     }

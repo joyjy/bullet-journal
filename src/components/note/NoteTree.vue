@@ -71,6 +71,7 @@ export default {
         this.refresh();
     },
     mounted: function(){
+        this.$eventbus.$on('search', e => this.search(e))
     },
     watch: {
         '$route' (to, from) {

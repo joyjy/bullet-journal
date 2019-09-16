@@ -12,6 +12,8 @@ const waitForStorageToBeReady = async (next) => {
   next()
 }
 
+Vue.prototype.$eventbus = new Vue()
+
 new Vue({
   vuetify,
   router,

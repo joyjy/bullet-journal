@@ -3,14 +3,15 @@
         v-html="innerHtml" 
         @focus="editing = true"
         @blur="editing = false"
-        @input="inputText($event)" 
-        @keypress.enter.prevent="pressEnter($event)" 
-        @keyup.delete="pressDelete($event)" 
-        @keydown.tab.prevent="pressTab($event)" 
-        @keydown.up.prevent="pressNav($event)"
-        @keydown.down.prevent="pressNav($event)"
-        @keyup.left="pressNav($event)"
-        @keyup.right="pressNav($event)">
+        @input="inputText" 
+        @keypress.enter.prevent="pressEnter" 
+        @keyup.delete="pressDelete" 
+        @keydown.tab.prevent="pressTab" 
+        @keydown.up.prevent="pressNav"
+        @keydown.down.prevent="pressNav"
+        @keyup.left="pressNav"
+        @keyup.right="pressNav"
+        @dblclick.capture="click">
     </div>
 </template>
 
@@ -168,6 +169,13 @@ export default {
                     this.$emit("nav-between-note", { direction: "down", position: position })
                 }
             }
+        },
+        click(e){
+            if(e.target.classList.contains('tag')){
+                this.$eventbus.$emit('search', e.target.innerText)
+            }else if(e.target.classList.contains('matched')){
+                this.$eventbus.$emit('search', '')
+            }
         }
     }
 }
@@ -184,6 +192,7 @@ export default {
 .note-content{
     font-size: 13px;
     color: #757575; /* grey darken-1 */
+    white-space: pre-wrap;
 }
 span.tag{
     color:#78909C; /*blue-grey lighten-1*/
