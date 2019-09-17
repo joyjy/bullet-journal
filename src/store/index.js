@@ -204,7 +204,8 @@ export default new Vuex.Store({
             commit("resetTag", state.notes)
         },
         async findByTextOrNewNote({state, commit, getters}, payload){
-            let found = getters.findNoteBy((note) => note.text == payload.text, payload.parent);
+            let found = getters.findNoteBy((note) => note.text.replace(/\xa0/g, ' ') == payload.text, payload.parent);
+            console.log(found)
             if(!found){
                 found = await this.dispatch("newNote", payload)
             }

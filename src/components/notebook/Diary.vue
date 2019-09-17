@@ -90,7 +90,7 @@ export default {
         NoteTreeRoot
     },
     created: async function(){
-        this.notebook = await this.$store.dispatch("findByTextOrNewNote", { text: 'Diary'});
+        this.notebook = await this.$store.dispatch("findByTextOrNewNote", { text: "Diary #notebook"});
 
         let now = new Date();
         let parts = this.depart(now);

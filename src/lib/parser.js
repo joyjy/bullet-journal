@@ -8,6 +8,7 @@ class Token{
 }
 
 class Symbol{
+
     constructor(ch, index){
         this.ch = ch;
         this.index = index;
@@ -31,8 +32,9 @@ const tokenize = function(text){
         return undefined;
     }
     symbols.popUntil = function(ch){
+        let array = Array.isArray(ch)?ch:[ch];
         let pop = this.pop();
-        while(pop != ch && this.length > 0){
+        while(array.includes(pop) && this.length > 0){
             pop = this.pop();
         }
         return pop;
@@ -59,7 +61,7 @@ const tokenize = function(text){
                     let peeked = symbols.peek();
                     // [state] must has no space or only one space [ ]
                     if(peeked.is(' ') /* more than one space */ || peeked.index < end-1 /* has text before */ ){
-                        let poped = symbols.popUntil('[');
+                        let poped = symbols.popUntil(['[', '(', '<']);
                         state = 'text';
                         start = end = poped.index; // restart from [ as 'text'
                     }else{
@@ -77,7 +79,11 @@ const tokenize = function(text){
             case '@':
             case '¥':
                 if(state == '$start' || state=='$split'){
+                    if(start < end){
+                        tokens.push(new Token('text', text, start, end))
+                    }
                     state = 'tag';
+                    start = end;
                     symbols.push(new Symbol(ch, end))
                 }else if(state == 'empty'){
                     tokens.push(new Token(state, text, start, end))
@@ -88,6 +94,7 @@ const tokenize = function(text){
                 break;
             case '[':
             case '(':
+            case '<':
                 if(state == '$start'){ // no need handle $split cause only self target it *NOW*
                     state = 'state'
                     symbols.push(new Symbol(ch, end));
@@ -99,9 +106,10 @@ const tokenize = function(text){
                 break;
             case ']':
             case ')':
+            case '>':
                 if(state == 'state'){
                     let peeked = symbols.peek();
-                    if((ch == ']' && peeked.is('[') || ch == ')' && peeked.is('('))
+                    if((ch == ']' && peeked.is('[') || ch == ')' && peeked.is('(') || ch =='>' && peeked.is('<'))
                         && peeked.index == end-1){ // [] no content is not state
                         state = 'text';
                     }
@@ -118,7 +126,7 @@ const tokenize = function(text){
             case '/':
             case '+':
             case '_':
-                let symbol = _.last(symbols);
+                let symbol = symbols.peek();
                 if(symbol && symbol.ch == ch){
 
                 }
@@ -133,7 +141,7 @@ const tokenize = function(text){
                     let peeked = symbols.peek();
                     // [state] must has no space or only one space [ ]
                     if(peeked.is(' ') /* has space before */){ 
-                        let poped = symbols.popUntil('[');
+                        let poped = symbols.popUntil(['[', '(', '<']);
                         state = 'text';
                         start = end = poped.index; // restart from [ as 'text'
                     }
@@ -174,6 +182,28 @@ const addMatchTag = function(text, match, textOffset){
     return text.replace(/</g, '&lt;');
 }
 
+import moment from "moment";
+
+const parseTime = function (text, note){
+    let trySplit = text.lastIndexOf('-');
+    if(trySplit > -1){
+        let to = text.slice(trySplit, -1);
+        console.log(to)
+    }else{ // is time
+        let time = moment(text, ["(h:m), <h:m>"]);
+        if(note.baseDate){
+
+        }else{
+            let date = moment(note.id);
+            time.set('year', date.year());
+            time.set('month', date.month());
+            time.set('date', date.date())
+            
+            return time.format("YYYY-MM-DD ddd HH:mm");
+        }
+    }
+}
+
 export default {
     parse: function(text) {
         let tokens = tokenize(text)
@@ -181,7 +211,10 @@ export default {
     },
     html: function(note, match, type){
         if(type == 'content'){
-            return note.content;
+            if(note.content){
+                return note.content.replace(/</g, '&lt;');
+            }
+            return undefined;
         }
 
         if(!note.tokens || note.tokens.length == 0){
@@ -200,8 +233,11 @@ export default {
                     break
                 case "state":
                     let elClass = "state";
-                    if(token.text[0] == '('){
-                        elClass += " time"
+                    if(token.text[0] == '(' || token.text[0] == '<'){
+                        note.time = parseTime(token.text, note);
+                        if(note.time){
+                            elClass += " time"
+                        }
                     }else if(token.text == '[ ]' || token.text == '[\xa0]' || token.text == '[TODO]'){
                         elClass += " todo";
                     }else if(token.text == '[x]' || token.text == '[DONE]'){

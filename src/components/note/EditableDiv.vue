@@ -1,5 +1,5 @@
 <template>
-    <div :class="'note-' + (type || 'text') + ' text-truncate'" contenteditable="true" 
+    <div :class="'note-' + (type || 'text')" contenteditable="true" 
         v-html="innerHtml" 
         @focus="editing = true; $emit('editing', editing)"
         @blur="editing = false; $emit('editing', editing)"
@@ -185,13 +185,13 @@ export default {
                     this.$emit("nav-between-note", "right");
                 }
             }else if(e.keyCode == 38){
-                if(navigator.platform.indexOf('Mac') > -1 && event.metaKey || event.ctrlKey){
+                if(e.shiftKey){
                     this.$emit("up-note", { position: position });
                 }else{
                     this.$emit("nav-between-note", { direction: "up", position: position });
                 }
             }else if(e.keyCode == 40){
-                if(navigator.platform.indexOf('Mac') > -1 && event.metaKey || event.ctrlKey){
+                if(e.shiftKey){
                     this.$emit("down-note", { position: position });
                 }else{
                     this.$emit("nav-between-note", { direction: "down", position: position })

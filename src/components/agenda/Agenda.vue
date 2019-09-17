@@ -104,7 +104,7 @@ export default {
                 let notes = this.$store.getters.filterNoteBy(note => moment(note.id).isBetween(day, nextDay));
                 if(notes.length > 0){
                     this.events.push({
-                        name: notes.length +" notes",
+                        name: "Created " + notes.length + (notes.length==1? " note" : " notes"),
                         start:day.format("YYYY-MM-DD"),
                         notes: notes
                     })
