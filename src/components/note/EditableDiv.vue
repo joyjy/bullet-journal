@@ -229,7 +229,7 @@ span.tag{
 span.state{
     padding: 0 .2rem;
     margin-right: .1rem;
-    border-radius: 10%;
+    border-radius: 2px;
     background-color: #757575; /*grey darken-1*/
     font-weight: 700; /*.font-weight-bold */
     color: #ffffff;

@@ -62,6 +62,12 @@ export default new Vuex.Store({
             if(payload.notes){
                 payload.note.notes = payload.notes
             }
+            let token = _.find(payload.tokens, (token) => token.time);
+            if(token){
+                Vue.set(payload.note, 'time', token.time);
+            }else{
+                Vue.delete(payload.note, 'time');
+            }
         },
         saveContent(state, payload){
             payload.before = _.clone(payload.note);
@@ -205,7 +211,6 @@ export default new Vuex.Store({
         },
         async findByTextOrNewNote({state, commit, getters}, payload){
             let found = getters.findNoteBy((note) => note.text.replace(/\xa0/g, ' ') == payload.text, payload.parent);
-            console.log(found)
             if(!found){
                 found = await this.dispatch("newNote", payload)
             }

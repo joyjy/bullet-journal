@@ -17,9 +17,6 @@
                     @down-note="downNote" 
                     @nav-between-note="navigationNote">
                 </editable-div>
-                <div class="attrs d-flex align-items-center caption font-italic" v-if="note.time">
-                    <v-icon small>mdi-av-timer</v-icon>{{ note.time }}
-                </div>
                 <editable-div v-if="note.content || focusContent" :type="'content'" :focus="focusContent"
                     :note="note" :match="match" @input="saveContent" @editing="focusContent = $event">
                 </editable-div>
@@ -93,7 +90,7 @@ export default {
                 return null;
             }
             return this.query;
-        }
+        },
     },
     watch: {
         query: function(){ // new query input
@@ -242,9 +239,6 @@ export default {
 .note-wrapper{
     margin-top: .25rem;
     display: flex;
-}
-.attrs{
-    background-color: #ECEFF1 /*blue-grey lighten-5*/
 }
 .moving-ghost{
     display: none;

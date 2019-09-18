@@ -71,6 +71,9 @@ const tokenize = function(text){
                 break;
             case '，':
             case '：':
+                if(state == 'state'){
+                    state = 'text';
+                }
                 tokens.push(new Token(state, text, start, end))
                 start = end;
                 state = '$split';
@@ -109,11 +112,15 @@ const tokenize = function(text){
             case '>':
                 if(state == 'state'){
                     let peeked = symbols.peek();
-                    if((ch == ']' && peeked.is('[') || ch == ')' && peeked.is('(') || ch =='>' && peeked.is('<'))
-                        && peeked.index == end-1){ // [] no content is not state
+                    let closed = ch == ']' && peeked.is('[') || ch == ')' && peeked.is('(') || ch =='>' && peeked.is('<');
+                    if(!closed || closed && peeked.index == end-1){ // [] no content is not state
                         state = 'text';
                     }
-                    tokens.push(new Token(state, text, start, end+1)) // close symbol contains self
+                    let token = new Token(state, text, start, end+1);
+                    if(state == 'state'){
+                        token.time = parseTime(token)
+                    }
+                    tokens.push(token) // close symbol contains self
                     start = end+1;
                     state = '$split'
                 }else if(state == 'empty'){ // act as text
@@ -182,33 +189,51 @@ const addMatchTag = function(text, match, textOffset){
     return text.replace(/</g, '&lt;');
 }
 
-import moment from "moment";
+const parseTime = function (state){
 
-const parseTime = function (text, note){
-    let trySplit = text.lastIndexOf('-');
-    if(trySplit > -1){
-        let to = text.slice(trySplit, -1);
-        console.log(to)
-    }else{ // is time
-        let time = moment(text, ["(h:m), <h:m>"]);
-        if(note.baseDate){
+    let ch = state.text.charAt(0);
 
-        }else{
-            let date = moment(note.id);
-            time.set('year', date.year());
-            time.set('month', date.month());
-            time.set('date', date.date())
-            
-            return time.format("YYYY-MM-DD ddd HH:mm");
+    if(ch == '[') return;
+
+    let time = {
+        type: ch == '(' ? 'stamp': 'schedule', // (stamp), <schedule>,
+        startDate: null,
+        startTime: null,
+        endDate: null,
+        endTime: null,
+        repeated: null
+    };
+
+    let text = state.text;
+    let regexp = /(\d{4}-\d{1,2}-\d{1,2})\.{0,1}|(\d{2}:\d{2})~{0,1}/g
+
+    let matchGroups = text.matchAll(regexp);
+    for (const group of matchGroups) {
+        let value = group[2] || group[1] || group[0];
+        if(value.length <= 5){ // time
+            if(time.startTime == null){
+                time.startTime = value;
+            }else if(time.endTime == null){
+                time.endTime = value;
+            }
+        }else{ // date
+            if(time.startDate == null){
+                time.startDate = value;
+            }else if(time.endDate == null){
+                time.endDate = value;
+            }
         }
     }
+
+    if(!time.startTime && !time.startDate || time.endDate < time.startDate ){
+        return;
+    }
+
+    return time;
 }
 
 export default {
-    parse: function(text) {
-        let tokens = tokenize(text)
-        return tokens;
-    },
+    parse: tokenize,
     html: function(note, match, type){
         if(type == 'content'){
             if(note.content){
@@ -234,8 +259,7 @@ export default {
                 case "state":
                     let elClass = "state";
                     if(token.text[0] == '(' || token.text[0] == '<'){
-                        note.time = parseTime(token.text, note);
-                        if(note.time){
+                        if(token.time){
                             elClass += " time"
                         }
                     }else if(token.text == '[ ]' || token.text == '[\xa0]' || token.text == '[TODO]'){
