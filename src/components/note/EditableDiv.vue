@@ -1,8 +1,8 @@
 <template>
     <div :class="'note-' + (type || 'text')" contenteditable="true" 
         v-html="innerHtml" 
-        @focus="editing = true; $emit('editing', editing)"
-        @blur="editing = false; $emit('editing', editing)"
+        @focus="editing = true;"
+        @blur="editing = false; $emit('editing', false)"
         @input="inputText" 
         @keyup.delete="pressDelete" 
         @keypress.enter.prevent="pressEnter" 
@@ -80,7 +80,12 @@ export default {
         },
         cursor: function(){
             if(this.cursor >= 0){
-                range.focus(this.$el, this.cursor)
+                if(this.type == 'content'){
+                    this.$emit('editing', true);
+                }
+                this.$nextTick(() => {
+                    range.focus(this.$el, this.cursor)
+                })
             }
         },
         editing(){
@@ -118,8 +123,9 @@ export default {
                 this.inputDel = false;
                 return;
             }
-            if(this.type == 'content'){
+            if(this.type == 'content' && (this.cursor == 0 || this.cursor == -1)){
                 // todo
+                this.$emit('editing', false);
                 return;
             }
             if(this.cursor == 0 || this.cursor == -1){

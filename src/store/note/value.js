@@ -41,7 +41,7 @@ export default {
             note.display.cursor.content = position
             
             if(time){
-                Vue.set(note, 'schedule', token.time);
+                Vue.set(note, 'schedule', time);
             }else{
                 Vue.delete(note, 'schedule');
             }

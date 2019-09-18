@@ -17,7 +17,7 @@
                     @down-note="downNote" 
                     @nav-between-note="navigationNote">
                 </editable-div>
-                <editable-div v-show="displayContent" :type="'content'" :focus="focusContent"
+                <editable-div v-show="displayContent || focusContent" :type="'content'"
                     :note="note" :match="match" @input="saveNote" @editing="focusContent = $event">
                 </editable-div>
             </div>
@@ -93,7 +93,7 @@ export default {
         },
         displayContent: function(){
             if(this.note.content){
-                return this.note.content.text || this.note.display.cursor.content >= 0;
+                return this.note.content.text;
             }
             return false;
         }

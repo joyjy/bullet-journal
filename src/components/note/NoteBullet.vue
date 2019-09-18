@@ -3,13 +3,13 @@
         <div class="collapsed-ic" @click="onClick" >
             <v-icon :x-small="ic[collapsed] == 'mdi-filter-variant'" small>{{ic[collapsed]}}</v-icon>
         </div>
-        <div :class="['note-bullet', {time: note.time}]"  @dblclick="onDoubleClick" @contextmenu.prevent="toggleMenu">
-            <v-icon v-if="note.time && note.time.type=='stamp'" small>mdi-av-timer</v-icon>
-            <v-icon v-else-if="note.time && note.time.type=='schedule'" small>mdi-alarm</v-icon>
+        <div :class="['note-bullet', {time: note.time || note.schedule}]"  @dblclick="onDoubleClick" @contextmenu.prevent="toggleMenu">
+            <v-icon v-if="stamp" small>mdi-av-timer</v-icon>
+            <v-icon v-else-if="schedule" small>mdi-alarm</v-icon>
         </div>
         <v-menu v-model="menu" absolute :position-x="x" :position-y="y" offset-y nudge-left="30%" open-delay="800">
             <v-list subheader dense>
-                <v-list-item v-if="note.time">
+                <v-list-item v-if="note.time || note.schedule">
                     <v-list-item-content class="caption font-italic">
                         {{ timestamp }}
                     </v-list-item-content>
@@ -37,6 +37,12 @@
                     <v-list-item-action-text>
                     </v-list-item-action-text>
                 </v-list-item>
+                <v-divider></v-divider>
+                <v-list-item :to="{ name:'debug', params:{ id: this.note.id }}">
+                    <v-list-item-title>
+                        Debug
+                    </v-list-item-title>
+                </v-list-item>
             </v-list>
         </v-menu>
     </div>
@@ -61,41 +67,25 @@ export default {
         }
     }),
     computed:{
+        stamp: function(){
+            return this.note.time && this.note.time.type == 'stamp'
+        },
+        schedule: function(){
+            if(this.note.time){
+                return this.note.time.type == 'schedule'
+            }
+            return this.note.schedule;
+        },
         timestamp: function(){
-            let date = moment(this.note.time.startDate || this.note.id);
-            let time = moment(this.note.time.startTime, 'h:m');
-            time.set('year', date.year());
-            time.set('month', date.month());
-            time.set('date', date.date());
+            let time = this.note.time || this.note.schedule;
 
-            let endDate, endTime;
-            if(this.note.time.endDate){
-                endDate = moment(this.note.time.endDate);
-            }
-            if(this.note.time.endTime){
-                endTime = moment(this.note.time.endTime, 'h:m');
-            }
-            if(endTime){
-                if(endDate){
-                    endTime.set('year', endDate.year());
-                    endTime.set('month', endDate.month());
-                    endTime.set('date', endDate.date());
-                }else {
-                    endTime.set('year', date.year());
-                    endTime.set('month', date.month());
-                    endTime.set('date', date.date());
+            let start = time.start();
+            let value = start.format(time.startTime ? "YYYY-MM-DD ddd HH:mm" : "YYYY-MM-DD ddd");
 
-                    if(this.note.time.endTime < this.note.time.startTime){
-                        time.date(time.date()-1);
-                    }
-                }
-            }else if(endDate){
-                endTime = endDate;
-            }
-
-            let value = time.format('YYYY-MM-DD ddd HH:mm');
-            if(endTime){
-                value += " ~ " + endTime.format("YYYY-MM-DD ddd HH:mm") + ", " + moment.duration(endTime.diff(time)).humanize();
+            let end = time.end()
+            if(end.isValid()){
+                value += end.format(time.endTime ? " -> YYYY-MM-DD ddd HH:mm, " : " -> YYYY-MM-DD ddd, ~")
+                         + moment.duration(end.diff(start)).humanize();
             }
 
             return value;
