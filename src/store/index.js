@@ -5,8 +5,15 @@ Vue.use(Vuex)
 
 import VuexPersist from 'vuex-persist'
 const vuexPersist = new VuexPersist({
-  key: 'bullet-note',
-  storage: window.localStorage
+    key: 'bullet-note',
+    storage: window.localStorage,
+    reducer: (state) => ({
+        // agenda: state.agenda, /* map can't JSON.stringfy? */
+        flattern: state.flattern,
+        notes: state.notes,
+        settings: state.settings,
+        tag: state.tag
+    })
 })
 
 import _ from "lodash"
@@ -80,9 +87,7 @@ export default new Vuex.Store({
             state.flattern = flattern;
         },
         backup(state){
-            let snap = _.cloneDeep(state);
-            let value = JSON.stringify(snap)
-            window.localStorage.setItem("backup", value);
+            window.localStorage.setItem("backup", window.localStorage.getItem("bullet-note"));
         },
         restore(){
             let value = window.localStorage.getItem("backup");

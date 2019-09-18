@@ -4,20 +4,22 @@
         @focus="editing = true; $emit('editing', editing)"
         @blur="editing = false; $emit('editing', editing)"
         @input="inputText" 
-        @keypress.enter.prevent="pressEnter" 
         @keyup.delete="pressDelete" 
+        @keypress.enter.prevent="pressEnter" 
         @keydown.tab.prevent="pressTab" 
         @keydown.up.prevent="pressNav"
         @keydown.down.prevent="pressNav"
         @keyup.left="pressNav"
         @keyup.right="pressNav"
-        @dblclick.capture="click">
+        @dblclick.capture="dblclick">
     </div>
 </template>
 
 <script>
 import Vue from "vue"
+
 import moment from "moment"
+
 import range from "@/lib/range"
 import parser from "@/lib/parser"
 
@@ -27,12 +29,11 @@ export default {
         return {
             innerHtml: "",
             editing: false,
-            beforeDelete: "",
+            inputDel: false,
         }
     },
     created: function() {
         this.innerHtml = parser.html(this.note, this.match, this.type)
-        this.beforeDelete = this.text;
     },
     mounted: function(){
         this.$eventbus.$on('timestamp', () => {})
@@ -59,7 +60,7 @@ export default {
             if(this.type == 'content'){
                 return this.note.display.cursor.content;
             }
-            if(Number.isInteger(this.note.display.cursor)){
+            if(Number.isInteger(this.note.display.cursor)){ // todo old spec
                 return this.note.display.cursor;
             }
             return this.note.display.cursor.text;
@@ -97,9 +98,13 @@ export default {
             if(e.isComposing && e.data == "　"){ // ime hasn't submit 
                 return;
             }
-            if(e.data){ // only insert has data
-                this.beforeDelete = e.target.innerText;
+
+            if(e.isComposing && e.data == null){ // delete in ime
+                this.inputDel = true;
+            }else if(e.inputType == "deleteContentBackward"){
+                this.inputDel = true;
             }
+            
             let payload = { 
                 text: e.target.innerText,
                 type: this.type,
@@ -107,53 +112,54 @@ export default {
             };
             this.$emit("input", payload)
         },
-        pressEnter(e){
+        pressDelete(e){
             // console.log(e);
-            switch(this.type){
-                case 'content':
-                    this.$emit('input', {text: this.note.content + "\n", position: this.note.content.length})
-                    break;
-                default:
-                    if(e.shiftKey){
-                        if(!this.note.content.text){
-                            this.$emit('new-content', { text:"", position: 0, type:'content'})
-                        }
-                        return;
-                    }
-                    let text = e.target.innerText;
-                    let position = range.position(this.$el);
-                    if (position < text.length) {
-                        let left = text.substring(0, position);
-                        let right = text.substring(position);
-                        this.$emit('new-note', {text:left, last: true})
-                        this.$nextTick(() => {
-                            this.$emit('input', { text:right, position: -1})
-                            this.$store.commit("focus", { note: this.note, position: 0});
-                        })
-                    } else { // new at last
-                        this.$emit('new-note', {});
-                    }
-                    break;
+            if(this.inputDel){
+                this.inputDel = false;
+                return;
+            }
+            if(this.type == 'content'){
+                // todo
+                return;
+            }
+            if(this.cursor == 0 || this.cursor == -1){
+                this.$emit('del-note', {keyboard:true})
             }
         },
-        pressDelete(e){
-            console.log(e, e.target.innerText, this.beforeDelete, range.position(this.$el));
-            switch(this.type){
-                case 'content':
-                    break;
-                default:
-                    if(e.isComposing){ // ime hasn't submit 
-                        this.beforeDelete =  e.target.innerText;
-                        return;
-                    }
-                    let text = e.target.innerText;
-                    let position = range.position(this.$el);
+        pressEnter(e){
+            // console.log(e);
+            if(this.type == 'content'){
+                this.$emit('input', {
+                    text: this.note.content + "\n",
+                    position: this.note.content.length
+                })
+                return;
+            }
 
-                    if(this.beforeDelete == "" || text == this.beforeDelete && position == 0){
-                        this.$emit('del-note', {keyboard:true})
-                    }
-                    this.beforeDelete = text;
-                    break;
+            if(e.shiftKey){
+                if(!this.note.content.text){
+                    this.$emit('new-content', {
+                        text: "",
+                        position: 0,
+                        type:'content'
+                    })
+                }
+                return;
+            }
+
+            let text = e.target.innerText;
+            let position = range.position(this.$el);
+            if (position < text.length) {
+                let left = text.substring(0, position);
+                let right = text.substring(position);
+
+                this.$emit('new-note', { text:left, prev: true}) // default add at next
+                this.$nextTick(() => {
+                    this.$emit('input', { text:right, position: -1})
+                    this.$store.commit("focus", { note: this.note, position: 0});
+                })
+            } else {
+                this.$emit('new-note', {});
             }
         },
         pressTab(e){
@@ -172,19 +178,17 @@ export default {
             // up arrow            38
             // right arrow         39
             // down arrow          40
+
             // console.log(e);
             if(this.type == 'content'){
                 return;
             }
+
             let position = range.position(this.$el)
-            if(e.keyCode == 37){
-                if(position == 0){
-                    this.$emit("nav-between-note", "left");
-                }
-            }else if(e.keyCode == 39){
-                if(position == this.beforeDelete.length){
-                    this.$emit("nav-between-note", "right");
-                }
+            if(e.keyCode == 37 && position == 0){
+                this.$emit("nav-between-note", {direction: "left"});
+            }else if(e.keyCode == 39 && position == this.text.length){
+                this.$emit("nav-between-note", {direction: "right"});
             }else if(e.keyCode == 38){
                 if(e.shiftKey){
                     this.$emit("up-note", { position: position });
@@ -199,7 +203,7 @@ export default {
                 }
             }
         },
-        click(e){
+        dblclick(e){
             if(e.target.classList.contains('tag')){
                 this.$eventbus.$emit('search', e.target.innerText)
             }else if(e.target.classList.contains('matched')){

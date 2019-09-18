@@ -17,6 +17,14 @@
                 <v-divider></v-divider>
                 <v-list-item @click="">
                     <v-list-item-title>
+                        Add Content
+                    </v-list-item-title>
+                    <v-list-item-action-text>
+                        Shift+Enter
+                    </v-list-item-action-text>
+                </v-list-item>
+                <v-list-item @click="">
+                    <v-list-item-title>
                         Duplicate
                     </v-list-item-title>
                     <v-list-item-action-text>

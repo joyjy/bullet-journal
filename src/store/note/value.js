@@ -6,7 +6,7 @@ import parser from "@/lib/parser"
 
 export default {
     mutations:{
-        saveText(state, {note, text, tokens, position, time}){
+        saveText(state, {note, text, tokens, notes, position, time}){
 
             note.text = text;
             note.tokens = tokens;
@@ -58,6 +58,7 @@ export default {
             let timeToken = _.find(payload.tokens, token => token.time);
             if(timeToken && timeToken.time){
                 payload.time = timeToken.time;
+                payload.time.context = { id: payload.note.id };
             }
 
             if(payload.type == 'content'){

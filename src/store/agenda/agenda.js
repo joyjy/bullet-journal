@@ -17,8 +17,8 @@ export default {
 
             let createdAt = []
             traversal.each(rootState.notes, -1, (note) => {
-                let time = state.timestamps.get(note)
-                let schedule = state.schedules.get(note);
+                let time = state.timestamps.get(note.id)
+                let schedule = state.schedules.get(note.id);
                 if(time && time.isBetween(day, nextDay)){
                     events.push({
                         name: note.text,
@@ -48,17 +48,19 @@ export default {
                 })
             }
 
+            console.log(events)
+
             return events;
         }
     },
     mutations:{
         add(state, {note, time}){
             let map = time.type == 'stamp' ? state.timestamps : state.schedules;
-            map.set(note, time)
+            map.set(note.id, time)
         },
         remove(state, {note}){
-            state.timestamps.delete(note);
-            state.schedules.delete(note);
+            state.timestamps.delete(note.id);
+            state.schedules.delete(note.id);
         }
     }
 }

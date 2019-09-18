@@ -1,7 +1,9 @@
+import moment from "moment"
+
 export class Time{
 
-    constructor(note){
-        this.context = note;
+    constructor(){
+        this.context = null;
         this.type = null;
         this.startDate = null;
         this.startTime = null;
@@ -44,10 +46,10 @@ export class Time{
     }
 
     startFormat(){
-        this.start().format(this.startTime ? "YYYY-MM-DD HH:mm":"YYYY-MM-DD");
+        return this.start().format(this.startTime ? "YYYY-MM-DD HH:mm":"YYYY-MM-DD");
     }
 
     endFormat(){
-        this.end().format(this.endTime ? "YYYY-MM-DD HH:mm": "YYYY-MM-DD");
+        return this.end().format(this.endTime ? "YYYY-MM-DD HH:mm": "YYYY-MM-DD");
     }
 }

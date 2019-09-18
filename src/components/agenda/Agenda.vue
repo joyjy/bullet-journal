@@ -85,7 +85,7 @@ export default {
             }
         },
         weekdays(){
-            if(this.$store.state.display.agenda.weekStart == 0){
+            if(this.$store.state.settings.agenda.weekStart == 0){
                 return [0, 1, 2, 3, 4, 5, 6]
             }else{
                 return [1, 2, 3, 4, 5, 6, 0]

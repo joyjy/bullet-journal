@@ -17,7 +17,7 @@
                     @down-note="downNote" 
                     @nav-between-note="navigationNote">
                 </editable-div>
-                <editable-div v-if="displayContent" :type="'content'" :focus="focusContent"
+                <editable-div v-show="displayContent" :type="'content'" :focus="focusContent"
                     :note="note" :match="match" @input="saveNote" @editing="focusContent = $event">
                 </editable-div>
             </div>
@@ -122,7 +122,7 @@ export default {
             this.$store.dispatch('saveNote', payload)
         },
         newNote: function(payload){
-            payload.index = payload.last ? this.index : this.index+1;
+            payload.index = payload.prev ? this.index : this.index+1;
             payload.parent = this.parent;
             this.$store.dispatch('newNote', payload)
         },
@@ -197,36 +197,30 @@ export default {
         },
         navigationNote: function(payload){
             let target;
+            let position;
             switch(payload.direction){
                 case "up":
-                    if(this.index == 0 && !this.parent.id){
-                        return;
-                    }
-                    if(this.index == 0){
-                        target = this.parent;
-                    }else{
-                        target = this.parent.notes[this.index-1]; // todo
-                    }
+                case "left":
+                    target = this.$store.getters.findPrevNote(this.note);
+                    position = payload.position || (target ? target.text.length: 0);
                     break;
                 case "down":
-                    if(this.index == this.parent.notes.length-1
-                        && this.note.notes.length == 0){
-                        return
-                    }
-                    if(this.index == this.parent.notes.length-1){
-                        target = this.notes[0];
-                    }else{
-                        target = this.parent.notes[this.index+1]
-                    }
-
+                case "right":
+                    target = this.$store.getters.findNextNote(this.note);
+                    position = payload.position || 0
                     break;
             }
 
-            if(payload.position > target.text.length){
-                payload.position = target.text.length;
+            if(target == undefined){
+                return;
             }
+            
+            if(position > target.text.length){
+                position = target.text.length;
+            }
+
             this.$nextTick(() => {
-                this.$store.commit("focus", {note: target, position: payload.position})
+                this.$store.commit("focus", {note: target, position: position})
             })
         },
     }
