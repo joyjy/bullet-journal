@@ -47,6 +47,8 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex'
+
 import AppLayout from "../app/Layout"
 
 import moment from "moment"
@@ -67,7 +69,8 @@ export default {
     },
     created: function(){
     },
-    computed:{
+    computed: {
+        ...mapGetters('agenda', ['eventsAtDay']),
         now: {
             get(){
                 this.current.format("YYYY-MM-DD")
@@ -100,15 +103,8 @@ export default {
             let day = moment(this.start);
             let endDay = moment(this.end).add(1, 'd');
             while(day.isBefore(endDay)){
-                let nextDay = day.clone().add(1, 'd');
-                let notes = this.$store.getters.filterNoteBy(note => moment(note.id).isBetween(day, nextDay));
-                if(notes.length > 0){
-                    this.events.push({
-                        name: "Created " + notes.length + (notes.length==1? " note" : " notes"),
-                        start:day.format("YYYY-MM-DD"),
-                        notes: notes
-                    })
-                }
+                let dayEvents = this.eventsAtDay(day);
+                this.events = this.events.concat(dayEvents);
                 day.add(1, 'd')
             }
         }

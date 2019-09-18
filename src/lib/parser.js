@@ -112,6 +112,10 @@ const tokenize = function(text){
             case '>':
                 if(state == 'state'){
                     let peeked = symbols.peek();
+                    if(peeked.ch == ' ' || peeked.ch == '\xa0'){
+                        symbols.pop();
+                        peeked = symbols.peek();
+                    }
                     let closed = ch == ']' && peeked.is('[') || ch == ')' && peeked.is('(') || ch =='>' && peeked.is('<');
                     if(!closed || closed && peeked.index == end-1){ // [] no content is not state
                         state = 'text';
@@ -236,8 +240,8 @@ export default {
     parse: tokenize,
     html: function(note, match, type){
         if(type == 'content'){
-            if(note.content){
-                return note.content.replace(/</g, '&lt;');
+            if(note.content.text){
+                return note.content.text.replace(/</g, '&lt;');
             }
             return undefined;
         }

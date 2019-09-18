@@ -22,7 +22,7 @@ import range from "@/lib/range"
 import parser from "@/lib/parser"
 
 export default {
-    props: ['note', 'match', 'type', 'focus'],
+    props: ['note', 'match', 'type'],
     data(){
         return {
             innerHtml: "",
@@ -35,16 +35,18 @@ export default {
         this.beforeDelete = this.text;
     },
     mounted: function(){
-        if(this.note.display.cursor > -1){ // new created or recreated(up/down)
+        this.$eventbus.$on('timestamp', () => {})
+        if(Number.isInteger(this.note.display.cursor)){ // todo old spec
+            return
+        }
+        if(this.note.display.cursor.text > -1){ // new created or recreated(up/down)
             this.$nextTick(() => {
-                range.focus(this.$el, this.note.display.cursor);
+                range.focus(this.$el, this.note.display.cursor.text);
             })
         }
-        this.$eventbus.$on('timestamp', (id) => {
-            if(this.note.id == id && this.type == 'text'){
-                console.log(moment())
-            }
-        })
+    },
+    destroyed: function(){
+        this.$eventbus.$off('timestamp', () => {})
     },
     computed: {
         text(){
@@ -54,7 +56,13 @@ export default {
             return this.note.text;
         },
         cursor(){
-            return this.note.display.cursor;
+            if(this.type == 'content'){
+                return this.note.display.cursor.content;
+            }
+            if(Number.isInteger(this.note.display.cursor)){
+                return this.note.display.cursor;
+            }
+            return this.note.display.cursor.text;
         }
     },
     watch: {
@@ -65,14 +73,11 @@ export default {
             this.innerHtml = parser.html(this.note, this.match, this.type);
             if(this.editing){
                 this.$nextTick(() => {
-                    range.focus(this.$el, this.note.display.cursor)
+                    range.focus(this.$el, this.cursor)
                 })
             }
         },
-        cursor: function(to, from){
-            // if(!this.editing){ // todo: 2 cursor
-            //     return
-            // }
+        cursor: function(){
             if(this.cursor >= 0){
                 range.focus(this.$el, this.cursor)
             }
@@ -80,11 +85,6 @@ export default {
         editing(){
             if(!this.editing){
                 this.$store.commit("unfocus", { note: this.note});
-            }
-        },
-        focus(){
-            if(this.focus){
-                range.focus(this.$el, this.cursor)
             }
         }
     },
@@ -102,6 +102,7 @@ export default {
             }
             let payload = { 
                 text: e.target.innerText,
+                type: this.type,
                 position: range.position(this.$el)
             };
             this.$emit("input", payload)
@@ -113,12 +114,12 @@ export default {
                     this.$emit('input', {text: this.note.content + "\n", position: this.note.content.length})
                     break;
                 default:
-                    // if(e.shiftKey){
-                    //     if(!this.note.content){
-                    //         this.$emit('new-content', { text:"", position: 0})
-                    //     }
-                    //     return;
-                    // }
+                    if(e.shiftKey){
+                        if(!this.note.content.text){
+                            this.$emit('new-content', { text:"", position: 0, type:'content'})
+                        }
+                        return;
+                    }
                     let text = e.target.innerText;
                     let position = range.position(this.$el);
                     if (position < text.length) {

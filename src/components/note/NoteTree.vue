@@ -29,7 +29,7 @@
                     </template>
                     <span>Toggle Outline Level</span>
                 </v-tooltip>
-                <v-btn text @click="$store.commit('backup')">
+                <v-btn text @click="$store.dispatch('backup')">
                     Backup
                 </v-btn>
                 <v-btn text @click="$store.commit('restore')">
@@ -126,7 +126,7 @@ export default {
         switchCollapse(){
             this.collapseLevel++;
             let maxLevel = this.depth-2;
-            if(this.collapseLevel > maxLevel){
+            if(this.collapseLevel > _.min([maxLevel, 2])){
                 this.collapseLevel = -1;
             }
             this.$store.commit("switchOutline", { notes: this.notes, level: this.collapseLevel });

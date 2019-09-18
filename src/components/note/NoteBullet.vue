@@ -14,7 +14,8 @@
                         {{ timestamp }}
                     </v-list-item-content>
                 </v-list-item>
-                <v-list-item @click="$emit('del-note')">
+                <v-divider></v-divider>
+                <v-list-item @click="">
                     <v-list-item-title>
                         Duplicate
                     </v-list-item-title>

@@ -6,7 +6,7 @@
 
         <template v-slot:toolbar-items>
             <v-btn-toggle class="align-center" mandatory
-                :value="$store.state.display.view['diary']" 
+                :value="$store.state.settings.view['diary']" 
                 @change="$store.commit('switchView', {key:'diary', value:$event})">
                 <v-btn text small>
                     <v-icon>mdi-view-list</v-icon>
@@ -70,7 +70,10 @@
 </template>
 
 <script>
+import {mapActions, mapGetters} from "vuex"
+
 import _ from "lodash"
+import moment from "moment"
 
 import AppLayout from "../app/Layout"
 import NoteTreeRoot from "../note/NoteTreeRoot"
@@ -78,69 +81,66 @@ import NoteTreeRoot from "../note/NoteTreeRoot"
 export default {
     data: () => ({
         notebook: null,
-        today: { notes: []},
-        todo: {notes:[]},
+        now: moment(),
+        today: { notes: [] },
+        todo: { notes: [] },
         lastYear: null,
         yesterday: null,
         weekdays: ["Sun", "Mon", "Tus", "Wen", "Thu", "Fri", "Sat"],
-        views: ['day','day-column','morning-diary', 'jibun-week']
+        views: ['day', 'day-column', 'morning-diary', 'jibun-week']
     }),
     components:{
         AppLayout,
         NoteTreeRoot
     },
     created: async function(){
-        this.notebook = await this.$store.dispatch("findByTextOrNewNote", { text: "Diary #notebook"});
+        this.notebook = await this.findByTextOrCreate({ text: "Diary #notebook"});
 
-        let now = new Date();
-        let parts = this.depart(now);
+        let yearNote = await this.findByTextOrCreate({ text: this.parts.year, parent: this.notebook});
+        let monthNote = await this.findByTextOrCreate({ text: this.parts.month, parent: yearNote});
 
-        let yearNote = await this.$store.dispatch("findByTextOrNewNote", { text: parts.year, parent: this.notebook});
-        let monthNote = await this.$store.dispatch("findByTextOrNewNote", { text: parts.month, parent: yearNote});
-
-        this.today = await this.$store.dispatch("findByTextOrNewNote", { 
+        this.today = await this.findByTextOrCreate({ 
                                 parent: monthNote, 
                                 index: monthNote.notes.length, 
-                                text: parts.title
+                                text: this.parts.title
                             });
         if(this.today.notes.length == 0){
-            this.$store.dispatch("newNote", { parent: this.today });
+            this.newNote({ parent: this.today });
         }
 
-        this.todo = await this.$store.dispatch("findByTextOrNewNote", { text: 'Inbox'})
+        this.todo = await this.findByTextOrCreate({ text: 'Inbox'})
         if(this.todo.notes.length == 0){
-            this.$store.dispatch("newNote", { parent: this.todo });
+            this.newNote({ parent: this.todo });
         }
 
-        this.lastYear = this.$store.getters.findNoteBy(note => note.text == this.depart(this.prevDate(now, "year")).title);
-        this.yesterday = this.$store.getters.findNoteBy(note => note.text == this.depart(this.prevDate(now, "day")).title);
-        
+        this.lastYear = this.findNoteByText(this.lastYearTitle);
+        this.yesterday = this.findNoteByText(this.yesterdayTitle);
     },
     computed: {
+        ...mapGetters(['findNoteByText']),
         view(){
-            return this.views[this.$store.state.display.view['diary']]
+            return this.views[this.$store.state.settings.view['diary']]
+        },
+        parts(){
+            return {
+                year: this.now.format("YYYY"),
+                month: this.now.format("MM"),
+                day: this.now.format("DD"),
+                title: this.now.format("YYYY #MM-DD #ddd")
+            }
+        },
+        lastYearTitle(){
+            return this.now.clone().subtract(1, 'y').format("YYYY #MM-DD #ddd")
+        },
+        yesterdayTitle(){
+            return this.now.clone().subtract(1, 'd').format("YYYY #MM-DD #ddd")
         }
     },
     methods: {
-        depart(date){
-            let result = {};
-
-            result.year = date.getFullYear().toString()
-            result.month = date.getMonth() < 9 ? '0' + (date.getMonth()+1) : (date.getMonth()+1).toString()
-            result.day = date.getDate() < 10 ? '0' + date.getDate() : date.getDate().toString()
-            result.title = result.year + " #" + result.month + "-" + result.day + " #" + this.weekdays[date.getDay()]
-
-            return result;
-        },
-        prevDate(date, unit){
-            let newDate = new Date(date.getTime());
-            switch(unit){
-                case 'year': newDate.setFullYear(newDate.getFullYear-1);break;
-                case 'day': newDate.setDate(newDate.getDate()-1);break;
-            }
-            return newDate;
-        }
-        
+        ...mapActions({
+            findByTextOrCreate: 'findByTextOrNewNote',
+            newNote: 'newNote',
+        })
     }
 }
 </script>

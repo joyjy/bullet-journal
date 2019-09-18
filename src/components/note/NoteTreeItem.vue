@@ -8,7 +8,7 @@
             <div class="d-flex flex-column flex-grow-1" style="width:100%">
                 <editable-div :note="note" :match="match"
                     @input="saveNote"
-                    @new-content="saveContent"
+                    @new-content="saveNote"
                     @new-note="newNote"
                     @del-note="deleteNote"
                     @downgrade-note="downgradeNote"
@@ -17,8 +17,8 @@
                     @down-note="downNote" 
                     @nav-between-note="navigationNote">
                 </editable-div>
-                <editable-div v-if="note.content || focusContent" :type="'content'" :focus="focusContent"
-                    :note="note" :match="match" @input="saveContent" @editing="focusContent = $event">
+                <editable-div v-if="displayContent" :type="'content'" :focus="focusContent"
+                    :note="note" :match="match" @input="saveNote" @editing="focusContent = $event">
                 </editable-div>
             </div>
         </div>
@@ -91,6 +91,12 @@ export default {
             }
             return this.query;
         },
+        displayContent: function(){
+            if(this.note.content){
+                return this.note.content.text || this.note.display.cursor.content >= 0;
+            }
+            return false;
+        }
     },
     watch: {
         query: function(){ // new query input
@@ -105,7 +111,7 @@ export default {
     methods:{
         switchCollapse: function(){
             this.ignoreFiltered = true;
-            this.$store.commit('collapse', this.note)
+            this.$store.commit('collapse', { note: this.note })
         },
         childrenMatchChanged: function(childMatch){
             this.childrenMatch = this.childrenMatch || childMatch;
@@ -223,11 +229,6 @@ export default {
                 this.$store.commit("focus", {note: target, position: payload.position})
             })
         },
-        saveContent(payload){
-            payload.note = this.note;
-            this.$store.commit("saveContent", payload)
-            this.focusContent = true;
-        }
     }
 }
 </script>
