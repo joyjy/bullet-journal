@@ -51,7 +51,6 @@ import moment from "moment"
 
 export default {
     data:() =>({
-        type: 'month',
         typeLabels: {
             month: 'Month',
             week: 'Week'
@@ -86,6 +85,14 @@ export default {
                 return [0, 1, 2, 3, 4, 5, 6]
             }else{
                 return [1, 2, 3, 4, 5, 6, 0]
+            }
+        },
+        type:{
+            get(){
+                return this.$store.state.settings.agenda.type || 'month';
+            },
+            set(value){
+                this.$store.commit("agendaType", value)
             }
         }
     },

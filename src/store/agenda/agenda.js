@@ -54,8 +54,7 @@ export default {
                     source: createdAt
                 })
             }
-
-            console.log(day, events.length)
+            
             return events;
         }
     },
