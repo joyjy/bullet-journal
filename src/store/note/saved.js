@@ -9,6 +9,9 @@ export default {
     getters:{
         isStarred: (state) => (id) => {
             return _.findIndex(state.notes, n => n.id == id) > -1;
+        },
+        isSavedFilter: (state) => (text) => {
+            return _.indexOf(state.filters, text) > -1;
         }
     },
     mutations:{

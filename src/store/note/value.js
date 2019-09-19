@@ -62,18 +62,18 @@ export default {
             }
 
             if(payload.type == 'content'){
+                commit("tag/remove", {tags: _.filter(payload.note.content.tokens, ['type','tag'])})
                 commit("saveContent", payload)
                 commit("focus", payload)
-                commit("tag/remove", {tags: _.filter(payload.note.content.tokens, ['type','tag'])})
 
             } else { // text
+                commit("tag/remove", {tags: _.filter(payload.note.tokens, ['type','tag'])})
                 commit("saveText", payload)
                 commit("focus", payload)
-                commit("tag/remove", {tags: _.filter(payload.note.tokens, ['type','tag'])})
             }
-
-            commit("tag/add", {tags: _.filter(payload.tokens, ['type', 'tag'])})
             
+            commit("tag/add", {tags: _.filter(payload.tokens, ['type', 'tag'])})
+
             if(payload.time){
                 commit("agenda/add", payload)
             }

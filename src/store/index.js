@@ -105,7 +105,9 @@ export default new Vuex.Store({
                 await this.dispatch("newNote", {})
             }
             commit("flattern", traversal.flattern(state.notes))
-            // reset tag
+            _.each(state.flattern, function(n){
+                commit("tag/add", {tags: _.filter(n.tokens, ['type','tag'])})
+            })
             // reset agenda
             return Promise.resolve();
         },

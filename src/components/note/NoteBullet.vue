@@ -87,7 +87,7 @@ export default {
 
             if(typeof time === 'object'){
                 let swap = time;
-                time = new Time();
+                time = new Time(this.note);
                 Object.assign(time, swap) 
             }
 

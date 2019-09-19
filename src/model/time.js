@@ -2,8 +2,12 @@ import moment from "moment"
 
 export class Time{
 
-    constructor(){
-        this.context = null;
+    constructor(note){
+        if(note){
+            this.context = { id:note.id, baseDate: note.baseDate }
+        }else{
+            this.context = null;
+        }
         this.type = null;
         this.startDate = null;
         this.startTime = null;

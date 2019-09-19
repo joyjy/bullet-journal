@@ -2,7 +2,7 @@
     <app-layout :right-drawer="true">
 
         <template v-slot:toolbar>
-            <v-breadcrumbs :items="breadsrumbs" divider=">">
+            <v-breadcrumbs v-show="breadsrumbs.length>0" :items="breadsrumbs" divider=">">
                 <template v-slot:item="props">
                     <v-breadcrumbs-item v-if="props.item.id" :to="{ name:'note', params:{ id: props.item.id }}">
                         {{ props.item.text }}
@@ -12,13 +12,26 @@
                     </v-breadcrumbs-item>
                 </template>
             </v-breadcrumbs>
-            <v-btn text icon small v-if="query" @click="switchSaveFilter">
-                <v-icon>mdi-filter-outline</v-icon>
-            </v-btn>
-            <v-btn  text icon small v-else v-show="id" @click="switchStarredNote({note:notes[0]})">
-                <v-icon v-if="isStarred(id)" color="yellow darken-1">mdi-star</v-icon>
-                <v-icon v-else>mdi-star-outline</v-icon>
-            </v-btn>
+
+            <v-tooltip right>
+                <template v-slot:activator="{ on }">
+                    <v-btn text icon small v-show="query && !id" @click="switchSaveFilter({text:query.value})" v-on="on">
+                        <v-icon v-if="isSavedFilter(query.value)">mdi-filter</v-icon>
+                        <v-icon v-else>mdi-filter-outline</v-icon>
+                    </v-btn>
+                </template>
+                <span>Toggle Saved Filter</span>
+            </v-tooltip>
+
+            <v-tooltip right>
+                <template v-slot:activator="{ on }">
+                    <v-btn  text icon small v-show="id && !query" @click="switchStarredNote({note:notes[0]})" v-on="on">
+                        <v-icon v-if="isStarred(id)" color="yellow darken-1">mdi-star</v-icon>
+                        <v-icon v-else>mdi-star-outline</v-icon>
+                    </v-btn>
+                </template>
+                <span>Toggle Starred Note</span>
+            </v-tooltip>
         </template>
 
         <template v-slot:toolbar-items>
@@ -90,7 +103,8 @@ export default {
     },
     computed: {
         ...mapGetters({
-            isStarred: "saved/isStarred"
+            isStarred: "saved/isStarred",
+            isSavedFilter: "saved/isSavedFilter"
         }),
         noteList: {
             get(){

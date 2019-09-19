@@ -48,12 +48,23 @@
 
         </v-list-group>
 
-        <v-list-item link>
-          <v-list-item-icon>
-            <v-icon>mdi-filter</v-icon>
-          </v-list-item-icon>
-          <v-list-item-title>Filter</v-list-item-title>
-        </v-list-item>
+
+
+        <v-list-group prepend-icon="mdi-filter" no-action>
+          <template v-slot:activator>
+            <v-list-item-content>
+              <v-list-item-title>Filter</v-list-item-title>
+            </v-list-item-content>
+          </template>
+
+          <v-list-item v-for="text in $store.state.saved.filters"
+            :key="text" :to="{name: 'note', query: {q: text}} ">
+            <v-list-item-content>
+              <v-list-item-title>{{ text }}</v-list-item-title>
+            </v-list-item-content>
+          </v-list-item>
+
+        </v-list-group>
 
         <v-list-item :to="{name:'agenda'}">
           <v-list-item-icon>
