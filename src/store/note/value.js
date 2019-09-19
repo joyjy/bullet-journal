@@ -4,6 +4,8 @@ import _ from "lodash"
 
 import parser from "@/lib/parser"
 
+import { toTime } from "@/model/time"
+
 export default {
     mutations:{
         saveText(state, {note, text, tokens, notes, position, time}){
@@ -46,7 +48,8 @@ export default {
                 Vue.delete(note, 'schedule');
             }
         },
-        saveAttrs(state, payload){
+        time(state, {note, token}){
+            token.time = toTime(token.time, note)
         }
     },
     actions: {

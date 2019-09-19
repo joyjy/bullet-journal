@@ -1,7 +1,7 @@
 <template>
     <app-layout color="white">
         <template v-slot:toolbar>
-            <v-btn outlined class="mr-4">
+            <v-btn outlined class="mr-4" @click="setToday">
                 Today
             </v-btn>
 
@@ -28,26 +28,22 @@
               <v-list-item @click="type = 'month'">
                 <v-list-item-title>Month</v-list-item-title>
               </v-list-item>
+              <v-list-item @click="type = 'week'">
+                <v-list-item-title>Week</v-list-item-title>
+              </v-list-item>
             </v-list>
           </v-menu>
         </template>
 
         <v-calendar ref="calendar" :type="type" :weekdays="weekdays" @change="update"
-            v-model="now" :start="start" :end="end" :events = "events"
-            class="border-top border-left" >
-            <!-- <template v-slot:day="{date}">
-                <div :style="{'max-height': '1rem'}">
-                    <div class="body-2" v-for="note in notesIn(date)" :key="note.id">
-                        - {{note.text}}
-                    </div>
-                </div>
-            </template> -->
+            v-model="now" :start="start" :end="end" :events = "events" :event-color="eventColor"
+            class="border-top border-left" :style="{'width':'100%'}" >
         </v-calendar>
     </app-layout>
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
+import { mapState, mapGetters } from 'vuex'
 
 import AppLayout from "../app/Layout"
 
@@ -57,7 +53,8 @@ export default {
     data:() =>({
         type: 'month',
         typeLabels: {
-            month: 'Month'
+            month: 'Month',
+            week: 'Week'
         },
         current: moment(),
         start: null,
@@ -93,12 +90,18 @@ export default {
         }
     },
     methods: {
+        setToday(){
+            this.now = moment()
+        },
         update({start, end}){
             if(this.start == start.date && this.end == end.date){
                 return;
             }
             this.start = start.date;
             this.end = end.date;
+            this.refreshEvents();
+        },
+        refreshEvents(){
             this.events = [];
             let day = moment(this.start);
             let endDay = moment(this.end).add(1, 'd');
@@ -107,6 +110,12 @@ export default {
                 this.events = this.events.concat(dayEvents);
                 day.add(1, 'd')
             }
+        },
+        eventColor(event){
+            if(Array.isArray(event.source)){
+                return "grey"
+            }
+            return "primary";
         }
     }
 }

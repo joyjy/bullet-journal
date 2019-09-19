@@ -52,7 +52,7 @@
 import _ from 'lodash'
 import moment from 'moment';
 
-import { Time } from '@/model/time'
+import { toTime } from '@/model/time'
 
 export default {
     props:['note', 'collapsed'],
@@ -85,11 +85,7 @@ export default {
                 return
             }
 
-            if(typeof time === 'object'){
-                let swap = time;
-                time = new Time(this.note);
-                Object.assign(time, swap) 
-            }
+            time = toTime(time, this.note);
 
             let start = time.start();
             let value = start.format(time.startTime ? "YYYY-MM-DD ddd HH:mm" : "YYYY-MM-DD ddd");

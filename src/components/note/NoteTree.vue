@@ -15,7 +15,7 @@
 
             <v-tooltip right>
                 <template v-slot:activator="{ on }">
-                    <v-btn text icon small v-show="query && !id" @click="switchSaveFilter({text:query.value})" v-on="on">
+                    <v-btn text icon small v-if="query && !id" @click="switchSaveFilter({text:query.value})" v-on="on">
                         <v-icon v-if="isSavedFilter(query.value)">mdi-filter</v-icon>
                         <v-icon v-else>mdi-filter-outline</v-icon>
                     </v-btn>
@@ -25,7 +25,7 @@
 
             <v-tooltip right>
                 <template v-slot:activator="{ on }">
-                    <v-btn  text icon small v-show="id && !query" @click="switchStarredNote({note:notes[0]})" v-on="on">
+                    <v-btn  text icon small v-if="id && !query" @click="switchStarredNote({note:notes[0]})" v-on="on">
                         <v-icon v-if="isStarred(id)" color="yellow darken-1">mdi-star</v-icon>
                         <v-icon v-else>mdi-star-outline</v-icon>
                     </v-btn>

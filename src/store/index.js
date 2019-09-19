@@ -8,7 +8,7 @@ const vuexPersist = new VuexPersist({
     key: 'bullet-note',
     storage: window.localStorage,
     reducer: (state) => ({
-        // agenda: state.agenda, /* map can't JSON.stringfy? */
+        agenda: state.agenda,
         // flattern: state.flattern,
         notes: state.notes,
         saved: state.saved,
@@ -106,9 +106,18 @@ export default new Vuex.Store({
             }
             commit("flattern", traversal.flattern(state.notes))
             _.each(state.flattern, function(n){
-                commit("tag/add", {tags: _.filter(n.tokens, ['type','tag'])})
+                let tags = [];
+                _.each(n.tokens, function(t){
+                    if(t.type == 'tag'){
+                        tags.push(t);
+                    }else if(t.time){
+                        if(typeof t.time === 'object'){
+                            commit("time", {note:n, token:t})
+                        }
+                    }
+                })
+                commit("tag/add", {tags})
             })
-            // reset agenda
             return Promise.resolve();
         },
         async findByTextOrNewNote({state, commit, getters}, payload){

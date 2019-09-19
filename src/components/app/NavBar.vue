@@ -2,19 +2,18 @@
     <v-navigation-drawer expand-on-hover app mini-variant-width="64">
       <template v-slot:prepend>
         <v-list>
-          <v-list-item>
+          <v-list-item link two-line>
             <v-list-item-avatar>
               <v-avatar color="grey lighten-3">
                 <span class="headline">J</span>
               </v-avatar>
             </v-list-item-avatar>
-          </v-list-item>
 
-          <v-list-item link two-line>
             <v-list-item-content>
               <v-list-item-title class="title">JoYJY</v-list-item-title>
               <v-list-item-subtitle>joyjy2ah@gmail.com</v-list-item-subtitle>
             </v-list-item-content>
+            
             <v-list-item-action>
               <v-icon>mdi-menu-down</v-icon>
             </v-list-item-action>
@@ -48,12 +47,10 @@
 
         </v-list-group>
 
-
-
         <v-list-group prepend-icon="mdi-filter" no-action>
           <template v-slot:activator>
             <v-list-item-content>
-              <v-list-item-title>Filter</v-list-item-title>
+              <v-list-item-title>Saved Filter</v-list-item-title>
             </v-list-item-content>
           </template>
 

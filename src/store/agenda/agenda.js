@@ -1,13 +1,17 @@
+import Vue from 'vue'
+
 import _ from 'lodash'
 import moment from "moment"
 
 import traversal from "@/lib/tree"
 
+import {toTime} from "@/model/time"
+
 export default {
     namespaced: true,
     state: {
-        timestamps: new Map(),
-        schedules: new Map(),
+        timestamps: {},
+        schedules: {},
     },
     getters:{
         eventsAtDay: (state, getters, rootState, rootGetters) => (day) =>{
@@ -16,9 +20,9 @@ export default {
             let nextDay = day.clone().add(1, 'd');
 
             let createdAt = []
+
             traversal.each(rootState.notes, -1, (note) => {
-                let time = state.timestamps.get(note.id)
-                let schedule = state.schedules.get(note.id);
+                let time = toTime(state.timestamps[note.id], note)
                 if(time && time.isBetween(day, nextDay)){
                     events.push({
                         name: note.text,
@@ -27,14 +31,17 @@ export default {
                         source: note
                     })
                 }
+                
+                let schedule = toTime(state.schedules[note.id], note);
                 if(schedule && schedule.isBetween(day, nextDay)){
                     events.push({
                         name: note.text,
-                        start: time.startFormat(),
-                        end: time.endFormat(),
+                        start: schedule.startFormat(),
+                        end: schedule.endFormat(),
                         source:note
                     })
                 }
+
                 if(moment(note.id).isBetween(day, nextDay)){
                     createdAt.push(note)
                 }
@@ -48,19 +55,18 @@ export default {
                 })
             }
 
-            console.log(events)
-
+            console.log(day, events.length)
             return events;
         }
     },
     mutations:{
         add(state, {note, time}){
             let map = time.type == 'stamp' ? state.timestamps : state.schedules;
-            map.set(note.id, time)
+            Vue.set(map, note.id, time);
         },
         remove(state, {note}){
-            state.timestamps.delete(note.id);
-            state.schedules.delete(note.id);
+            Vue.delete(state.timestamps, note.id);
+            Vue.delete(state.schedules, note.id);
         }
     }
 }

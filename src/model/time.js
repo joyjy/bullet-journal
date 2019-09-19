@@ -1,6 +1,6 @@
 import moment from "moment"
 
-export class Time{
+class Time{
 
     constructor(note){
         if(note){
@@ -19,7 +19,7 @@ export class Time{
     isBetween(from, to) {
         let start = this.start();
         let end = this.end();
-        return start.isValid() && start.isBetween(from, to) || end.isValid() && end.isBetween(from, to)
+        return start.isValid() && start.isBetween(from, to)
     }
 
     start(){
@@ -57,6 +57,25 @@ export class Time{
     }
 
     endFormat(){
-        return this.end().format(this.endTime ? "YYYY-MM-DD HH:mm": "YYYY-MM-DD");
+        let end = this.end();
+        if(!end){
+            return undefined;
+        }
+        return end.format(this.endTime ? "YYYY-MM-DD HH:mm": "YYYY-MM-DD");
     }
 }
+
+const toTime = function(time, note){
+    if(!time){
+        return undefined;
+    }
+    if(typeof time === 'Time'){
+        return time;
+    }
+    let swap = time;
+    time = new Time(note);
+    Object.assign(time, swap) 
+    return time;
+}
+
+export { Time, toTime }
