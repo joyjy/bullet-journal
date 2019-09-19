@@ -27,18 +27,21 @@ export class Time{
         time.set('year', date.year());
         time.set('month', date.month());
         time.set('date', date.date());
-        if(this.startTime < this.endTime){
+        if(this.startTime > this.endTime){
             time.subtract(1, 'd')
         }
         return time;
     }
 
     end(){
+        if(!this.endDate && !this.endTime){
+            return undefined;
+        }
         let date = moment(this.endDate || this.startDate || this.context.baseDate || this.context.id);
         if(!this.endTime){
             return date;
         }
-        let time = moment(thie.endTime, 'h:m');
+        let time = moment(this.endTime, 'h:m');
         time.set('year', date.year());
         time.set('month', date.month());
         time.set('date', date.date());

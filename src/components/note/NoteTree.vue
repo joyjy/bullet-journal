@@ -12,9 +12,17 @@
                     </v-breadcrumbs-item>
                 </template>
             </v-breadcrumbs>
+            <v-btn text icon small v-if="query" @click="switchSaveFilter">
+                <v-icon>mdi-filter-outline</v-icon>
+            </v-btn>
+            <v-btn  text icon small v-else v-show="id" @click="switchStarredNote({note:notes[0]})">
+                <v-icon v-if="isStarred(id)" color="yellow darken-1">mdi-star</v-icon>
+                <v-icon v-else>mdi-star-outline</v-icon>
+            </v-btn>
         </template>
 
         <template v-slot:toolbar-items>
+
             <v-toolbar-items>
                 <v-text-field prepend-inner-icon="mdi-magnify" class="compact-form"
                     clearable solo rounded flat :value="$route.query.q"
@@ -43,6 +51,8 @@
 </template>
 
 <script>
+import { mapMutations, mapGetters } from 'vuex'
+
 import AppLayout from '../app/Layout'
 import NoteTreeRoot from './NoteTreeRoot'
 
@@ -79,6 +89,9 @@ export default {
         }
     },
     computed: {
+        ...mapGetters({
+            isStarred: "saved/isStarred"
+        }),
         noteList: {
             get(){
                 return this.notes;
@@ -90,8 +103,19 @@ export default {
                 //     })
             }
         },
+        id: function(){
+            if(this.root){
+                return this.root.id;
+            }else{
+                return this.$route.params.id
+            }
+        }
     },
     methods:{
+        ...mapMutations({
+            switchSaveFilter: "saved/filter",
+            switchStarredNote: "saved/note"
+        }),
         refresh: function(){
             this.setRoot();
             if(this.$route.query.q){
@@ -101,17 +125,11 @@ export default {
             }
         },
         setRoot: function(){
-            let id;
-            if(this.root){
-                id = this.root.id;
-            }else{
-                id = this.$route.params.id
-            }
-            if(!id){
+            if(!this.id){
                 this.breadsrumbs = []
                 this.notes = this.$store.state.notes;
             }else {
-                let stack = this.$store.getters.findNoteStackById(id)
+                let stack = this.$store.getters.findNoteStackById(this.id)
                 if(stack){
                     stack.unshift("Root");
                     this.breadsrumbs = stack;

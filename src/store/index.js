@@ -9,10 +9,11 @@ const vuexPersist = new VuexPersist({
     storage: window.localStorage,
     reducer: (state) => ({
         // agenda: state.agenda, /* map can't JSON.stringfy? */
-        flattern: state.flattern,
+        // flattern: state.flattern,
         notes: state.notes,
+        saved: state.saved,
         settings: state.settings,
-        tag: state.tag
+        // tag: state.tag
     })
 })
 
@@ -27,6 +28,7 @@ import noteValueModule from "./note/value"
 import noteRelationModule from "./note/relation"
 import noteDisplayModule from "./note/display"
 // 
+import savedModule from "./note/saved"
 import tagModule from "./tag/tag"
 import agendaModule from "./agenda/agenda"
 import settings from "./settings/display"
@@ -41,6 +43,7 @@ export default new Vuex.Store({
         'note-value': noteValueModule,
         'note-relation': noteRelationModule, 
         'note-display': noteDisplayModule,
+        saved: savedModule,
         agenda: agendaModule,
         tag: tagModule,
         settings: settings,
@@ -102,6 +105,8 @@ export default new Vuex.Store({
                 await this.dispatch("newNote", {})
             }
             commit("flattern", traversal.flattern(state.notes))
+            // reset tag
+            // reset agenda
             return Promise.resolve();
         },
         async findByTextOrNewNote({state, commit, getters}, payload){

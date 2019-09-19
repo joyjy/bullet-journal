@@ -32,12 +32,21 @@
           <v-list-item-title>All Note</v-list-item-title>
         </v-list-item>
 
-        <v-list-item link>
-          <v-list-item-icon>
-            <v-icon>mdi-star</v-icon>
-          </v-list-item-icon>
-          <v-list-item-title>Starred</v-list-item-title>
-        </v-list-item>
+        <v-list-group prepend-icon="mdi-star" no-action>
+          <template v-slot:activator>
+            <v-list-item-content>
+              <v-list-item-title>Starred</v-list-item-title>
+            </v-list-item-content>
+          </template>
+
+          <v-list-item v-for="n in $store.state.saved.notes"
+            :key="n.id" :to="{name: 'note', params:{id:n.id}} ">
+            <v-list-item-content>
+              <v-list-item-title>{{ n.name }}</v-list-item-title>
+            </v-list-item-content>
+          </v-list-item>
+
+        </v-list-group>
 
         <v-list-item link>
           <v-list-item-icon>

@@ -52,6 +52,8 @@
 import _ from 'lodash'
 import moment from 'moment';
 
+import { Time } from '@/model/time'
+
 export default {
     props:['note', 'collapsed'],
     data: () => ({
@@ -79,12 +81,22 @@ export default {
         timestamp: function(){
             let time = this.note.time || this.note.schedule;
 
+            if(!time){
+                return
+            }
+
+            if(typeof time === 'object'){
+                let swap = time;
+                time = new Time();
+                Object.assign(time, swap) 
+            }
+
             let start = time.start();
             let value = start.format(time.startTime ? "YYYY-MM-DD ddd HH:mm" : "YYYY-MM-DD ddd");
 
             let end = time.end()
-            if(end.isValid()){
-                value += end.format(time.endTime ? " -> YYYY-MM-DD ddd HH:mm, " : " -> YYYY-MM-DD ddd, ~")
+            if(end && end.isValid()){
+                value += end.format(time.endTime ? " -> YYYY-MM-DD ddd HH:mm, ~" : " -> YYYY-MM-DD ddd, ~")
                          + moment.duration(end.diff(start)).humanize();
             }
 
@@ -146,7 +158,7 @@ export default {
 
 .collapsed-ic {
     position: absolute;
-    top: 0px;
+    top: -1px;
     left: -0.8rem;
 }
 </style>

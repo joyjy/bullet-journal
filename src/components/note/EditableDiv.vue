@@ -143,7 +143,7 @@ export default {
             }
 
             if(e.shiftKey){
-                if(!this.note.content.text){
+                if(!this.note.content || !this.note.content.text){
                     this.$emit('new-content', {
                         text: "",
                         position: 0,
