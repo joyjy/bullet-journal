@@ -7,6 +7,9 @@ export default {
         agenda:{
             weekStart: 0, // [0,6] - sun to sat; [1,7] - mon to sun
             type: 'month',
+        },
+        drawer: {
+            pinned: false
         }
     },
     mutations:{
@@ -15,6 +18,9 @@ export default {
         },
         agendaType(state, type){
             state.agenda.type = type;
+        },
+        drawerPinned(state, pinned){
+            state.drawer.pinned = pinned;
         }
     }
 }

@@ -1,5 +1,7 @@
 <template>
-    <v-navigation-drawer expand-on-hover app mini-variant-width="64">
+    <v-navigation-drawer app :mini-variant="!pinned && !hover" mini-variant-width="64"
+      @mouseover.native="hover = true"
+      @mouseleave.native="hover = false">
       <template v-slot:prepend>
         <v-list>
           <v-list-item link two-line>
@@ -14,8 +16,9 @@
               <v-list-item-subtitle>joyjy2ah@gmail.com</v-list-item-subtitle>
             </v-list-item-content>
             
-            <v-list-item-action>
-              <v-icon>mdi-menu-down</v-icon>
+            <v-list-item-action @click="pinned = !pinned">
+              <v-icon v-if="pinned">mdi-pin</v-icon>
+              <v-icon v-else>mdi-pin-outline</v-icon>
             </v-list-item-action>
           </v-list-item>
         </v-list>
@@ -90,7 +93,21 @@
 </template>
 
 <script>
+import Vue from 'vue'
+
 export default {
-    
+    data: () => ({
+      hover:false
+    }),
+    computed: {
+        pinned:{
+            get(){
+                return this.$store.state.settings.drawer.pinned || false;
+            },
+            set(value){
+              this.$store.commit("drawerPinned", value)
+            }
+        }
+    }
 }
 </script>
