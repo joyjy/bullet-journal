@@ -1,7 +1,7 @@
 <template>
     <draggable tag="ul" class="note-tree body-2 align-self-start" v-model="noteList" :group="{ name: 'note-tree' }">
         <note-tree-item v-for="(note,i) in noteList" :key="note.id"
-            :note="note" :index="i" :parent="parent" :query="query">
+            :note="note" :index="i" :parent="parent" :query="query" :root="root">
         </note-tree-item>
     </draggable>
 </template>
@@ -11,11 +11,9 @@ import NoteTreeItem from './NoteTreeItem'
 import draggable from "vuedraggable"
 
 export default {
-    props: ['notes', 'query', 'parent'],
-    data: function(){
-        return {
-        }
-    },
+    props: ['query',
+            'parent', // not note, but contain's notes
+            "root"], // is note 
     components:{
         draggable,
         NoteTreeItem,
@@ -23,7 +21,7 @@ export default {
     computed: {
         noteList: {
             get(){
-                return this.notes;
+                return this.parent.notes;
             },
             set(value){
                 // this.$store.dispatch("dragToSort", { notes: value})
@@ -33,8 +31,6 @@ export default {
             }
         },
     },
-    methods:{
-    }
 }
 </script>
 

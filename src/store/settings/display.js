@@ -10,6 +10,9 @@ export default {
         },
         drawer: {
             pinned: false
+        },
+        note: {
+            clickType: 'sgl' // sgl or dbl
         }
     },
     mutations:{

@@ -25,7 +25,7 @@
         <draggable tag="ul" v-model="noteList" :group="{ name: 'note-tree' }" ghost-class="moving-ghost"
             v-show="collapsed == 'expand' || collapsed == 'filtered'">
             <note-tree-item v-for="(child,i) in noteList" :key="child.id"
-                :note="child" :index="i" :parent="note"
+                :note="child" :index="i" :parent="note" :root="root"
                 :query="subQuery" @matched = "childrenMatchChanged">
             </note-tree-item>
         </draggable>
@@ -43,7 +43,11 @@ import draggable from "vuedraggable"
 
 export default {
     name: "note-tree-item",
-    props: ["parent", 'note', 'index', 'query'],
+    props: ["parent", // firstParent is NoteTree's $data, recurisive is note
+            'note',
+            'index',
+            'query',
+            "root"],
     data: () => ({
         match: {},
         childrenMatch: false,
@@ -178,6 +182,15 @@ export default {
         },
         upgradeNote: function(payload){
             if(!this.parent.id){
+                return;
+            }
+            if(this.root && this.root == this.parent){
+                // double'Enter purpose to upgrade, 
+                // but when focus view, upgrade to parent will out of visible range,
+                // still emit new Note
+                payload.index = payload.prev ? this.index : this.index+1;
+                payload.parent = this.parent;
+                this.$store.dispatch('newNote', payload)
                 return;
             }
             payload.parent = this.parent;

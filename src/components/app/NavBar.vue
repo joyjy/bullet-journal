@@ -1,5 +1,5 @@
 <template>
-    <v-navigation-drawer app :mini-variant="!pinned && !hover" mini-variant-width="64"
+    <v-navigation-drawer app :mini-variant="!pinned && !hover" :expand-on-hover="!pinned" mini-variant-width="64"
       @mouseover.native="hover = true"
       @mouseleave.native="hover = false">
       <template v-slot:prepend>
@@ -12,13 +12,16 @@
             </v-list-item-avatar>
 
             <v-list-item-content>
-              <v-list-item-title class="title">JoYJY</v-list-item-title>
+              <v-list-item-title>JoYJY</v-list-item-title>
               <v-list-item-subtitle>joyjy2ah@gmail.com</v-list-item-subtitle>
+              <v-list-item-subtitle>{{$store.state.flattern.length}} bullet notes</v-list-item-subtitle>
             </v-list-item-content>
             
             <v-list-item-action @click="pinned = !pinned">
-              <v-icon v-if="pinned">mdi-pin</v-icon>
-              <v-icon v-else>mdi-pin-outline</v-icon>
+              <v-btn text icon>
+                <v-icon v-if="pinned">mdi-pin</v-icon>
+                <v-icon v-else>mdi-pin-outline</v-icon>
+              </v-btn>
             </v-list-item-action>
           </v-list-item>
         </v-list>

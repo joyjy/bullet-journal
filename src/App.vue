@@ -44,9 +44,4 @@ export default {
   -moz-osx-font-smoothing: grayscale;
   color: #212121; /*grey darken-4*/
 }
-
-.compact-form {
-    transform: scale(0.75);
-    transform-origin: 80% center;
-}
 </style>

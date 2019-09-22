@@ -2,7 +2,7 @@
     <app-layout :right-drawer="true">
 
         <template v-slot:toolbar>
-            <v-breadcrumbs v-show="breadsrumbs.length>0" :items="breadsrumbs" divider=">">
+            <v-breadcrumbs v-show="breadsrumbs.length>0" :items="breadsrumbs" divider=">" :style="{paddingRight:'0px'}">
                 <template v-slot:item="props">
                     <v-breadcrumbs-item v-if="props.item.id" :to="{ name:'note', params:{ id: props.item.id }}">
                         {{ props.item.text }}
@@ -12,16 +12,6 @@
                     </v-breadcrumbs-item>
                 </template>
             </v-breadcrumbs>
-
-            <v-tooltip right>
-                <template v-slot:activator="{ on }">
-                    <v-btn text icon small v-if="query && !id" @click="switchSaveFilter({text:query.value})" v-on="on">
-                        <v-icon v-if="isSavedFilter(query.value)">mdi-filter</v-icon>
-                        <v-icon v-else>mdi-filter-outline</v-icon>
-                    </v-btn>
-                </template>
-                <span>Toggle Saved Filter</span>
-            </v-tooltip>
 
             <v-tooltip right>
                 <template v-slot:activator="{ on }">
@@ -37,8 +27,10 @@
         <template v-slot:toolbar-items>
 
             <v-toolbar-items>
-                <v-text-field prepend-inner-icon="mdi-magnify" class="compact-form"
-                    clearable solo rounded flat :value="$route.query.q"
+                <v-text-field class="compact-form" :style="{width: 20+'rem'}" clearable solo rounded flat
+                    :prepend-inner-icon="query && isSavedFilter(query.value) ? 'mdi-filter' : 'mdi-filter-outline'"
+                    @click:prepend-inner="switchSaveFilter({text:query.value})"
+                    :value="$route.query.q"
                     @change="search" @click:clear="search('')">
                 </v-text-field>
 
@@ -59,7 +51,7 @@
             </v-toolbar-items>
         </template>
         
-        <note-tree-root :notes="notes" :query="query" :parent="$data"></note-tree-root>
+        <note-tree-root :query="query" :parent="$data" :root="root"></note-tree-root>
     </app-layout>
 </template>
 
@@ -76,13 +68,13 @@ import traversal from "@/lib/tree"
 import filter from "@/lib/filter"
 
 export default {
-    props: ['root'],
     data: function(){
         return {
-            notes: [],
+            root: null,
             breadsrumbs: [],
-            collapseLevel: -1,
+            notes: [],
             depth: 0,
+            collapseLevel: -1,
             query: undefined,
         }
     },
@@ -95,6 +87,9 @@ export default {
     },
     mounted: function(){
         this.$eventbus.$on('search', e => this.search(e))
+    },
+    destroyed: function(){
+        this.$eventbus.$off('search')
     },
     watch: {
         '$route' () {
@@ -118,11 +113,7 @@ export default {
             }
         },
         id: function(){
-            if(this.root){
-                return this.root.id;
-            }else{
-                return this.$route.params.id
-            }
+            return this.$route.params.id;
         }
     },
     methods:{
@@ -131,16 +122,11 @@ export default {
             switchStarredNote: "saved/note"
         }),
         refresh: function(){
-            this.setRoot();
-            if(this.$route.query.q){
-                this.setFilter();
-            }else{
-                this.query = undefined;
-            }
-        },
-        setRoot: function(){
+            this.root = null;
+            this.breadsrumbs = [];
+            this.notes = [];
+
             if(!this.id){
-                this.breadsrumbs = []
                 this.notes = this.$store.state.notes;
             }else {
                 let stack = this.$store.getters.findNoteStackById(this.id)
@@ -148,12 +134,17 @@ export default {
                     stack.unshift("Root");
                     this.breadsrumbs = stack;
                     this.notes = stack.slice(-1)
-                }else{
-                    this.notes = [] // todo
+                    this.root = this.notes[0];
                 }
             }
 
             this.depth = traversal.depth(this.notes);
+
+            if(this.$route.query.q){
+                this.query = filter.parse(this.$route.query.q);
+            }else{
+                this.query = null;
+            }
         },
         switchCollapse(){
             this.collapseLevel++;
@@ -163,15 +154,16 @@ export default {
             }
             this.$store.commit("switchOutline", { notes: this.notes, level: this.collapseLevel });
         },
-        setFilter(){
-            this.query = filter.parse(this.$route.query.q);
-        },
         search(payload){
-            this.$router.push({ name:'note', params:{ id: this.$route.params.id }, query: {q: payload}});
+            this.$router.push({ name:'note', params:{ id: this.id }, query: {q: payload}});
         }
     }
 }
 </script>
 
 <style>
+.compact-form {
+    transform: scale(0.75);
+    transform-origin: 75% center;
+}
 </style>

@@ -4,14 +4,15 @@
         @focus="editing = true;"
         @blur="editing = false; $emit('editing', false)"
         @input="inputText" 
-        @keyup.delete="pressDelete" 
+        @keydown.delete="pressDelete" 
         @keypress.enter.prevent="pressEnter" 
         @keydown.tab.prevent="pressTab" 
         @keydown.up.prevent="pressNav"
         @keydown.down.prevent="pressNav"
-        @keyup.left="pressNav"
-        @keyup.right="pressNav"
-        @dblclick.capture="dblclick">
+        @keydown.left="pressNav"
+        @keydown.right="pressNav"
+        @dblclick.capture="click('dbl', $event)"
+        @click.capture="click('sgl', $event)">
     </div>
 </template>
 
@@ -40,7 +41,7 @@ export default {
         if(Number.isInteger(this.note.display.cursor)){ // todo old spec
             return
         }
-        if(this.note.display.cursor.text > -1){ // new created or recreated(up/down)
+        if(this.note.display.cursor.text > -1){ // new created or recreated
             this.$nextTick(() => {
                 range.focus(this.$el, this.note.display.cursor.text);
             })
@@ -130,6 +131,7 @@ export default {
             }
             if(this.cursor == 0 || this.cursor == -1){
                 this.$emit('del-note', {keyboard:true})
+                e.preventDefault();
             }
         },
         pressEnter(e){
@@ -150,6 +152,11 @@ export default {
                         type:'content'
                     })
                 }
+                return;
+            }
+
+            if(e.target.innerText == ''){
+                this.$emit("upgrade-note", {position: 0})
                 return;
             }
 
@@ -209,11 +216,19 @@ export default {
                 }
             }
         },
-        dblclick(e){
-            if(e.target.classList.contains('tag')){
-                this.$eventbus.$emit('search', e.target.innerText)
-            }else if(e.target.classList.contains('matched')){
-                this.$eventbus.$emit('search', '')
+        click(type, e){
+            if(type != this.$store.state.settings.note.clickType){
+                return;
+            }
+
+            if(this.$route.name != 'note'){
+                this.$router.push({ name:'note', query: {q: e.target.innerText}});
+            }else{
+                if(e.target.classList.contains('tag')){
+                    this.$eventbus.$emit('search', e.target.innerText)
+                }else if(e.target.classList.contains('matched')){
+                    this.$eventbus.$emit('search', '')
+                }
             }
         }
     }
