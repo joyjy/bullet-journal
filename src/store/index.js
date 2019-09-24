@@ -4,6 +4,8 @@ import Vuex from 'vuex'
 Vue.use(Vuex)
 
 import VuexPersist from 'vuex-persist'
+import Cookies from 'js-cookie'
+
 const vuexPersist = new VuexPersist({
     key: 'bullet-note',
     storage: window.localStorage,
@@ -15,6 +17,14 @@ const vuexPersist = new VuexPersist({
         settings: state.settings,
         // tag: state.tag
     })
+})
+
+const vuexPersistCookie = new VuexPersist({
+    restoreState: (key, storage) => Cookies.getJSON(key),
+    saveState: (key, state, storage) =>
+        Cookies.set(key, state, {expires: 3}),
+    modules: ['user'], //only save user module
+    filter: (mutation) => mutation.type == 'signIn' || mutation.type == 'signOut'
 })
 
 import _ from "lodash"
@@ -31,14 +41,15 @@ import noteDisplayModule from "./note/display"
 import savedModule from "./note/saved"
 import tagModule from "./tag/tag"
 import agendaModule from "./agenda/agenda"
-import settings from "./settings/display"
+import settingsModule from "./settings/display"
+import userModule from "./user/user"
 
 import config from "@/config"
 import axios from "axios"
 
 export default new Vuex.Store({
     strict: true,
-    plugins: [vuexPersist.plugin, undoRedoPlugin],
+    plugins: [vuexPersist.plugin, vuexPersistCookie.plugin, undoRedoPlugin],
     modules: {
         'note-value': noteValueModule,
         'note-relation': noteRelationModule, 
@@ -46,7 +57,8 @@ export default new Vuex.Store({
         saved: savedModule,
         agenda: agendaModule,
         tag: tagModule,
-        settings: settings,
+        user: userModule,
+        settings: settingsModule,
     },
     state: {
         notes: [],

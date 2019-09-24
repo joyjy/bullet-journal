@@ -1,10 +1,10 @@
 <template>
   <v-app>
-    <app-nav-bar></app-nav-bar>
+    <app-nav-bar v-if="this.$store.getters.signed()"></app-nav-bar>
     
     <router-view></router-view>
 
-    <app-fab></app-fab>
+    <app-fab v-if="this.$store.getters.signed()"></app-fab>
   </v-app>
 </template>
 
@@ -18,6 +18,11 @@ export default {
     AppNavBar,
     AppFab,
   },
+  created: function(){
+    if(!this.$store.getters.signed() && this.$route.name != 'signin'){
+      this.$router.push({'name': 'signin'})
+    }
+  },
   mounted: function () {
     this.$el.ownerDocument.addEventListener('keydown', this.onKey, {capture: true})
   },
@@ -29,6 +34,7 @@ export default {
       if(e.keyCode == 90){
         if(navigator.platform.indexOf('Mac') > -1 && event.metaKey || event.ctrlKey){
           this.$store.commit("undo")
+          e.preventDefault();
           e.stopPropagation();
         }
       }

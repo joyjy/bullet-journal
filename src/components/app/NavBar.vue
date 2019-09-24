@@ -7,13 +7,13 @@
           <v-list-item link two-line>
             <v-list-item-avatar>
               <v-avatar color="grey lighten-3">
-                <span class="headline">J</span>
+                <span class="headline">{{ $store.getters.profile() }}</span>
               </v-avatar>
             </v-list-item-avatar>
 
             <v-list-item-content>
-              <v-list-item-title>JoYJY</v-list-item-title>
-              <v-list-item-subtitle>joyjy2ah@gmail.com</v-list-item-subtitle>
+              <v-list-item-title>{{ $store.state.user.name }}</v-list-item-title>
+              <v-list-item-subtitle>{{ $store.state.user.account }}</v-list-item-subtitle>
               <v-list-item-subtitle>{{$store.state.flattern.length}} bullet notes</v-list-item-subtitle>
             </v-list-item-content>
             
@@ -69,14 +69,14 @@
 
         </v-list-group>
 
-        <v-list-item :to="{name:'agenda'}">
+        <!--v-list-item :to="{name:'agenda'}">
           <v-list-item-icon>
             <v-icon>mdi-calendar</v-icon>
           </v-list-item-icon>
           <v-list-item-title>Agenda</v-list-item-title>
-        </v-list-item>
+        </v-list-item-->
 
-        <v-list-group prepend-icon="mdi-book" value="true" no-action>
+        <!--v-list-group prepend-icon="mdi-book" value="true" no-action>
           <template v-slot:activator>
             <v-list-item-content>
               <v-list-item-title>Notebook</v-list-item-title>
@@ -89,9 +89,26 @@
             </v-list-item-content>
           </v-list-item>
 
-        </v-list-group>
+          <v-list-item @click="">
+            <v-list-item-content>
+              <v-list-item-title>Add...</v-list-item-title>
+            </v-list-item-content>
+          </v-list-item>
+
+        </v-list-group-->
 
       </v-list>
+      
+      <template v-slot:append>
+        <v-list nav dense>
+          <v-list-item :to="{name:'setting'}">
+            <v-list-item-icon>
+              <v-icon>mdi-settings</v-icon>
+            </v-list-item-icon>
+            <v-list-item-title>Settings</v-list-item-title>
+          </v-list-item>
+        </v-list>
+      </template>
     </v-navigation-drawer>
 </template>
 
