@@ -2,7 +2,7 @@
     <v-container>
         <v-row align="center" justify="center">
             <v-col cols="3">
-                <v-form @submit="signIn">
+                <v-form v-model="valid" @submit="signIn">
                     <div>Sign in</div>
                     <v-input>
                         <v-text-field label="Email" v-model="email" required>
@@ -22,6 +22,7 @@
 <script>
 export default {
     data: () => ({
+        valid: true,
         email: '',
         password: ''
     }),

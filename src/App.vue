@@ -4,7 +4,7 @@
     
     <router-view></router-view>
 
-    <app-fab v-if="this.$store.getters.signed()"></app-fab>
+    <app-fab v-if="false"></app-fab>
   </v-app>
 </template>
 

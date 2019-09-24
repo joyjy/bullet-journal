@@ -3,9 +3,9 @@
       @mouseover.native="hover = true"
       @mouseleave.native="hover = false">
       <template v-slot:prepend>
-        <v-list>
-          <v-list-item link two-line>
-            <v-list-item-avatar>
+        <v-list nav>
+          <v-list-item three-line>
+            <v-list-item-avatar class="align-self-center">
               <v-avatar color="grey lighten-3">
                 <span class="headline">{{ $store.getters.profile() }}</span>
               </v-avatar>
@@ -13,8 +13,12 @@
 
             <v-list-item-content>
               <v-list-item-title>{{ $store.state.user.name }}</v-list-item-title>
-              <v-list-item-subtitle>{{ $store.state.user.account }}</v-list-item-subtitle>
-              <v-list-item-subtitle>{{$store.state.flattern.length}} bullet notes</v-list-item-subtitle>
+              <v-list-item-subtitle class="text-truncate" :style="{display:'inline-block'}">
+                {{ $store.state.user.account }}
+              </v-list-item-subtitle>
+              <v-list-item-subtitle class="caption">
+                {{$store.state.flattern.length}} bullet notes
+              </v-list-item-subtitle>
             </v-list-item-content>
             
             <v-list-item-action @click="pinned = !pinned">
@@ -37,7 +41,7 @@
           <v-list-item-title>All Note</v-list-item-title>
         </v-list-item>
 
-        <v-list-group prepend-icon="mdi-star" no-action>
+        <v-list-group v-if="$store.state.saved.notes.length" prepend-icon="mdi-star" no-action>
           <template v-slot:activator>
             <v-list-item-content>
               <v-list-item-title>Starred</v-list-item-title>
@@ -52,8 +56,14 @@
           </v-list-item>
 
         </v-list-group>
+        <v-list-item v-else>
+          <v-list-item-icon>
+            <v-icon>mdi-star</v-icon>
+          </v-list-item-icon>
+          <v-list-item-title>Starred</v-list-item-title>
+        </v-list-item>
 
-        <v-list-group prepend-icon="mdi-filter" no-action>
+        <v-list-group v-if="$store.state.saved.filters.length" prepend-icon="mdi-filter" no-action>
           <template v-slot:activator>
             <v-list-item-content>
               <v-list-item-title>Saved Filter</v-list-item-title>
@@ -68,6 +78,12 @@
           </v-list-item>
 
         </v-list-group>
+        <v-list-item v-else>
+          <v-list-item-icon>
+            <v-icon>mdi-filter</v-icon>
+          </v-list-item-icon>
+          <v-list-item-title>Saved Filter</v-list-item-title>
+        </v-list-item>
 
         <!--v-list-item :to="{name:'agenda'}">
           <v-list-item-icon>

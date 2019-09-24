@@ -42,12 +42,6 @@
                     </template>
                     <span>Toggle Outline Level</span>
                 </v-tooltip>
-                <v-btn text @click="$store.dispatch('backup')">
-                    Backup
-                </v-btn>
-                <v-btn text @click="$store.commit('restore')">
-                    Restore
-                </v-btn>
             </v-toolbar-items>
         </template>
         

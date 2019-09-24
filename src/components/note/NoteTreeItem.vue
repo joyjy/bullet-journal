@@ -182,6 +182,11 @@ export default {
         },
         upgradeNote: function(payload){
             if(!this.parent.id){
+                if(payload.trigger && payload.trigger == 'enter'){
+                    payload.index = payload.prev ? this.index : this.index+1;
+                    payload.parent = this.parent;
+                    this.$store.dispatch('newNote', payload)
+                }
                 return;
             }
             if(this.root && this.root == this.parent){

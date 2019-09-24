@@ -156,7 +156,7 @@ export default {
             }
 
             if(e.target.innerText == ''){
-                this.$emit("upgrade-note", {position: 0})
+                this.$emit("upgrade-note", {position: 0, trigger: 'enter'})
                 return;
             }
 
