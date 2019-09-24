@@ -30,6 +30,10 @@ export default {
             }else{
                 state.notes.splice(index, 1);
             }
+        },
+        updateNote(state, {note}){
+            let copy = _.find(state.notes, n => n.id == note.id)
+            copy.name = note.text;
         }
     }
 }

@@ -30,7 +30,6 @@ export default {
         return {
             innerHtml: "",
             editing: false,
-            inputDel: false,
         }
     },
     created: function() {
@@ -105,11 +104,11 @@ export default {
                 return;
             }
 
-            if(e.isComposing && e.data == null){ // delete in ime
-                this.inputDel = true;
-            }else if(e.inputType == "deleteContentBackward"){
-                this.inputDel = true;
-            }
+            // if(e.isComposing && e.data == null){ // delete in ime
+            //     this.inputDel = true;
+            // }else if(e.inputType == "deleteContentBackward"){
+            //     this.inputDel = true;
+            // }
             
             let payload = { 
                 text: e.target.innerText,
@@ -119,17 +118,17 @@ export default {
             this.$emit("input", payload)
         },
         pressDelete(e){
-            // console.log(e);
-            if(this.inputDel){
-                this.inputDel = false;
-                return;
-            }
+            console.log(e, this.cursor, range.position(this.$el));
+            // if(this.inputDel){
+            //     this.inputDel = false;
+            //     return;
+            // }
             if(this.type == 'content' && (this.cursor == 0 || this.cursor == -1)){
                 // todo
                 this.$emit('editing', false);
                 return;
             }
-            if(this.cursor == 0 || this.cursor == -1){
+            if(range.position(this.$el) == 0){
                 this.$emit('del-note', {keyboard:true})
                 e.preventDefault();
             }

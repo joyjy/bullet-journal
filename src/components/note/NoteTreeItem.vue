@@ -33,6 +33,8 @@
 </template>
 
 <script>
+import { mapMutations, mapGetters } from 'vuex'
+
 import NoteBullet from "./NoteBullet.vue"
 import EditableDiv from "./EditableDiv.vue"
 import range from "@/lib/range"
@@ -64,6 +66,9 @@ export default {
         this.match = filter.match(this.note, this.query);
     },
     computed: {
+        ...mapGetters({
+            isStarred: "saved/isStarred",
+        }),
         noteList: {
             get(){
                 return this.note.notes;
@@ -123,7 +128,11 @@ export default {
         },
         saveNote: function(payload){
             payload.note = this.note;
-            this.$store.dispatch('saveNote', payload)
+            this.$store.dispatch('saveNote', payload).then(() => {
+                if(this.isStarred(this.note.id)){
+                    this.$store.commit("saved/updateNote", {note: this.note})
+                }
+            })
         },
         newNote: function(payload){
             payload.index = payload.prev ? this.index : this.index+1;

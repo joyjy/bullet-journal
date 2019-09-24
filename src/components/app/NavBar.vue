@@ -4,7 +4,7 @@
       @mouseleave.native="hover = false">
       <template v-slot:prepend>
         <v-list nav>
-          <v-list-item three-line>
+          <v-list-item two-line>
             <v-list-item-avatar class="align-self-center">
               <v-avatar color="grey lighten-3">
                 <span class="headline">{{ $store.getters.profile() }}</span>
@@ -17,7 +17,7 @@
                 {{ $store.state.user.account }}
               </v-list-item-subtitle>
               <v-list-item-subtitle class="caption">
-                {{$store.state.flattern.length}} bullet notes
+                {{$store.state.flattern.length}} bullets
               </v-list-item-subtitle>
             </v-list-item-content>
             
