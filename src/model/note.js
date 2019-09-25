@@ -11,10 +11,14 @@ export class Note{
         }
         this.display = {
             collapse: false,
-            cursor: {
-                text: 0,
-                content: -1
-            }
+            text: {
+                focus: false,
+                cursor: 0,
+            },
+            content: {
+                focus: false,
+                cursor: -1,
+            },
         }
         this.notes = [];
     }

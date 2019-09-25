@@ -11,6 +11,7 @@ export default {
         }
 
         let range = sel.getRangeAt(0);
+
         let container = range.commonAncestorContainer;
         let offset = range.startOffset;
         if(container.isSameNode(el)){
@@ -27,10 +28,10 @@ export default {
             offset += child.textContent.length;
         }
 
-        return undefined;
+        throw range;
     },
     focus(el, position){
-        //console.log("focus", el, position)
+        console.log("focus", el, position);
         if(!el.hasAttribute("contenteditable")){
             throw el;
         }

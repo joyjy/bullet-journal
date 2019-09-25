@@ -17,6 +17,9 @@
                     @down-note="downNote" 
                     @nav-between-note="navigationNote">
                 </editable-div>
+                <div class="debug">
+                    cursor: {{ note.display.text.cursor }}
+                </div>
                 <editable-div v-show="displayContent || focusContent" :type="'content'"
                     :note="note" :match="match" @input="saveNote" @editing="focusContent = $event">
                 </editable-div>
@@ -202,9 +205,11 @@ export default {
                 // double'Enter purpose to upgrade, 
                 // but when focus view, upgrade to parent will out of visible range,
                 // still emit new Note
-                payload.index = payload.prev ? this.index : this.index+1;
-                payload.parent = this.parent;
-                this.$store.dispatch('newNote', payload)
+                if(payload.trigger && payload.trigger == 'enter'){
+                    payload.index = payload.prev ? this.index : this.index+1;
+                    payload.parent = this.parent;
+                    this.$store.dispatch('newNote', payload)
+                }
                 return;
             }
             payload.parent = this.parent;
@@ -257,12 +262,20 @@ export default {
 <style>
 .note-item {
     list-style: none;
+    position: relative;
 }
 .note-wrapper{
-    margin-top: .25rem;
     display: flex;
 }
 .moving-ghost{
     display: none;
+}
+.debug{
+    position: absolute;
+    right:0;
+    top:0;
+}
+[contenteditable="true"].editing{
+    background-color: pink;
 }
 </style>

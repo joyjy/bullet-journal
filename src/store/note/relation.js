@@ -47,6 +47,10 @@ export default {
             if(!payload.parent){
                 payload.parent = rootState;
             }
+
+            if(payload.position){
+                payload.note.display.text.cursor = payload.position;
+            }
             
             commit("addNote", payload)
             commit("flattern", traversal.flattern(rootState.notes))

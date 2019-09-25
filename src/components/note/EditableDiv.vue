@@ -1,8 +1,8 @@
 <template>
-    <div :class="'note-' + (type || 'text')" contenteditable="true" 
+    <div :class="['note-' + (type || 'text'), {editing: editing}]" contenteditable="true" 
         v-html="innerHtml" 
-        @focus="editing = true;"
-        @blur="editing = false; $emit('editing', false)"
+        @focus="editing = true"
+        @blur="editing = false"
         @input="inputText" 
         @keydown.delete="pressDelete" 
         @keypress.enter.prevent="pressEnter" 
@@ -36,18 +36,11 @@ export default {
         this.innerHtml = parser.html(this.note, this.match, this.type)
     },
     mounted: function(){
-        this.$eventbus.$on('timestamp', () => {})
-        if(Number.isInteger(this.note.display.cursor)){ // todo old spec
-            return
-        }
-        if(this.note.display.cursor.text > -1){ // new created or recreated
+        if(this.cursor == 0){ // new created
             this.$nextTick(() => {
-                range.focus(this.$el, this.note.display.cursor.text);
+                range.focus(this.$el, this.cursor);
             })
         }
-    },
-    destroyed: function(){
-        this.$eventbus.$off('timestamp', () => {})
     },
     computed: {
         text(){
@@ -58,12 +51,9 @@ export default {
         },
         cursor(){
             if(this.type == 'content'){
-                return this.note.display.cursor.content;
+                return this.note.display.content.cursor;
             }
-            if(Number.isInteger(this.note.display.cursor)){ // todo old spec
-                return this.note.display.cursor;
-            }
-            return this.note.display.cursor.text;
+            return this.note.display.text.cursor;
         }
     },
     watch: {
@@ -72,79 +62,59 @@ export default {
         },
         text: function(){
             this.innerHtml = parser.html(this.note, this.match, this.type);
-            if(this.editing){
+            if(this.editing){ // change innerHtml must keep position
                 this.$nextTick(() => {
                     range.focus(this.$el, this.cursor)
                 })
             }
         },
-        cursor: function(){
-            if(this.cursor >= 0){
-                if(this.type == 'content'){
-                    this.$emit('editing', true);
-                }
-                this.$nextTick(() => {
-                    range.focus(this.$el, this.cursor)
-                })
-            }
+        cursor: function(to, from){
+            console.log("cursor", this.text, from, to, this.editing)
+            // if(!this.editing){ // after other note event, may lead this getting focus
+            //     this.$nextTick(() => {
+            //         range.focus(this.$el, this.cursor)
+            //     })
+            // }
         },
-        editing(){
-            if(!this.editing){
-                this.$store.commit("unfocus", { note: this.note});
+        editing: function(){
+            if(this.editing){ // mouse range not accurate
+
+            }else{
+                this.$store.commit('unfocus', {note:this.note});
             }
         }
     },
     methods: {
         inputText(e){
-            // console.log(e);
-            if(e.inputType == "historyUndo"){
-                return; // document will handle ctrl+z
-            }
             if(e.isComposing && e.data == "　"){ // ime hasn't submit 
                 return;
             }
-
-            // if(e.isComposing && e.data == null){ // delete in ime
-            //     this.inputDel = true;
-            // }else if(e.inputType == "deleteContentBackward"){
-            //     this.inputDel = true;
-            // }
             
             let payload = { 
                 text: e.target.innerText,
+                position: range.position(this.$el), // change innerHtml must keep position
                 type: this.type,
-                position: range.position(this.$el)
             };
+
             this.$emit("input", payload)
         },
         pressDelete(e){
-            console.log(e, this.cursor, range.position(this.$el));
-            // if(this.inputDel){
-            //     this.inputDel = false;
-            //     return;
-            // }
-            if(this.type == 'content' && (this.cursor == 0 || this.cursor == -1)){
-                // todo
-                this.$emit('editing', false);
+            if(this.type == 'content'){
                 return;
             }
+
             if(range.position(this.$el) == 0){
-                this.$emit('del-note', {keyboard:true})
+                this.$emit('del-note', { keyboard:true })
                 e.preventDefault();
             }
         },
         pressEnter(e){
-            // console.log(e);
             if(this.type == 'content'){
-                this.$emit('input', {
-                    text: this.note.content + "\n",
-                    position: this.note.content.length
-                })
                 return;
             }
 
             if(e.shiftKey){
-                if(!this.note.content || !this.note.content.text){
+                if(!this.note.content.text){
                     this.$emit('new-content', {
                         text: "",
                         position: 0,
@@ -154,35 +124,27 @@ export default {
                 return;
             }
 
-            if(e.target.innerText == ''){
-                this.$emit("upgrade-note", {position: 0, trigger: 'enter'})
-                return;
-            }
-
             let text = e.target.innerText;
             let position = range.position(this.$el);
-            if (position < text.length) {
+            if (position < text.length) { // split
                 let left = text.substring(0, position);
                 let right = text.substring(position);
 
-                this.$emit('new-note', { text:left, prev: true}) // default add at next
-                this.$nextTick(() => {
-                    this.$emit('input', { text:right, position: -1})
-                    this.$store.commit("focus", { note: this.note, position: 0});
-                })
-            } else {
-                this.$emit('new-note', {});
+                this.$emit('new-note', { text: left, prev: true, position: -1}) // default add at next
+                this.$emit('input', { text:right, position: 0})
+                return;
             }
+            
+            this.$emit('new-note', {});
         },
         pressTab(e){
             if(this.type == 'content'){
                 return;
             }
-            // console.log(e);
             if(e.shiftKey){
-                this.$emit("upgrade-note", {position: range.position(this.$el)})
+                this.$emit("upgrade-note", { position: range.position(this.$el) })
             }else{
-                this.$emit("downgrade-note", {position: range.position(this.$el)})
+                this.$emit("downgrade-note", { position: range.position(this.$el) })
             }
         },
         pressNav(e){
@@ -191,28 +153,41 @@ export default {
             // right arrow         39
             // down arrow          40
 
-            // console.log(e);
             if(this.type == 'content'){
                 return;
             }
 
             let position = range.position(this.$el)
-            if(e.keyCode == 37 && position == 0){
-                this.$emit("nav-between-note", {direction: "left"});
-            }else if(e.keyCode == 39 && position == this.text.length){
-                this.$emit("nav-between-note", {direction: "right"});
-            }else if(e.keyCode == 38){
-                if(e.shiftKey){
-                    this.$emit("up-note", { position: position });
-                }else{
-                    this.$emit("nav-between-note", { direction: "up", position: position });
-                }
-            }else if(e.keyCode == 40){
-                if(e.shiftKey){
-                    this.$emit("down-note", { position: position });
-                }else{
-                    this.$emit("nav-between-note", { direction: "down", position: position })
-                }
+            switch(e.keyCode){
+                case 37: //left
+                    if(position == 0){
+                        this.$emit("nav-between-note", { direction: "left" });
+                        e.preventDefault()
+                    }else{
+                        this.$store.commit("focus", {note: this.note, position: position-1})
+                    }
+                    break;
+                case 39: //right
+                    if(position == this.text.length){
+                        this.$emit("nav-between-note", { direction: "right" });
+                        e.preventDefault()
+                    }else{
+                        this.$store.commit("focus", {note: this.note, position: position+1})
+                    }
+                    break;
+                case 38: // up
+                    if(e.shiftKey){
+                        this.$emit("up-note", { position: position });
+                    }else{
+                        this.$emit("nav-between-note", { direction: "up", position: position });
+                    }
+                    break;
+                case 40: // down
+                    if(e.shiftKey){
+                        this.$emit("down-note", { position: position });
+                    }else{
+                        this.$emit("nav-between-note", { direction: "down", position: position })
+                    }
             }
         },
         click(type, e){
@@ -241,6 +216,10 @@ export default {
 [contenteditable="true"]:active,[contenteditable="true"]:focus{
     border:none;
     outline:none;
+}
+.note-text{
+    padding-top:.125rem;
+    padding-bottom: .125rem;
 }
 .note-content{
     font-size: 13px;

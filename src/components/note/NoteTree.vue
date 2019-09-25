@@ -45,6 +45,8 @@
             </v-toolbar-items>
         </template>
         
+        <div class="blank" @click="focusLast"></div>
+        
         <note-tree-root :query="query" :parent="$data" :root="root"></note-tree-root>
     </app-layout>
 </template>
@@ -150,6 +152,8 @@ export default {
         },
         search(payload){
             this.$router.push({ name:'note', params:{ id: this.id }, query: {q: payload}});
+        },
+        focusLast(e){
         }
     }
 }
@@ -159,5 +163,12 @@ export default {
 .compact-form {
     transform: scale(0.75);
     transform-origin: 75% center;
+}
+.blank{
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
 }
 </style>

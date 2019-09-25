@@ -117,6 +117,10 @@ export default new Vuex.Store({
                 await this.dispatch("newNote", {})
             }
             commit("flattern", traversal.flattern(state.notes))
+            if(state.flattern.length == 1 && !state.flattern[0].text){
+                commit("focus", { note: state.flattern[0], position: 0});
+            }
+
             _.each(state.flattern, function(n){
                 let tags = [];
                 _.each(n.tokens, function(t){

@@ -37,7 +37,7 @@ export default {
 <style>
 .note-tree {
     width: 100%;
-    margin-bottom: 1rem;
+    position: relative;
 }
 .note-tree ul{
     padding-left: 16px;

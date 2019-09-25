@@ -13,11 +13,6 @@ export default {
             note.text = text;
             note.tokens = tokens;
 
-            if(Number.isInteger(note.display.cursor)){ // todo remove with clean state
-                Vue.set(note.display.cursor = { text: -1, content: -1});
-            }
-            note.display.cursor.text = position;
-
             if(notes){ // when merge note
                 note.notes = notes
             }
@@ -36,11 +31,6 @@ export default {
 
             note.content.text = text;
             note.content.tokens = tokens;
-
-            if(Number.isInteger(note.display.cursor)){ // todo remove with clean state
-                Vue.set(note.display.cursor = { text: -1, content: -1});
-            }
-            note.display.cursor.content = position
             
             if(time){
                 Vue.set(note, 'schedule', time);

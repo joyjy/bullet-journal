@@ -21,7 +21,7 @@
         <v-divider id="app-bar-divider"></v-divider>
         
         <v-content class="fill-height">
-            <v-container fluid fill-height :style="{backgroundColor:color}">
+            <v-container fluid :style="{backgroundColor:color, height:'100%'}">
                 <slot name="default">
                 </slot>
             </v-container>
