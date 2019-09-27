@@ -1,3 +1,4 @@
+import _ from "lodash"
 
 class Query{
     
@@ -11,10 +12,13 @@ class Query{
             let result = [];
             for (let i = 0; i < ands.length; i++) {
                 const text = ands[i];
-                result.push({type:i==0?"OR":"AND", value: text.trim()})
+                result.push({
+                    type:i === 0 ? "OR" : "AND",
+                    value: text.trim()
+                });
             }
             return result;
-        })
+        });
     }
 }
 
@@ -22,7 +26,7 @@ class Match{
 
     constructor(matched, start, length){
         this.matched = matched;
-        this.ranges = []
+        this.ranges = [];
         this.start = start,
         this.length = length;
     }
@@ -35,8 +39,8 @@ class Match{
 export default {
 
     parse: function(q){
-        let query = new Query()
-        query.setValue(q)
+        let query = new Query();
+        query.setValue(q);
         return query;
     },
     match: function(note, query){
@@ -48,10 +52,10 @@ export default {
         for (let i = 0; i < query.querys.length; i++) {
             const q = query.querys[i];
             if(q.type === "OR"){
-                let start = note.text.indexOf(q.value)
+                let start = note.text.indexOf(q.value);
                 match.matched = match.matched || start > -1;
                 if(start > -1){
-                    match.addMatchRange(start, q.value.length)
+                    match.addMatchRange(start, q.value.length);
                 }
             }
         }
