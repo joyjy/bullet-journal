@@ -45,4 +45,11 @@ export default {
     margin-left: 8px;
     border-left: 1px solid #EEEEEE;
 }
+
+.sortable-ghost{
+    height: 2px;
+    overflow: hidden;
+    border: 1px solid black;
+    border-radius: 1px;
+}
 </style>

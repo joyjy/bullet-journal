@@ -25,7 +25,7 @@
                 </editable-div>
             </div>
         </div>
-        <draggable tag="ul" v-model="noteList" :group="{ name: 'note-tree' }" ghost-class="moving-ghost"
+        <draggable tag="ul" v-model="noteList" :group="{ name: 'note-tree' }"
             v-show="collapsed == 'expand' || collapsed == 'filtered'">
             <note-tree-item v-for="(child,i) in noteList" :key="child.id"
                 :note="child" :index="i" :parent="note" :root="root"
@@ -257,9 +257,6 @@ export default {
 }
 .note-wrapper{
     display: flex;
-}
-.moving-ghost{
-    display: none;
 }
 .debug{
     display: none;
