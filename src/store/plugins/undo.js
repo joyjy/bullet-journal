@@ -77,7 +77,7 @@ class UndoRedoHistory {
                 let swap = prevState.payload.toIndex;
                 prevState.payload.toIndex = prevState.payload.fromIndex;
                 prevState.payload.fromIndex = swap;
-                this.store.commit("swapNote", prevState.payload)
+                this.store.commit("swapNote", prevState.payload);
                 break;
         }
         this.currentIndex--;
@@ -106,8 +106,6 @@ const undoRedoPlugin = (store) => {
         if (!undoRedoHistory.record) {
             return;
         }
-
-        console.log(mutation)
 
         switch (mutation.type) {
             case "saveText":

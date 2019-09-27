@@ -137,13 +137,20 @@ export default {
             })
         },
         newNote: function(payload){
-            if(this.note.text == "" && (this.parent.id || this.root && this.root != this.parent)){
-                this.upgradeNote(payload);
-                return;
+            if(this.note.text == ""){
+                if(this.root && this.root != this.parent || !this.root && this.parent.id){
+                    this.upgradeNote(payload);
+                    return;
+                }
             }
 
-            payload.index = payload.prev ? this.index : this.index+1;
-            payload.parent = this.parent;
+            if(this.root && this.root == this.note){ // focus
+                payload.parent = this.note;
+            }else{
+                payload.index = payload.prev ? this.index : this.index+1;
+                payload.parent = this.parent;
+            }
+
             payload.curNote = this.note;
             this.$store.dispatch("newNote", payload)
         },
@@ -178,7 +185,7 @@ export default {
                 parent: this.parent, 
                 note: this.note,
                 index: this.index,
-                keyboard: payload.keyboard,
+                keyboard: payload && payload.keyboard,
                 batchId: batchId,
             })
         },
@@ -264,7 +271,7 @@ export default {
     display: flex;
 }
 .debug{
-    /* display: none; */
+    display: none;
     position: absolute;
     right:0;
     top:0;

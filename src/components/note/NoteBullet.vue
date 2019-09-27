@@ -1,9 +1,11 @@
 <template>
     <div class="note-control">
-        <div class="collapsed-ic" @click="onClick" >
+        <div class="collapsed-ic" @click="collapse" >
             <v-icon :x-small="ic[collapsed] == 'mdi-filter-variant'" small>{{ic[collapsed]}}</v-icon>
         </div>
-        <div :class="['note-bullet', {time: note.time || note.schedule}]"  @dblclick="onDoubleClick" @contextmenu.prevent="toggleMenu">
+        <div :class="['note-bullet', {time: note.time || note.schedule}]" 
+            @dblclick="click('dbl', $event)" @click.capture="click('sgl', $event)"
+            @contextmenu.prevent="toggleMenu">
             <v-icon v-if="stamp" small>mdi-av-timer</v-icon>
             <v-icon v-else-if="schedule" small>mdi-alarm</v-icon>
         </div>
@@ -100,10 +102,13 @@ export default {
         }
     },
     methods: {
-        onClick: function(){
+        collapse: function(){
             this.$emit('collapse-note');
         },
-        onDoubleClick: function(){
+        click: function(type, e){
+            if(type != this.$store.state.settings.note.clickType){
+                return;
+            }
             this.$router.push({ name:'note', params:{ id: this.note.id }})
         },
         toggleMenu: function(){
