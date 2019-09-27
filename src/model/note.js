@@ -40,7 +40,6 @@ const toNote = function(note){
         }
         return _.isUndefined(fromVal) ? toVal: fromVal;
     });
-    console.log(to.display.text)
     return to;
 }
 

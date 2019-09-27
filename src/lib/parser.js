@@ -5,18 +5,28 @@ const clarify = function(text){
 }
 
 const addMatchTag = function(text, match, textOffset){
-    if(!match || !match.matched || match.length === 0){
+    if(!match || !match.matched || match.ranges.length === 0){
         return clarify(text);
     }
 
-    let start = match.start - textOffset;
+    let matchedText = "";
 
-    if(start >= 0 && start < text.length && match.length <= text.length - start){
-        let left = text.substring(0, start);
-        let center = text.substring(start, start+match.length);
-        let right = text.substring(start+match.length, text.length);
+    for (let i = 0; i < match.ranges.length; i++) {
+        const range = match.ranges[i];
+        
+        let start = range[0] - textOffset;
 
-        return clarify(left) + '<span class="matched">' + clarify(center) + "</span>" + clarify(right);
+        if(start >= 0 && start < text.length && range[1] <= text.length - start){
+            let left = text.substring(0, start);
+            let center = text.substring(start, start+range[1]);
+            let right = text.substring(start+range[1], text.length);
+
+            matchedText += clarify(left) + '<span class="matched">' + clarify(center) + "</span>" + clarify(right);
+        }
+    }
+
+    if(matchedText){
+        return matchedText;
     }
 
     return clarify(text);

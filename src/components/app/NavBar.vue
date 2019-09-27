@@ -16,9 +16,8 @@
               <v-list-item-subtitle class="text-truncate" :style="{display:'inline-block'}">
                 {{ $store.state.user.account }}
               </v-list-item-subtitle>
-              <v-list-item-subtitle class="caption">
-                {{$store.state.flattern.length}} bullets,
-                {{$store.state.tag.count}} tags
+              <v-list-item-subtitle class="caption" :title="stat">
+                {{ stat }}
               </v-list-item-subtitle>
             </v-list-item-content>
             
@@ -144,6 +143,9 @@ export default {
             set(value){
               this.$store.commit("drawerPinned", value)
             }
+        },
+        stat: function(){
+          return this.$store.state.flattern.length + " bullets, " + this.$store.state.tag.count + " tags."
         }
     }
 }
