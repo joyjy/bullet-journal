@@ -36,7 +36,6 @@ class UndoRedoHistory {
         this.record = false;
 
         const prevState = this.history[this.currentIndex];
-        console.log(prevState.type)
         switch (prevState.type) {
             case "saveText":
                 let to = prevState.payload.note;
@@ -50,6 +49,7 @@ class UndoRedoHistory {
                 break;
             case "addNote":
                 this.store.commit("deleteNote", prevState.payload);
+                this.store.commit("flattern")
                 if(prevState.payload.keyboard){
                     this.store.commit("focus", {
                         note: prevState.payload.curNote,
@@ -72,6 +72,13 @@ class UndoRedoHistory {
                     batched = lastState.payload.batchId === prevState.payload.batchId;
                     // todo cursor
                 }
+                break;
+            case "swapNote":
+                let swap = prevState.payload.toIndex;
+                prevState.payload.toIndex = prevState.payload.fromIndex;
+                prevState.payload.fromIndex = swap;
+                this.store.commit("swapNote", prevState.payload)
+                break;
         }
         this.currentIndex--;
 
@@ -100,10 +107,13 @@ const undoRedoPlugin = (store) => {
             return;
         }
 
+        console.log(mutation)
+
         switch (mutation.type) {
             case "saveText":
             case "addNote":
             case "deleteNote":
+            case "swapNote":
                 undoRedoHistory.addState(mutation);
         }
     });
