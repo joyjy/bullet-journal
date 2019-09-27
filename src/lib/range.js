@@ -1,6 +1,6 @@
 export default {
     position(el){
-        //console.log("position", el);
+        // console.log("position", el);
         if(!el.hasAttribute("contenteditable")){
             throw el;
         }

@@ -69,7 +69,7 @@ const toTime = function(time, note){
     if(!time){
         return undefined;
     }
-    if(typeof time === 'Time'){
+    if(typeof time == 'Time'){
         return time;
     }
     let swap = time;

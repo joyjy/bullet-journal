@@ -6,7 +6,7 @@
                 @del-note="deleteNote">
             </note-bullet>
             <div class="d-flex flex-column flex-grow-1" style="width:100%">
-                <editable-div :note="note" :match="match"
+                <editable-div :note="note" :type="'text'" :match="match" 
                     @input="saveNote"
                     @new-content="saveNote"
                     @new-note="newNote"
@@ -36,7 +36,7 @@
 </template>
 
 <script>
-import { mapMutations, mapGetters } from 'vuex'
+import { mapMutations, mapGetters } from "vuex"
 
 import NoteBullet from "./NoteBullet.vue"
 import EditableDiv from "./EditableDiv.vue"
@@ -49,9 +49,9 @@ import draggable from "vuedraggable"
 export default {
     name: "note-tree-item",
     props: ["parent", // firstParent is NoteTree's $data, recurisive is note
-            'note',
-            'index',
-            'query',
+            "note",
+            "index",
+            "query",
             "root"],
     data: () => ({
         match: {},
@@ -81,15 +81,15 @@ export default {
             }
         },
         collapsed: function(){
-            if(this.note.notes.length == ''){
-                return 'none'
+            if(this.note.notes.length == ""){
+                return "none"
             }
 
             if(this.query && !this.ignoreFiltered && this.filtered){
-                return 'filtered'
+                return "filtered"
             }
 
-            return this.note.display.collapse ? 'collapsed' : 'expand';
+            return this.note.display.collapse ? "collapsed" : "expand";
         },
         filtered: function(){
             return this.selfMatch || this.childrenMatch;
@@ -117,30 +117,35 @@ export default {
             this.match = filter.match(this.note, this.query); // search self
         },
         match: function(){ // after searched, $emit result;
-            this.$emit('matched', this.selfMatch)
+            this.$emit("matched", this.selfMatch)
         }
     },
     methods:{
         switchCollapse: function(){
             this.ignoreFiltered = true;
-            this.$store.commit('collapse', { note: this.note })
+            this.$store.commit("collapse", { note: this.note })
         },
         childrenMatchChanged: function(childMatch){
             this.childrenMatch = this.childrenMatch || childMatch;
-            this.$emit('matched', this.filtered); // up boardcast match to display path;
+            this.$emit("matched", this.filtered); // up boardcast match to display path;
         },
         saveNote: function(payload){
             payload.note = this.note;
-            this.$store.dispatch('saveNote', payload).then(() => {
+            this.$store.dispatch("saveNote", payload).then(() => {
                 if(this.isStarred(this.note.id)){
                     this.$store.commit("saved/updateNote", {note: this.note})
                 }
             })
         },
         newNote: function(payload){
+            if(this.note.text == "" && (this.parent.id || this.root && this.root != this.parent)){
+                this.upgradeNote(payload);
+                return;
+            }
+
             payload.index = payload.prev ? this.index : this.index+1;
             payload.parent = this.parent;
-            this.$store.dispatch('newNote', payload)
+            this.$store.dispatch("newNote", payload)
         },
         deleteNote: function(payload){
             // first node can't be remove, only empty
@@ -157,17 +162,16 @@ export default {
                 if(!prev){
                     throw "prev undefined"
                 }
-
-                let position = prev.text.length;
-                this.$store.dispatch('saveNote', { 
+                
+                this.$store.dispatch("saveNote", { 
                     note: prev, 
                     text: prev.text + text,
-                    notes: prev.notes.concat(notes)
-                }).then(() => {
-                    this.$store.commit("focus", {note: prev, position: position})
+                    notes: prev.notes.concat(notes),
+                    position: prev.text.length
                 })
             }
-            this.$store.dispatch('deleteNote', { 
+
+            this.$store.dispatch("deleteNote", { 
                 parent: this.parent, 
                 note: this.note,
                 index: this.index
@@ -180,7 +184,7 @@ export default {
             payload.parent = this.parent;
             payload.index = this.index;
             payload.note = this.note;
-            this.$store.dispatch('downgradeNote', payload)
+            this.$store.dispatch("downgradeNote", payload)
         },
         downNote: function(payload){
             // last node can't down
@@ -190,32 +194,19 @@ export default {
             payload.parent = this.parent;
             payload.index = this.index;
             payload.note = this.note;
-            this.$store.dispatch('downNote', payload)
+            this.$store.dispatch("downNote", payload)
         },
         upgradeNote: function(payload){
             if(!this.parent.id){
-                if(payload.trigger && payload.trigger == 'enter'){
-                    payload.index = payload.prev ? this.index : this.index+1;
-                    payload.parent = this.parent;
-                    this.$store.dispatch('newNote', payload)
-                }
                 return;
             }
-            if(this.root && this.root == this.parent){
-                // double'Enter purpose to upgrade, 
-                // but when focus view, upgrade to parent will out of visible range,
-                // still emit new Note
-                if(payload.trigger && payload.trigger == 'enter'){
-                    payload.index = payload.prev ? this.index : this.index+1;
-                    payload.parent = this.parent;
-                    this.$store.dispatch('newNote', payload)
-                }
-                return;
+            if(!payload.position){
+                payload.position = payload.curPosition;
             }
             payload.parent = this.parent;
             payload.index = this.index;
             payload.note = this.note;
-            this.$store.dispatch('upgradeNote', payload)
+            this.$store.dispatch("upgradeNote", payload)
         },
         upNote: function(payload){
             // first node can't up
@@ -225,7 +216,7 @@ export default {
             payload.parent = this.parent;
             payload.index = this.index;
             payload.note = this.note;
-            this.$store.dispatch('upNote', payload)
+            this.$store.dispatch("upNote", payload)
         },
         navigationNote: function(payload){
             let target;

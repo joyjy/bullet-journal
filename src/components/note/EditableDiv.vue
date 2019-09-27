@@ -25,7 +25,7 @@ import range from "@/lib/range"
 import parser from "@/lib/parser"
 
 export default {
-    props: ['note', 'match', 'type'],
+    props: ["note", "match", "type"],
     data(){
         return {
             innerHtml: "",
@@ -36,7 +36,8 @@ export default {
         this.innerHtml = parser.html(this.note, this.match, this.type)
     },
     mounted: function(){
-        if(this.cursor == 0){ // new created
+        console.log("mounted")
+        if(this.cursor > -1){ // new created
             this.$nextTick(() => {
                 range.focus(this.$el, this.cursor);
             })
@@ -44,13 +45,13 @@ export default {
     },
     computed: {
         text(){
-            if(this.type == 'content'){
+            if(this.type == "content"){
                 return this.note.content;
             }
             return this.note.text;
         },
         cursor(){
-            if(this.type == 'content'){
+            if(this.type == "content"){
                 return this.note.display.content.cursor;
             }
             return this.note.display.text.cursor;
@@ -62,6 +63,7 @@ export default {
         },
         text: function(){
             this.innerHtml = parser.html(this.note, this.match, this.type);
+            console.log("text")
             if(this.editing){ // change innerHtml must keep position
                 this.$nextTick(() => {
                     range.focus(this.$el, this.cursor)
@@ -69,24 +71,24 @@ export default {
             }
         },
         cursor: function(to, from){
-            console.log("cursor", this.text, from, to, this.editing)
-            // if(!this.editing){ // after other note event, may lead this getting focus
-            //     this.$nextTick(() => {
-            //         range.focus(this.$el, this.cursor)
-            //     })
-            // }
+            console.log("cursor", from, to)
+            if(!this.editing && to > 0){ // after other note event, may lead this getting focus
+                this.$nextTick(() => {
+                    range.focus(this.$el, this.cursor)
+                })
+            }
         },
         editing: function(){
             if(this.editing){ // mouse range not accurate
 
             }else{
-                this.$store.commit('unfocus', {note:this.note});
+                this.$store.commit("unfocus", {note:this.note});
             }
         }
     },
     methods: {
         inputText(e){
-            if(e.isComposing && e.data == "　"){ // ime hasn't submit 
+            if(e.isComposing && e.data == "　"){ // ime hasn"t submit 
                 return;
             }
             
@@ -99,26 +101,32 @@ export default {
             this.$emit("input", payload)
         },
         pressDelete(e){
-            if(this.type == 'content'){
+            if(this.type == "content"){
+                return;
+            }
+
+            console.log(e)
+
+            if(e.isComposing){ // ime hasn"t submit 
                 return;
             }
 
             if(range.position(this.$el) == 0){
-                this.$emit('del-note', { keyboard:true })
+                this.$emit("del-note", { keyboard:true })
                 e.preventDefault();
             }
         },
         pressEnter(e){
-            if(this.type == 'content'){
+            if(this.type == "content"){
                 return;
             }
 
             if(e.shiftKey){
                 if(!this.note.content.text){
-                    this.$emit('new-content', {
+                    this.$emit("new-content", {
                         text: "",
                         position: 0,
-                        type:'content'
+                        type:"content"
                     })
                 }
                 return;
@@ -130,15 +138,15 @@ export default {
                 let left = text.substring(0, position);
                 let right = text.substring(position);
 
-                this.$emit('new-note', { text: left, prev: true, position: -1}) // default add at next
-                this.$emit('input', { text:right, position: 0})
+                this.$emit("new-note", { text: left, prev: true, position: -1}) // default add at next
+                this.$emit("input", { text:right, position: 0})
                 return;
             }
             
-            this.$emit('new-note', {});
+            this.$emit("new-note", {curPosition: range.position(this.$el)});
         },
         pressTab(e){
-            if(this.type == 'content'){
+            if(this.type == "content"){
                 return;
             }
             if(e.shiftKey){
@@ -153,7 +161,7 @@ export default {
             // right arrow         39
             // down arrow          40
 
-            if(this.type == 'content'){
+            if(this.type == "content"){
                 return;
             }
 
@@ -195,13 +203,13 @@ export default {
                 return;
             }
 
-            if(this.$route.name != 'note'){
-                this.$router.push({ name:'note', query: {q: e.target.innerText}});
+            if(this.$route.name != "note"){
+                this.$router.push({ name:"note", query: {q: e.target.innerText}});
             }else{
-                if(e.target.classList.contains('tag')){
-                    this.$eventbus.$emit('search', e.target.innerText)
-                }else if(e.target.classList.contains('matched')){
-                    this.$eventbus.$emit('search', '')
+                if(e.target.classList.contains("tag")){
+                    this.$eventbus.$emit("search", e.target.innerText)
+                }else if(e.target.classList.contains("matched")){
+                    this.$eventbus.$emit("search", "")
                 }
             }
         }
