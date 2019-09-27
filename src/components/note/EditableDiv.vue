@@ -17,9 +17,9 @@
 </template>
 
 <script>
-import Vue from "vue"
-
-import moment from "moment"
+import Vue from "vue";
+import _ from "lodash";
+import moment from "moment";
 
 import range from "@/lib/range"
 import parser from "@/lib/parser"
@@ -128,7 +128,7 @@ export default {
                         text: "",
                         position: 0,
                         type:"content"
-                    })
+                    });
                 }
                 return;
             }
@@ -139,12 +139,16 @@ export default {
                 let left = text.substring(0, position);
                 let right = text.substring(position);
 
-                this.$emit("new-note", { text: left, prev: true, position: -1}) // default add at next
-                this.$emit("input", { text:right, position: 0})
+                let batchId = _.now();
+                this.$emit("input", { text: right, position: 0, batchId: batchId});
+                this.$emit("new-note", { text: left, prev: true, position: -1, batchId: batchId}); // default add at next
                 return;
             }
             
-            this.$emit("new-note", {curPosition: range.position(this.$el)});
+            this.$emit("new-note", {
+                keyboard: true,
+                curPosition: range.position(this.$el)
+            });
         },
         pressTab(e){
             if(this.type == "content"){

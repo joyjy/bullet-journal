@@ -1,8 +1,12 @@
-import lexer from "./lexer"
+import lexer from "./lexer";
+
+const clarify = function(text){
+    return text.replace(/</g, "&lt;");
+}
 
 const addMatchTag = function(text, match, textOffset){
-    if(!match || !match.matched || match.length == 0){
-        return text.replace(/</g, '&lt;');
+    if(!match || !match.matched || match.length === 0){
+        return clarify(text);
     }
 
     let start = match.start - textOffset;
@@ -12,16 +16,16 @@ const addMatchTag = function(text, match, textOffset){
         let center = text.substring(start, start+match.length);
         let right = text.substring(start+match.length, text.length);
 
-        return left.replace(/</g, '&lt;') + '<span class="matched">' + center.replace(/</g, '&lt;') + '</span>' + right.replace(/</g, '&lt;');
+        return clarify(left) + '<span class="matched">' + clarify(center) + "</span>" + clarify(right);
     }
 
-    return text.replace(/</g, '&lt;');
+    return clarify(text);
 }
 
 const textHtml = function(note, match){
 
-    if(!note.tokens || note.tokens.length == 0){
-        return note.text.replace(/</g, '&lt;');
+    if(!note.tokens || note.tokens.length === 0){
+        return clarify(note.text);
     }
 
     let htmlContent = "";
@@ -32,20 +36,20 @@ const textHtml = function(note, match){
 
         switch (token.type) {
             case "tag":
-                htmlContent += '<span class="'+token.type+'">' + addMatchTag(token.text, match, textOffset) +'</span>'
-                break
+                htmlContent += '<span class="'+token.type+'">' + addMatchTag(token.text, match, textOffset) +"</span>";
+                break;
             case "state":
                 let elClass = "state";
-                if(token.text[0] == '(' || token.text[0] == '<'){
+                if(token.text[0] === "(" || token.text[0] === "<"){
                     if(token.time){
-                        elClass += " time"
+                        elClass += " time";
                     }
-                }else if(token.text == '[ ]' || token.text == '[\xa0]' || token.text == '[TODO]'){
+                }else if(token.text === "[ ]" || token.text === "[\xa0]" || token.text === "[TODO]"){
                     elClass += " todo";
-                }else if(token.text == '[x]' || token.text == '[DONE]'){
-                    elClass += " done"
+                }else if(token.text === "[x]" || token.text === "[DONE]"){
+                    elClass += " done";
                 }
-                htmlContent += '<span class="'+elClass+'">' + addMatchTag(token.text, match, textOffset) +'</span>'
+                htmlContent += '<span class="'+elClass+'">' + addMatchTag(token.text, match, textOffset) +"</span>";
                 break;
             case "text":
             case "empty":
@@ -62,7 +66,7 @@ const textHtml = function(note, match){
 
 const contentHtml = function(note, match){
     if(note.content && note.content.text){
-        return note.content.text.replace(/</g, '&lt;');
+        return clarify(note.content.text);
     }
     return undefined;
 }
@@ -70,8 +74,8 @@ const contentHtml = function(note, match){
 export default {
     parse: lexer.tokenize,
     html: function(note, match, type){
-        if(type == 'content'){
-            return contentHtml(note, match)
+        if(type === "content"){
+            return contentHtml(note, match);
         }
 
         return textHtml(note, match);

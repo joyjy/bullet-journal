@@ -144,6 +144,7 @@ export default {
 
             payload.index = payload.prev ? this.index : this.index+1;
             payload.parent = this.parent;
+            payload.curNote = this.note;
             this.$store.dispatch("newNote", payload)
         },
         deleteNote: function(payload){

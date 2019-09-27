@@ -36,6 +36,7 @@ class UndoRedoHistory {
         this.record = false;
 
         const prevState = this.history[this.currentIndex];
+        console.log(prevState.type)
         switch (prevState.type) {
             case "saveText":
                 let to = prevState.payload.note;
@@ -49,6 +50,16 @@ class UndoRedoHistory {
                 break;
             case "addNote":
                 this.store.commit("deleteNote", prevState.payload);
+                if(prevState.payload.keyboard){
+                    this.store.commit("focus", {
+                        note: prevState.payload.curNote,
+                        position: prevState.payload.curPosition
+                    });
+                }
+                if(prevState.payload.batchId){
+                    let lastState = this.history[this.currentIndex-1];
+                    batched = lastState.payload.batchId === prevState.payload.batchId;
+                }
                 break;
             case "deleteNote":
                 this.store.commit("addNote", prevState.payload);
