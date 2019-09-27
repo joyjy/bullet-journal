@@ -1,8 +1,5 @@
 import Vue from "vue";
-
 import _ from "lodash";
-
-import traversal from "@/lib/tree"
 import { Note } from "@/model/note";
 
 export default {

@@ -55,7 +55,7 @@ export default {
         }
         return stack;
     },
-    each(notes, level, iteratee, depth){
+    each(notes, iteratee, {level, depth} = {}){
         if(!depth){
             depth = 0;
         }
@@ -65,7 +65,7 @@ export default {
         for (let i = 0; i < notes.length; i++) {
             let note = notes[i];
             iteratee(note, depth);
-            this.each(note.notes, level, iteratee, depth+1);
+            this.each(note.notes, iteratee, {level, depth: depth+1});
         }
     },
     flattern(notes){
@@ -79,5 +79,13 @@ export default {
             array = array.concat(this.flattern(note.notes));
         }
         return array;
+    },
+    dup(notes, iteratee){
+        let dupNotes = [];
+        for (let i = 0; i < notes.length; i++) {
+            notes[i].notes = this.dup(notes[i].notes, iteratee)
+            dupNotes.push(iteratee(notes[i]))
+        }
+        return dupNotes;
     }
 }

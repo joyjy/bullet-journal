@@ -1,7 +1,7 @@
 import _ from "lodash"
 
-export class Note{
-    constructor(text){
+class Note{
+    constructor(){
         this.id = _.now();
         this.text = '';
         this.tokens = [];
@@ -23,3 +23,25 @@ export class Note{
         this.notes = [];
     }
 }
+
+const toNote = function(note){
+    if(!note){
+        return;
+    }
+    if(note instanceof Note){
+        return note;
+    }
+    let from = note;
+    let to = new Note();
+    _.assignWith(to, from, (toVal, fromVal) => {
+        if(typeof toVal === 'object'){
+            _.assignWith(toVal, fromVal);
+            return toVal;
+        }
+        return _.isUndefined(fromVal) ? toVal: fromVal;
+    });
+    console.log(to.display.text)
+    return to;
+}
+
+export { Note, toNote }

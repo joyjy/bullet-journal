@@ -43,6 +43,8 @@ import agendaModule from "./agenda/agenda";
 import settingsModule from "./settings/display";
 import userModule from "./user/user";
 
+import { toNote } from "@/model/note";
+
 export default new Vuex.Store({
     strict: true,
     plugins: [vuexPersist.plugin, vuexPersistCookie.plugin, undoRedoPlugin],
@@ -97,6 +99,14 @@ export default new Vuex.Store({
         flattern(state){
             state.flattern = traversal.flattern(state.notes);
         },
+        mergeNotes(state, {notes}){
+            notes = traversal.dup(notes, (n) => toNote(n))
+            if(state.notes.length == 1 && state.notes[0].text ==''){
+                Vue.set(state, "notes", notes);
+            }else{
+                state.notes = state.notes.concat(notes);
+            }
+        }
     },
     actions: {
         async init({commit, state}){
@@ -130,5 +140,13 @@ export default new Vuex.Store({
             }
             return Promise.resolve(found);
         },
+        async merge({commit}, payload){
+
+            console.log(payload)
+
+            commit("mergeNotes", payload)
+
+            return Promise.resolve();
+        }
     }
 })

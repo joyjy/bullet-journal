@@ -23,8 +23,16 @@
                 <v-col>Data</v-col>
             </v-row>
             <v-row>
-                <v-col>
+                <v-col cols="1">
                     <v-btn @click="exportJson">Export</v-btn>
+                </v-col>
+                <v-col>
+                    <v-file-input accept=".json" label="Import" @change="importJson"></v-file-input>
+                </v-col>
+            </v-row>
+            <v-row>
+                <v-col>
+                    <v-file-input accept=".opml" label="Import Workflowy OPML" @change="importWorkflowy"></v-file-input>
                 </v-col>
             </v-row>
         </v-container>
@@ -48,6 +56,19 @@ export default {
             linkElement.setAttribute('href', dataUri);
             linkElement.setAttribute('download', exportFileDefaultName);
             linkElement.click();
+        },
+        importJson(file){
+            console.log(file)
+
+            var reader = new FileReader();
+            reader.onload = () =>{
+                let data = JSON.parse(reader.result);
+                this.$store.dispatch("merge", data)
+            };
+            reader.readAsText(file);
+        },
+        importWorkflowy(files){
+            console.log(files)
         }
     }
 }

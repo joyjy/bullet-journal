@@ -42,7 +42,7 @@ export default {
 
             let nextDay = day.clone().add(1, "d");
 
-            traversal.each(rootState.notes, -1, (note) => {
+            traversal.each(rootState.notes, (note) => {
                 let time = toTime(state.timestamps[note.id], note);
                 if(time && time.isBetween(day, nextDay)){
                     events.push(new Event({

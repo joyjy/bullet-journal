@@ -11,11 +11,11 @@ export default {
             note.display.collapse = !note.display.collapse
         },
         switchOutline({state}, payload){
-            traversal.each(payload.notes, payload.level, (note, depth) => {
+            traversal.each(payload.notes, (note, depth) => {
                 if(note.notes.length > 0){
                     note.display.collapse = depth == payload.level
                 }
-            })
+            }, {level: payload.level})
         },
         focus({state}, {note, position, type}){
             
