@@ -25,7 +25,6 @@ export default {
             display.cursor = position;
         },
         unfocus({state}, {note}){
-            
             note.display.content.focus = false;
             note.display.content.cursor = -1;
             note.display.text.focus = false;

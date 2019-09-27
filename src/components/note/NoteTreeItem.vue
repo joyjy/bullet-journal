@@ -77,7 +77,7 @@ export default {
                 return this.note.notes;
             },
             set(value){
-                // this.$store.dispatch("dragToSort", { notes: value, note: this.note})
+                this.$store.dispatch("dragToSort", { note: this.note, notes: value})
             }
         },
         collapsed: function(){
@@ -262,11 +262,12 @@ export default {
     display: none;
 }
 .debug{
+    display: none;
     position: absolute;
     right:0;
     top:0;
 }
 [contenteditable="true"].editing{
-    background-color: pink;
+    background-color: inherit;
 }
 </style>

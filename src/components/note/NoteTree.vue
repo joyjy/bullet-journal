@@ -47,7 +47,9 @@
         
         <div class="blank" @click="focusLast"></div>
         
-        <note-tree-root :query="query" :parent="$data" :root="root"></note-tree-root>
+        <note-tree-root :query="query" :parent="$data" :root="root"
+            @refresh="refresh">
+        </note-tree-root>
     </app-layout>
 </template>
 
@@ -97,17 +99,6 @@ export default {
             isStarred: "saved/isStarred",
             isSavedFilter: "saved/isSavedFilter"
         }),
-        noteList: {
-            get(){
-                return this.notes;
-            },
-            set(value){
-                // this.$store.dispatch("dragToSort", { notes: value})
-                //     .then(() => {
-                //         this.setRoot(this.$route.params.id)
-                //     })
-            }
-        },
         id: function(){
             return this.$route.params.id;
         }

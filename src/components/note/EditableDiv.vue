@@ -7,8 +7,8 @@
         @keydown.delete="pressDelete" 
         @keypress.enter.prevent="pressEnter" 
         @keydown.tab.prevent="pressTab" 
-        @keydown.up.prevent="pressNav"
-        @keydown.down.prevent="pressNav"
+        @keydown.up="pressNav"
+        @keydown.down="pressNav"
         @keydown.left="pressNav"
         @keydown.right="pressNav"
         @dblclick.capture="click('dbl', $event)"
@@ -30,13 +30,13 @@ export default {
         return {
             innerHtml: "",
             editing: false,
+            swapDown: false,
         }
     },
     created: function() {
         this.innerHtml = parser.html(this.note, this.match, this.type)
     },
     mounted: function(){
-        console.log("mounted")
         if(this.cursor > -1){ // new created
             this.$nextTick(() => {
                 range.focus(this.$el, this.cursor);
@@ -63,7 +63,6 @@ export default {
         },
         text: function(){
             this.innerHtml = parser.html(this.note, this.match, this.type);
-            console.log("text")
             if(this.editing){ // change innerHtml must keep position
                 this.$nextTick(() => {
                     range.focus(this.$el, this.cursor)
@@ -71,18 +70,22 @@ export default {
             }
         },
         cursor: function(to, from){
-            console.log("cursor", from, to)
-            if(!this.editing && to > 0){ // after other note event, may lead this getting focus
+            if(this.cursor > -1){ // after other note event, may lead this getting focus
                 this.$nextTick(() => {
                     range.focus(this.$el, this.cursor)
                 })
             }
         },
-        editing: function(){
-            if(this.editing){ // mouse range not accurate
-
+        editing: function(to, from){
+            if(this.editing){
+                // mouse range not accurate so do not record position
             }else{
-                this.$store.commit("unfocus", {note:this.note});
+                if(this.swapDown){ // swapDown(Shift + ↓ will trigger blur )
+                    range.focus(this.$el, this.cursor); // refocus
+                    this.swapDown = false;
+                }else{
+                    this.$store.commit("unfocus", {note:this.note});
+                }
             }
         }
     },
@@ -104,8 +107,6 @@ export default {
             if(this.type == "content"){
                 return;
             }
-
-            console.log(e)
 
             if(e.isComposing){ // ime hasn"t submit 
                 return;
@@ -161,6 +162,8 @@ export default {
             // right arrow         39
             // down arrow          40
 
+            let handled = false;
+
             if(this.type == "content"){
                 return;
             }
@@ -169,33 +172,38 @@ export default {
             switch(e.keyCode){
                 case 37: //left
                     if(position == 0){
-                        this.$emit("nav-between-note", { direction: "left" });
-                        e.preventDefault()
+                        handled = this.$emit("nav-between-note", { direction: "left" });
                     }else{
                         this.$store.commit("focus", {note: this.note, position: position-1})
                     }
                     break;
                 case 39: //right
                     if(position == this.text.length){
-                        this.$emit("nav-between-note", { direction: "right" });
-                        e.preventDefault()
+                        handled = this.$emit("nav-between-note", { direction: "right" });
                     }else{
                         this.$store.commit("focus", {note: this.note, position: position+1})
                     }
                     break;
                 case 38: // up
                     if(e.shiftKey){
-                        this.$emit("up-note", { position: position });
+                        handled = this.$emit("up-note", { position: position });
                     }else{
-                        this.$emit("nav-between-note", { direction: "up", position: position });
+                        handled = this.$emit("nav-between-note", { direction: "up", position: position });
                     }
                     break;
                 case 40: // down
                     if(e.shiftKey){
-                        this.$emit("down-note", { position: position });
+                        this.swapDown = true;
+                        handled = this.$emit("down-note", { position: position });
                     }else{
-                        this.$emit("nav-between-note", { direction: "down", position: position })
+                        handled = this.$emit("nav-between-note", { direction: "down", position: position })
                     }
+                    break;
+            }
+
+            if(handled){
+                e.preventDefault();
+                e.stopPropagation();
             }
         },
         click(type, e){
