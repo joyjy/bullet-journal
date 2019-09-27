@@ -1,89 +1,100 @@
-import Vue from "vue"
 import _ from "lodash";
 
 class UndoRedoHistory {
 
-    constructor(){
+    constructor() {
         this.history = [];
         this.currentIndex = -1;
         this.record = true;
     }
 
-    init(store){
+    init(store) {
         this.store = store;
     }
-  
+
     addState(state) {
-      // may be we have to remove redo steps
-      if (this.currentIndex + 1 < this.history.length) {
-        this.history.splice(this.currentIndex + 1);
-      }
-      this.history.push(state);
-      this.currentIndex++;
+        // may be we have to remove redo steps
+        if (this.currentIndex + 1 < this.history.length) {
+            this.history.splice(this.currentIndex + 1);
+        }
+        this.history.push(state);
+        this.currentIndex++;
     }
 
-    reset(){
-      this.history.splice(0, this.currentIndex);
-      this.currentIndex = -1;
-      console.log("reset", this.history, this.currentIndex)
+    reset() {
+        this.history.splice(0, this.currentIndex);
+        this.currentIndex = -1;
     }
-  
-    undo(state) {
-      if(this.currentIndex == -1){
-        return;
-      }
 
-      this.record = false;
+    undo() {
+        if (this.currentIndex === -1) {
+            return;
+        }
 
-      const prevState = this.history[this.currentIndex];
-      switch(prevState.type){
-        case "saveNote":
-            prevState.payload.note.text = prevState.payload.before.text;
-            prevState.payload.note.tokens = prevState.payload.before.tokens;
-          break;
-        case "addNote":
-          this.store.commit("deleteNote", prevState.payload)
-          break;
-        case "deleteNote":
-          this.store.commit("addNote", prevState.payload)
-      }
-      this.currentIndex--;
+        let batched = false; 
 
-      this.record = true;
-      console.log("undo", this.history, this.currentIndex)
+        this.record = false;
+
+        const prevState = this.history[this.currentIndex];
+        switch (prevState.type) {
+            case "saveText":
+                let to = prevState.payload.note;
+                let from = prevState.payload.before;
+
+                this.store.commit("tag/remove", {tags: _.filter(to.tokens, ['type','tag'])});
+                to.text = from.text;
+                to.tokens = from.tokens;
+                this.store.commit("tag/add", {tags: _.filter(from.tokens, ['type','tag'])});
+                // todo cursor
+                break;
+            case "addNote":
+                this.store.commit("deleteNote", prevState.payload);
+                break;
+            case "deleteNote":
+                this.store.commit("addNote", prevState.payload);
+                this.store.commit("flattern")
+                if(prevState.payload.keyboard){
+                    this.store.commit("focus", {note: prevState.payload.note, position:0});
+                }
+                if(prevState.payload.batchId){
+                    let lastState = this.history[this.currentIndex-1];
+                    batched = lastState.payload.batchId === prevState.payload.batchId;
+                    // todo cursor
+                }
+        }
+        this.currentIndex--;
+
+        this.record = true;
+
+        if(batched){
+            this.undo();
+        }
     }
-  
+
     redo() {
-      const nextState = this.history[this.currentIndex + 1];
-      //
-      this.currentIndex++;
+        // todo
+        this.currentIndex++;
     }
 }
 
 const undoRedoHistory = new UndoRedoHistory();
 
 const undoRedoPlugin = (store) => {
-    
+
     undoRedoHistory.init(store);
-  
-    store.subscribe((mutation, state) => {
 
-      if(!undoRedoHistory.record){
-        return;
-      }
-      
-      switch(mutation.type){
-        case "replaceTag": // todo with saveNote
-          break;
-        case "saveNote":
-        case "addNote":
-        case "deleteNote":
-            undoRedoHistory.addState(mutation);
-      }
+    store.subscribe((mutation) => {
 
-      if(mutation.payload && mutation.payload.init){
-        undoRedoHistory.reset()
-      }
+        if (!undoRedoHistory.record) {
+            return;
+        }
+
+        switch (mutation.type) {
+            case "saveText":
+            case "addNote":
+            case "deleteNote":
+                undoRedoHistory.addState(mutation);
+        }
     });
 }
 

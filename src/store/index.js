@@ -94,8 +94,8 @@ export default new Vuex.Store({
         undo(state){
             undoRedoHistory.undo(state);
         },
-        flattern(state, flattern){
-            state.flattern = flattern;
+        flattern(state){
+            state.flattern = traversal.flattern(state.notes);
         },
     },
     actions: {
@@ -103,7 +103,7 @@ export default new Vuex.Store({
             if(state.notes.length == 0){
                 await this.dispatch("newNote", {});
             }
-            commit("flattern", traversal.flattern(state.notes));
+            commit("flattern");
             if(state.flattern.length == 1 && !state.flattern[0].text){
                 commit("focus", { note: state.flattern[0], position: 0});
             }

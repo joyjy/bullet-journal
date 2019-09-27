@@ -37,14 +37,13 @@
 
 <script>
 import { mapMutations, mapGetters } from "vuex"
+import draggable from "vuedraggable"
+import _ from "lodash"
 
 import NoteBullet from "./NoteBullet.vue"
 import EditableDiv from "./EditableDiv.vue"
 import range from "@/lib/range"
-
 import filter from "@/lib/filter"
-
-import draggable from "vuedraggable"
 
 export default {
     name: "note-tree-item",
@@ -153,6 +152,7 @@ export default {
                 return;
             }
 
+            let batchId = "";
             if(payload && payload.keyboard){
                 let text = this.note.text;
                 let notes = this.note.notes;
@@ -163,18 +163,22 @@ export default {
                     throw "prev undefined"
                 }
                 
+                batchId = _.now().toString();
                 this.$store.dispatch("saveNote", { 
                     note: prev, 
                     text: prev.text + text,
                     notes: prev.notes.concat(notes),
-                    position: prev.text.length
+                    position: prev.text.length,
+                    batchId: batchId,
                 })
             }
 
             this.$store.dispatch("deleteNote", { 
                 parent: this.parent, 
                 note: this.note,
-                index: this.index
+                index: this.index,
+                keyboard: payload.keyboard,
+                batchId: batchId,
             })
         },
         downgradeNote: function(payload){
@@ -259,7 +263,7 @@ export default {
     display: flex;
 }
 .debug{
-    display: none;
+    /* display: none; */
     position: absolute;
     right:0;
     top:0;

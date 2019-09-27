@@ -1,10 +1,7 @@
-import Vue from "vue"
-
-import _ from "lodash"
-
-import parser from "@/lib/parser"
-
-import { toTime } from "@/model/time"
+import Vue from "vue";
+import _ from "lodash";
+import parser from "@/lib/parser";
+import { toTime } from "@/model/time";
 
 export default {
     mutations:{
@@ -14,7 +11,7 @@ export default {
             note.tokens = tokens;
 
             if(notes){ // when merge note
-                note.notes = notes
+                note.notes = notes;
             }
 
             if(time){ // has timestamp
@@ -26,12 +23,12 @@ export default {
         saveContent(state, {note, text, tokens, position, time}){
 
             if(!note.content){
-                Vue.set(note, 'content', { text:'', tokens:[] })
+                Vue.set(note, 'content', { text:'', tokens:[] });
             }
 
             note.content.text = text;
             note.content.tokens = tokens;
-            
+
             if(time){
                 Vue.set(note, 'schedule', time);
             }else{
@@ -39,7 +36,7 @@ export default {
             }
         },
         time(state, {note, token}){
-            token.time = toTime(token.time, note)
+            token.time = toTime(token.time, note);
         }
     },
     actions: {
@@ -55,20 +52,20 @@ export default {
             }
 
             if(payload.type == 'content'){
-                commit("tag/remove", {tags: _.filter(payload.note.content.tokens, ['type','tag'])})
-                commit("saveContent", payload)
-                commit("focus", payload)
+                commit("tag/remove", {tags: _.filter(payload.note.content.tokens, ['type','tag'])});
+                commit("saveContent", payload);
+                commit("focus", payload);
 
             } else { // text
-                commit("tag/remove", {tags: _.filter(payload.note.tokens, ['type','tag'])})
-                commit("saveText", payload)
-                commit("focus", payload)
+                commit("tag/remove", {tags: _.filter(payload.note.tokens, ['type','tag'])});
+                commit("saveText", payload);
+                commit("focus", payload);
             }
             
-            commit("tag/add", {tags: _.filter(payload.tokens, ['type', 'tag'])})
+            commit("tag/add", {tags: _.filter(payload.tokens, ['type', 'tag'])});
 
             if(payload.time){
-                commit("agenda/add", payload)
+                commit("agenda/add", payload);
             }
 
             return Promise.resolve();

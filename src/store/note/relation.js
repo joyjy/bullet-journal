@@ -54,7 +54,7 @@ export default {
             }
             
             commit("addNote", payload);
-            commit("flattern", traversal.flattern(rootState.notes));
+            commit("flattern");
 
             if(payload.text){
                 await this.dispatch("saveNote", payload);
@@ -66,7 +66,7 @@ export default {
 
             commit("tag/remove", {tags: _.filter(payload.note.tokens, ["type","tag"])});
             commit("deleteNote", payload);
-            commit("flattern", traversal.flattern(rootState.notes));
+            commit("flattern");
 
             return Promise.resolve()
         },
@@ -74,7 +74,7 @@ export default {
 
             commit("downgradeNote", payload);
             commit("focus", {note:payload.note, position:payload.position});
-            commit("flattern", traversal.flattern(rootState.notes));
+            commit("flattern");
 
             return Promise.resolve()
         },
@@ -91,7 +91,7 @@ export default {
 
             commit("upgradeNote", payload);
             commit("focus", {note:payload.note, position:payload.position});
-            commit("flattern", traversal.flattern(rootState.notes));
+            commit("flattern");
 
             return Promise.resolve()
         },
@@ -103,7 +103,7 @@ export default {
             commit("unfocus", {note:payload.note});
             commit("swapNote", payload);
             commit("focus", {note:payload.note, position:payload.position});
-            commit("flattern", traversal.flattern(rootState.notes));
+            commit("flattern");
 
             return Promise.resolve()
         },
@@ -115,7 +115,7 @@ export default {
             commit("unfocus", {note:payload.note});
             commit("swapNote", payload);
             commit("focus", {note:payload.note, position:payload.position});
-            commit("flattern", traversal.flattern(rootState.notes));
+            commit("flattern");
 
             return Promise.resolve();
         },
@@ -126,7 +126,7 @@ export default {
             }
             
             commit("dragToSort", payload);
-            commit("flattern", traversal.flattern(rootState.notes));
+            commit("flattern");
 
             return Promise.resolve();
         },

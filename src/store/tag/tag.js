@@ -1,4 +1,4 @@
-import Vue from "vue"
+import Vue from "vue";
 
 export default {
     namespaced: true,
@@ -15,7 +15,7 @@ export default {
                     Vue.set(state[group], tag.text, 0);
                 }
                 state[group][tag.text]++;
-            })
+            });
         },
         remove(state, {tags}){
             _.each(tags, tag => {
@@ -26,11 +26,7 @@ export default {
                         delete state[group][tag.text];
                     }
                 }
-            })
-        },
-        replace(state, {oldTags, newTags}){
-            this.remove(state, {tags:oldTags})
-            this.add(state, {tags:newTags})
+            });
         },
     }
 }
