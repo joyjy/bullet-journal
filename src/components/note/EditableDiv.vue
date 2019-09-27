@@ -215,13 +215,16 @@ export default {
                 return;
             }
 
-            if(this.$route.name != "note"){
-                this.$router.push({ name:"note", query: {q: e.target.innerText}});
-            }else{
-                if(e.target.classList.contains("tag")){
-                    this.$eventbus.$emit("search", e.target.innerText)
-                }else if(e.target.classList.contains("matched")){
-                    this.$eventbus.$emit("search", "")
+            if(e.target.classList.contains("matched")){
+                this.$eventbus.$emit("search", "")
+                return;
+            }
+
+            if(e.target.classList.contains("tag") || e.target.classList.contains("state")){
+                if(this.$route.name != "note"){
+                    this.$router.push({ name:"note", query: {q: e.target.innerText}});
+                }else{
+                    this.$eventbus.$emit("search", e.target.innerText);
                 }
             }
         }

@@ -1,49 +1,33 @@
 <template>
     <div class="note-control">
         <div class="collapsed-ic" @click="collapse" >
-            <v-icon :x-small="ic[collapsed] == 'mdi-filter-variant'" small>{{ic[collapsed]}}</v-icon>
+            <v-icon :x-small="ic[collapsed] == 'mdi-filter-variant'" small>
+                {{ic[collapsed]}}
+            </v-icon>
         </div>
-        <div :class="['note-bullet', {time: note.time || note.schedule}]" 
-            @dblclick="click('dbl', $event)" @click.capture="click('sgl', $event)"
-            @contextmenu.prevent="toggleMenu">
-            <v-icon v-if="stamp" small>mdi-av-timer</v-icon>
-            <v-icon v-else-if="schedule" small>mdi-alarm</v-icon>
-        </div>
-        <v-menu v-model="menu" absolute :position-x="x" :position-y="y" offset-y nudge-left="30%" open-delay="800">
+        
+        <v-menu open-on-hover offset-y open-delay="1000">
+            <template v-slot:activator="{ on }">
+                <div :class="['note-bullet', {time: note.time || note.schedule}]" 
+                    @dblclick="click('dbl', $event)" @click.capture="click('sgl', $event)"
+                    v-on="on">
+                    <v-icon v-if="stamp" small>mdi-av-timer</v-icon>
+                    <v-icon v-else-if="schedule" small>mdi-alarm</v-icon>
+                </div>
+            </template>
             <v-list subheader dense>
                 <v-list-item v-if="note.time || note.schedule">
                     <v-list-item-content class="caption font-italic">
                         {{ timestamp }}
                     </v-list-item-content>
                 </v-list-item>
-                <v-divider></v-divider>
-                <v-list-item @click="">
-                    <v-list-item-title>
-                        Add Content
-                    </v-list-item-title>
-                    <v-list-item-action-text>
-                        Shift+Enter
-                    </v-list-item-action-text>
-                </v-list-item>
-                <v-list-item @click="">
-                    <v-list-item-title>
-                        Duplicate
-                    </v-list-item-title>
-                    <v-list-item-action-text>
-                    </v-list-item-action-text>
-                </v-list-item>
+                <v-divider v-if="note.time || note.schedule"></v-divider>
                 <v-list-item @click="$emit('del-note')">
                     <v-list-item-title>
                         Delete
                     </v-list-item-title>
                     <v-list-item-action-text>
                     </v-list-item-action-text>
-                </v-list-item>
-                <v-divider></v-divider>
-                <v-list-item :to="{ name:'debug', params:{ id: this.note.id }}">
-                    <v-list-item-title>
-                        Debug
-                    </v-list-item-title>
                 </v-list-item>
             </v-list>
         </v-menu>
@@ -57,26 +41,23 @@ import moment from 'moment';
 import { toTime } from '@/model/time'
 
 export default {
-    props:['note', 'collapsed'],
+    props:["note", "collapsed"],
     data: () => ({
-        menu: false,
-        x: 0,
-        y: 0,
         ignoreFiltered: false,
         ic : {
-            'expand': 'mdi-menu-down',
-            'collapsed': 'mdi-menu-right',
-            'filtered': 'mdi-filter-variant',
-            'none': ''
+            "expand": "mdi-menu-down",
+            "collapsed": "mdi-menu-right",
+            "filtered": "mdi-filter-variant",
+            "none": ""
         }
     }),
     computed:{
         stamp: function(){
-            return this.note.time && this.note.time.type == 'stamp'
+            return this.note.time && this.note.time.type == "stamp"
         },
         schedule: function(){
             if(this.note.time){
-                return this.note.time.type == 'schedule'
+                return this.note.time.type == "schedule"
             }
             return this.note.schedule;
         },
@@ -103,23 +84,13 @@ export default {
     },
     methods: {
         collapse: function(){
-            this.$emit('collapse-note');
+            this.$emit("collapse-note");
         },
         click: function(type, e){
             if(type != this.$store.state.settings.note.clickType){
                 return;
             }
-            this.$router.push({ name:'note', params:{ id: this.note.id }})
-        },
-        toggleMenu: function(){
-            if(!this.menu){
-                var rect = this.$el.getBoundingClientRect();
-                this.x = rect.right;
-                this.y = rect.bottom;
-                this.menu = true;
-            }else{
-                this.menu = false;
-            }
+            this.$router.push({ name:"note", params:{ id: this.note.id }})
         }
     }
 }

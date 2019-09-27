@@ -40,7 +40,7 @@
                             <v-icon>mdi-arrow-expand-vertical</v-icon>
                         </v-btn>
                     </template>
-                    <span>Toggle Outline Level</span>
+                    <span>Toggle Outline Level: {{ collapseLevel == -1 ? 'All': collapseLevel+1 }}</span>
                 </v-tooltip>
             </v-toolbar-items>
         </template>
@@ -54,14 +54,13 @@
 </template>
 
 <script>
-import { mapMutations, mapGetters } from 'vuex'
-
-import AppLayout from '../app/Layout'
-import NoteTreeRoot from './NoteTreeRoot'
-
-import range from '@/lib/range'
-
+import { mapState, mapGetters, mapMutations } from "vuex"
 import _ from "lodash"
+
+import AppLayout from "../app/Layout"
+import NoteTreeRoot from "./NoteTreeRoot"
+import range from "@/lib/range"
+
 import traversal from "@/lib/tree"
 import filter from "@/lib/filter"
 
@@ -84,17 +83,21 @@ export default {
         this.refresh();
     },
     mounted: function(){
-        this.$eventbus.$on('search', e => this.search(e))
+        this.$eventbus.$on("search", e => this.search(e))
     },
     destroyed: function(){
-        this.$eventbus.$off('search')
+        this.$eventbus.$off("search")
     },
     watch: {
-        '$route' () {
+        "$route" () {
             this.refresh();
+        },
+        flattern(){
+            this.depth = traversal.depth(this.notes);
         }
     },
     computed: {
+        ...mapState(['flattern']),
         ...mapGetters({
             isStarred: "saved/isStarred",
             isSavedFilter: "saved/isSavedFilter"
@@ -142,7 +145,7 @@ export default {
             this.$store.commit("switchOutline", { notes: this.notes, level: this.collapseLevel });
         },
         search(payload){
-            this.$router.push({ name:'note', params:{ id: this.id }, query: {q: payload}});
+            this.$router.push({ name:"note", params:{ id: this.id }, query: {q: payload}});
         },
         focusLast(e){
         }

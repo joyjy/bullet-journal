@@ -2,7 +2,7 @@
     <v-container>
         <v-row align="center" justify="center">
             <v-col cols="3">
-                <v-form v-model="valid" @submit="signIn">
+                <v-form v-model="valid" @submit.prevent="signIn">
                     <div>Sign in</div>
                     <v-input>
                         <v-text-field label="Email" v-model="email" required>
@@ -28,7 +28,10 @@ export default {
     }),
     methods: {
         signIn(){
-            this.$store.dispatch("signIn", {email: this.email, password: this.password}).then((succeed) => {
+            this.$store.dispatch("signIn", {
+                email: this.email, 
+                password: this.password
+            }).then((succeed) => {
                 if(succeed){
                     this.$router.replace({name:'note'})
                 }

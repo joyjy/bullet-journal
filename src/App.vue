@@ -1,6 +1,6 @@
 <template>
   <v-app>
-    <app-nav-bar v-if="this.$store.getters.signed()"></app-nav-bar>
+    <app-nav-bar v-if="signed()"></app-nav-bar>
     
     <router-view></router-view>
 
@@ -9,6 +9,8 @@
 </template>
 
 <script>
+import { mapState, mapGetters, mapMutations } from "vuex"
+
 import AppNavBar from "@/components/app/NavBar.vue"
 import AppFab from "@/components/app/Fab.vue"
 
@@ -19,7 +21,7 @@ export default {
     AppFab,
   },
   created: function(){
-    if(!this.$store.getters.signed() && this.$route.name != 'signin'){
+    if(!this.signed() && this.$route.name != 'signin'){
       this.$router.push({'name': 'signin'})
     }
   },
@@ -29,11 +31,15 @@ export default {
   beforeDestroy: function () {
     this.$el.ownerDocument.removeEventListener('keydown', this.onKey)
   },
+  computed: {
+    ...mapGetters(["signed"])
+  },
   methods: {
+    ...mapMutations(["undo"]),
     onKey: function(e){
       if(e.keyCode == 90){
         if(navigator.platform.indexOf('Mac') > -1 && event.metaKey || event.ctrlKey){
-          this.$store.commit("undo")
+          this.undo();
           e.preventDefault();
           e.stopPropagation();
         }

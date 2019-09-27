@@ -17,7 +17,8 @@
                 {{ $store.state.user.account }}
               </v-list-item-subtitle>
               <v-list-item-subtitle class="caption">
-                {{$store.state.flattern.length}} bullets
+                {{$store.state.flattern.length}} bullets,
+                {{$store.state.tag.count}} tags
               </v-list-item-subtitle>
             </v-list-item-content>
             

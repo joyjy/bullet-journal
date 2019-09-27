@@ -30,10 +30,10 @@
 </template>
 
 <script>
-import AllTag from '../tag/AllTag'
+import AllTag from "../tag/AllTag";
 
 export default {
-    props: ['rightDrawer', 'color'],
+    props: ["rightDrawer", "color"],
     components:{
         "tag-all-list": AllTag,
     }

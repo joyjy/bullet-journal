@@ -1,7 +1,9 @@
 <template>
     <v-container>
-        <v-row v-for="group in groups" :key="group">
-            > {{group}}
+        <v-row v-for="group in groups" :key="group" no-gutters>
+            <v-col cols="12" v-show="!isEmpty(group)">
+                > {{group}}
+            </v-col>
             <v-chip-group column>
                 <v-chip v-for="tag in tags[group]" :key="tag.text"
                     label small @click="$eventbus.$emit('search', tag.text)">
@@ -14,7 +16,7 @@
 </template>
 
 <script>
-import _ from "lodash"
+import _ from "lodash";
 
 export default {
     data:() => ({
@@ -32,6 +34,11 @@ export default {
             }
             return tags;
         }
+    },
+    methods: {
+        isEmpty: function(group){
+            return _.isEmpty(this.tags[group])
+        },
     }
 }
 </script>

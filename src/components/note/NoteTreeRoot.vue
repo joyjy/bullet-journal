@@ -24,11 +24,9 @@ export default {
                 return this.parent.notes;
             },
             set(value){
-                this.$store
-                    .dispatch("dragToSort", { note: this.root, notes: value})
-                    .then(() => {
+                this.$store.dispatch("dragToSort", { note: this.root, notes: value}).then(() => {
                         this.$emit("refresh")
-                    });
+                });
             }
         },
     },

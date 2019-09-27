@@ -1,10 +1,10 @@
-import moment from "moment"
+import moment from "moment";
 
 class Time{
 
     constructor(note){
         if(note){
-            this.context = { id:note.id, baseDate: note.baseDate }
+            this.context = { id:note.id, baseDate: note.baseDate };
         }else{
             this.context = null;
         }
@@ -19,7 +19,7 @@ class Time{
     isBetween(from, to) {
         let start = this.start();
         let end = this.end();
-        return start.isValid() && start.isBetween(from, to)
+        return start.isValid() && start.isBetween(from, to);
     }
 
     start(){
@@ -27,12 +27,12 @@ class Time{
         if(!this.startTime){
             return date;
         }
-        let time = moment(this.startTime, 'h:m');
-        time.set('year', date.year());
-        time.set('month', date.month());
-        time.set('date', date.date());
+        let time = moment(this.startTime, "h:m");
+        time.set("year", date.year());
+        time.set("month", date.month());
+        time.set("date", date.date());
         if(this.startTime > this.endTime){
-            time.subtract(1, 'd')
+            time.subtract(1, "d");
         }
         return time;
     }
@@ -45,10 +45,10 @@ class Time{
         if(!this.endTime){
             return date;
         }
-        let time = moment(this.endTime, 'h:m');
-        time.set('year', date.year());
-        time.set('month', date.month());
-        time.set('date', date.date());
+        let time = moment(this.endTime, "h:m");
+        time.set("year", date.year());
+        time.set("month", date.month());
+        time.set("date", date.date());
         return time;
     }
 
@@ -67,14 +67,14 @@ class Time{
 
 const toTime = function(time, note){
     if(!time){
-        return undefined;
+        return;
     }
-    if(typeof time == 'Time'){
+    if(time instanceof Time){
         return time;
     }
     let swap = time;
     time = new Time(note);
-    Object.assign(time, swap) 
+    Object.assign(time, swap);
     return time;
 }
 
