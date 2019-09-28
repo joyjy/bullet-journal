@@ -15,24 +15,24 @@ export default {
             }
 
             if(time){ // has timestamp
-                Vue.set(note, 'time', time);
+                Vue.set(note, "time", time);
             }else{
-                Vue.delete(note, 'time');
+                Vue.delete(note, "time");
             }
         },
         saveContent(state, {note, text, tokens, position, time}){
 
             if(!note.content){
-                Vue.set(note, 'content', { text:'', tokens:[] });
+                Vue.set(note, "content", { text:"", tokens:[] });
             }
 
             note.content.text = text;
             note.content.tokens = tokens;
 
             if(time){
-                Vue.set(note, 'schedule', time);
+                Vue.set(note, "schedule", time);
             }else{
-                Vue.delete(note, 'schedule');
+                Vue.delete(note, "schedule");
             }
         },
         time(state, {note, token}){
@@ -51,18 +51,18 @@ export default {
                 payload.time.context = { id: payload.note.id };
             }
 
-            if(payload.type == 'content'){
-                commit("tag/remove", {tags: _.filter(payload.note.content.tokens, ['type','tag'])});
+            if(payload.type === "content"){
+                commit("tag/remove", {tags: _.filter(payload.note.content.tokens, ["type","tag"])});
                 commit("saveContent", payload);
                 commit("focus", payload);
 
             } else { // text
-                commit("tag/remove", {tags: _.filter(payload.note.tokens, ['type','tag'])});
+                commit("tag/remove", {tags: _.filter(payload.note.tokens, ["type","tag"])});
                 commit("saveText", payload);
                 commit("focus", payload);
             }
             
-            commit("tag/add", {tags: _.filter(payload.tokens, ['type', 'tag'])});
+            commit("tag/add", {tags: _.filter(payload.tokens, ["type", "tag"])});
 
             if(payload.time){
                 commit("agenda/add", payload);

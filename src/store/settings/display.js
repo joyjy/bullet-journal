@@ -1,19 +1,21 @@
+import Vue from "vue";
+
 export default {
 
     state: {
-        view:{
-            diary:0
+        note: {
+            clickType: "sgl" // sgl or dbl
         },
         agenda:{
             weekStart: 0, // [0,6] - sun to sat; [1,7] - mon to sun
-            type: 'month',
+            type: "month",
         },
         drawer: {
             pinned: false
         },
-        note: {
-            clickType: 'sgl' // sgl or dbl
-        }
+        view:{
+            diary:0
+        },
     },
     mutations:{
         switchView(state, {key, value}){
@@ -24,6 +26,10 @@ export default {
         },
         drawerPinned(state, pinned){
             state.drawer.pinned = pinned;
-        }
+        },
+        updateSettings(state, {select, key, value}){
+            let left = select(state);
+            Vue.set(left, key, value);
+        },
     }
 }

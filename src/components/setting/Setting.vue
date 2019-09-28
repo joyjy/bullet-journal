@@ -2,7 +2,7 @@
     <v-content >
         <v-tabs dark @change="view = $event">
             <v-tab>Account</v-tab>
-            <v-tab>Display</v-tab>
+            <v-tab>Common</v-tab>
             <v-tab>Data</v-tab>
         </v-tabs>
         <v-container v-if="view == 0" fluid>
@@ -15,7 +15,26 @@
         </v-container>
         <v-container v-else-if="view == 1" fluid>
             <v-row>
-                <v-col>Display</v-col>
+                <v-col>Note</v-col>
+            </v-row>
+            <v-row>
+                <v-col>
+                    <v-radio-group v-model="noteClickType" row label="Note click: ">
+                        <v-radio label="Single Click" value="sgl"></v-radio>
+                        <v-radio label="Double Click" value="dbl"></v-radio>
+                    </v-radio-group>
+                </v-col>
+            </v-row>
+            <v-row>
+                <v-col>Agenda</v-col>
+            </v-row>
+            <v-row>
+                <v-col>
+                    <v-radio-group v-model="agendaWeekStart" row label="Week start: ">
+                        <v-radio label="Sunday" value="0"></v-radio>
+                        <v-radio label="Monday" value="1"></v-radio>
+                    </v-radio-group>
+                </v-col>
             </v-row>
         </v-container>
         <v-container v-else-if="view == 2" fluid>
@@ -41,10 +60,38 @@
 
 <script>
 
+import opml from "@/lib/opml"
+
 export default {
     data: () => ({
         view:0
     }),
+    computed:{
+        noteClickType: {
+            get(){
+                return this.$store.state.settings.note.clickType;
+            },
+            set(value){
+                this.$store.commit("updateSettings", {
+                    select: (state) => state.note,
+                    key: "clickType",
+                    value: value,
+                })
+            }
+        },
+        agendaWeekStart: {
+            get(){
+                return this.$store.state.settings.agenda.weekStart.toString();
+            },
+            set(value){
+                this.$store.commit("updateSettings", {
+                    select: (state) => state.agenda,
+                    key: "weekStart",
+                    value: Number.parseInt(value),
+                })
+            }
+        },
+    },
     methods: {
         exportJson(){
             let dataStr = JSON.stringify(this.$store.state);
@@ -58,7 +105,6 @@ export default {
             linkElement.click();
         },
         importJson(file){
-            console.log(file)
 
             var reader = new FileReader();
             reader.onload = () =>{
@@ -67,8 +113,12 @@ export default {
             };
             reader.readAsText(file);
         },
-        importWorkflowy(files){
-            console.log(files)
+        importWorkflowy(file){
+            var reader = new FileReader();
+            reader.onload = () =>{
+                this.$store.dispatch("merge", { notes: opml.toNotes(reader.result) })
+            };
+            reader.readAsText(file);
         }
     }
 }

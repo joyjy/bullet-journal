@@ -113,6 +113,10 @@ export default {
         clearInterval(this.timer)
     },
     computed: {
+        ...mapState({
+            agendaType: state => state.settings.agenda.type,
+            weekStart: state => state.settings.agenda.weekStart,
+        }),
         ...mapGetters('agenda', ['eventsAtDay', 'noteCountAtDay']),
         now: {
             get(){
@@ -128,7 +132,7 @@ export default {
             }
         },
         weekdays(){
-            if(this.$store.state.settings.agenda.weekStart == 0){
+            if(this.weekStart == 0){
                 return [0, 1, 2, 3, 4, 5, 6]
             }else{
                 return [1, 2, 3, 4, 5, 6, 0]
@@ -136,7 +140,7 @@ export default {
         },
         type:{
             get(){
-                return this.$store.state.settings.agenda.type || 'month';
+                return this.agendaType || 'month';
             },
             set(value){
                 this.$store.commit("agendaType", value)
@@ -175,7 +179,8 @@ export default {
         type: function(to, from){
             console.log(from, to)
             if(from === 'month' && to === 'week'){
-                this.start = this.current.subtract(this.current.day(), 'd').format("YYYY-MM-DD");
+                let offset = this.current.day() - this.weekStart;
+                this.start = this.current.subtract(offset, 'd').format("YYYY-MM-DD");
             }
         }
     },
