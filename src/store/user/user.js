@@ -1,11 +1,10 @@
-import Vue from "vue"
 
 export default {
     state: {
-        'name': '',
-        'profile': '',
-        'account': '',
-        'sessionId': '',
+        "name": "",
+        "profile": "",
+        "account": "",
+        "sessionId": "",
     },
     getters: {
         profile: (state) => () => {
@@ -25,16 +24,16 @@ export default {
             state.sessionId = sessionId;
         },
         signOut(state, {}){
-            state.name = '';
-            state.account = '';
-            state.sessionId = '';
+            state.name = "";
+            state.account = "";
+            state.sessionId = "";
         },
     },
     actions: {
-        signIn({commit, state}, {email, password}){
+        signIn({commit}, {email}){
             let succeed = false;
-            if(email == 'joyjy2ah@gmail.com'){
-                commit('signIn', {name:'JoYJY', account:email, "sessionId":'fake'})
+            if(email === "joyjy2ah@gmail.com"){
+                commit("signIn", {name:"JoYJY", account:email, "sessionId":"fake"})
             }
             return Promise.resolve(succeed);
         }

@@ -5,7 +5,7 @@
                 Today
             </v-btn>
 
-            <v-btn fab text small @click="$refs.calendar.prev()">
+            <v-btn fab text small @click="prev">
                 <v-icon small>mdi-chevron-left</v-icon>
             </v-btn>
             <v-btn fab text small @click="$refs.calendar.next()">
@@ -36,8 +36,7 @@
         </template>
 
         <v-calendar ref="calendar" :type="type" :weekdays="weekdays" @change="update"
-            v-model="now" :start="start" :end="end" :events = "events" :event-color="eventColor"
-            :interval-style="intervalStyle" :interval-height="30"
+            v-model="now" :start="start" :end="end" :interval-style="intervalStyle" :interval-height="30"
             class="border-top border-left" :style="{width:'100%'}" >
 
             <template v-slot:day-label="{date, day}">
@@ -64,8 +63,10 @@
             <template v-slot:day-month>
                 <div>day-month</div>
             </template>
-            <template v-slot:day-header>
-                <div>day-header</div>
+            <template v-slot:day-header="{date}">
+                <div class="badge" v-show="noteCountAtDay(date) > 0" :title="'Created ' + noteCountAtDay(date) + ' notes' ">
+                    {{ noteCountAtDay(date) }}
+                </div>
             </template>
         </v-calendar>
 
@@ -170,17 +171,25 @@ export default {
             return ''
       },
     },
+    watch: {
+        type: function(to, from){
+            console.log(from, to)
+            if(from === 'month' && to === 'week'){
+                this.start = this.current.subtract(this.current.day(), 'd').format("YYYY-MM-DD");
+            }
+        }
+    },
     methods: {
         setToday(){
             this.now = moment()
         },
         update({start, end}){
+            console.log(start.date, end.date)
             if(this.start == start.date && this.end == end.date){
                 return;
             }
             this.start = start.date;
             this.end = end.date;
-            //this.refreshEvents();
         },
         intervalStyle({date, day, future, hasDay, hasTime, hour, minute, month, past, present, weekday, year}){
             if(hour < 6 || hour > 21){
@@ -191,21 +200,12 @@ export default {
 
             return undefined;
         },
-        refreshEvents(){
-            this.events = [];
-            let day = moment(this.start);
-            let endDay = moment(this.end).add(1, 'd');
-            while(day.isBefore(endDay)){
-                let dayEvents = this.eventsAtDay(day);
-                this.events = this.events.concat(dayEvents);
-                day.add(1, 'd')
+        prev(){
+            if(this.type == 'month'){
+                this.$refs.calendar.prev();
+            }else{
+                this.start = moment(this.start).subtract(7, 'd').format("YYYY-MM-DD");
             }
-        },
-        eventColor(event){
-            if(Array.isArray(event.source)){
-                return "grey"
-            }
-            return "primary";
         }
     }
 }
@@ -233,7 +233,7 @@ export default {
     width: 48px!important;
     height: 48px!important;
 }
-.v-calendar-weekly__day{
+.v-calendar-weekly__day,.v-calendar-daily_head-day{
     position: relative;
 }
 .badge{
@@ -243,7 +243,8 @@ export default {
     background-color:lightgrey;
     border-radius: 0 0 0 1.1rem/1rem;
     font-size: .85rem;
-    padding: 0 2px 0 5px;
     min-width: 22px;
+    display: flex;
+    justify-content: center;
 }
 </style>
