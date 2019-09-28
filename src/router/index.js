@@ -9,9 +9,6 @@ import Setting from "@/components/setting/Setting"
 import Agenda from "@/components/agenda/Agenda"
 import Diary from "@/components/notebook/Diary"
 
-
-import Debug from "@/components/app/Debug"
-
 Vue.use(VueRouter)
 
 export default new VueRouter({
@@ -23,7 +20,6 @@ export default new VueRouter({
         { path: "/notebook/:name", name: "notebook", component: Diary },
         { path: "/setting", name: "setting", component: Setting },
         { path: "/signin", name: "signin", component: Signin },
-        { path: "/debug/:id?", name: "debug", component: Debug},
         { path: "/*", redirect: { name: 'note' }},
     ]
 })
