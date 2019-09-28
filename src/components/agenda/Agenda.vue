@@ -35,10 +35,12 @@
           </v-menu>
         </template>
 
+        <v-sheet height="702"><!--todo-->
         <v-calendar ref="calendar" :type="type" :weekdays="weekdays" @change="update"
-            v-model="now" :start="start" :end="end" :interval-style="intervalStyle" :interval-height="30"
-            class="border-top border-left" :style="{width:'100%'}" >
+            v-model="now" :start="start" :end="end" :interval-style="intervalStyle" :interval-height="36"
+            class="border-top border-left border-bottom" :style="{height:'100%'}">
 
+            <!--month-->
             <template v-slot:day-label="{date, day}">
                 <v-btn text icon>
                     {{day}}
@@ -47,29 +49,35 @@
                     {{ noteCountAtDay(date) }}
                 </div>
             </template>
-            <template v-slot:day="{date}">
-                <div v-for="event in eventsAtDay(date)" :key="event.name" class='event'>
+            <template v-slot:day="{date}" >
+                <div v-for="(event, index) in eventsAtDay(date)" :key="event.name" class='event'
+                    v-show="index < 2 || eventsAtDay(date).length<=3 && index < 3">
                     {{event.name}}
+                </div>
+                <div v-if="eventsAtDay(date).length > 3" class="event">
+                    {{eventsAtDay(date).length - 2}} more...
                 </div>
             </template>
 
-            <template v-slot:day-body="{date, present, timeToY, minutesToPixels}">
-                <div v-for="event in eventsAtDay(date)" :key="event.name" class='event'
-                    :style="{ top: timeToY(event.startMinutes()) + 'px', height: minutesToPixels(event.duration()) + 'px' }">
-                    {{event.name}}
-                </div>
-                <div v-if="present" class="indicator" :style="{ left:indicator.x + 'px', top:indicator.y + 'px' }"></div>
-            </template>
-            <template v-slot:day-month>
-                <div>day-month</div>
-            </template>
+            <!--week-->
             <template v-slot:day-header="{date}">
                 <div class="badge" v-show="noteCountAtDay(date) > 0" :title="'Created ' + noteCountAtDay(date) + ' notes' ">
                     {{ noteCountAtDay(date) }}
                 </div>
             </template>
-        </v-calendar>
+            <template v-slot:day-body="{date, present, timeToY, minutesToPixels}">
+                <div v-for="event in eventsAtDay(date)" :key="event.name" class='event'
+                    :style="eventStyle(event, date, timeToY, minutesToPixels)">
+                    {{event.name}}
+                </div>
+                <div v-if="present" class="indicator" :style="{ left:indicator.x + 'px', top:indicator.y + 'px' }"></div>
+            </template>
 
+            <template v-slot:day-month>
+                <div>day-month</div>
+            </template>
+        </v-calendar>
+        </v-sheet>
     </app-layout>
 </template>
 
@@ -80,6 +88,11 @@ import AppLayout from "../app/Layout"
 
 import moment from "moment"
 
+const last = {
+    date: '',
+    bottom: 0
+}
+
 export default {
     data:() =>({
         typeLabels: {
@@ -89,11 +102,10 @@ export default {
         current: moment(),
         start: null,
         end: null,
-        events: [],
         timer: null,
         indicator: {
             x:0,
-            y:0
+            y:-1
         }
     }),
     components: {
@@ -102,12 +114,13 @@ export default {
     created: function(){
     },
     mounted: function(){
-        let calendar = this.$refs.calendar
-        let indicator = this.indicator;
+        let time = moment();
+        this.indicator.y = this.$refs.calendar.timeToY({hour: time.hour(), minute: time.minute()});
+        this.$refs.calendar.scrollToTime({hour: time.hour(), minute: time.minute()}) // todo
         this.timer = setInterval(() => {
             let time = moment();
-            indicator.y = calendar.timeToY({hour: time.hour(), minute: time.minute()});
-        }, 1000);
+            this.indicator.y = this.$refs.calendar.timeToY({hour: time.hour(), minute: time.minute()});
+        }, 1000)
     },
     destroyed: function(){
         clearInterval(this.timer)
@@ -189,7 +202,6 @@ export default {
             this.now = moment()
         },
         update({start, end}){
-            console.log(start.date, end.date)
             if(this.start == start.date && this.end == end.date){
                 return;
             }
@@ -204,6 +216,32 @@ export default {
             }
 
             return undefined;
+        },
+        eventStyle(event, date, timeToY, minutesToPixels){
+
+            let top = timeToY(event.startMinutes());
+            let duration = event.duration();
+            let height = 18;
+            if(duration){
+                height = minutesToPixels(duration);
+            }
+
+            let overlap = false
+            if(last.date === date && top+1 < last.bottom){
+                overlap = true;
+            }
+            last.date = date;
+            last.bottom = top+height;
+
+            if(overlap){
+                return { 
+                        top: top + 'px', 
+                        height: height + 'px',
+                        left: '4px',
+                    };
+            }
+            
+            return { top: top + 'px', height: height + 'px'}
         },
         prev(){
             if(this.type == 'month'){
@@ -224,19 +262,24 @@ export default {
     width: 100%;
     z-index: 100;
 }
-.event{
+.v-calendar-weekly__day .event{
+    height: 1.5rem;
+}
+.v-calendar-daily__day .event{
     position:absolute;
-    width:100%;
+}
+.event{
+    padding:0 .25rem;
+    overflow: hidden;
     border:1px solid black;
     background-color: white;
     word-break: break-all;
     border-radius:.25rem;
-    padding:.25rem;
     font-size: 13px;
 }
 .v-calendar-daily_head-day-label>.v-btn{
-    width: 48px!important;
-    height: 48px!important;
+    width: 36px!important;
+    height: 36px!important;
 }
 .v-calendar-weekly__day,.v-calendar-daily_head-day{
     position: relative;

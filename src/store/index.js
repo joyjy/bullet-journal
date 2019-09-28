@@ -103,8 +103,9 @@ export default new Vuex.Store({
                         tags.push(t);
                     }else if(t.time){
                         if(typeof t.time === "object"){
-                            commit("time", {note:n, token:t});
+                            commit("setTimePrototype", {note:n, token:t});
                         }
+                        commit('agenda/add', {note: n, time: t.time})
                     }
                 });
                 commit("tag/add", {tags});

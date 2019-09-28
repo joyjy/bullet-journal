@@ -35,7 +35,7 @@ export default {
                 Vue.delete(note, "schedule");
             }
         },
-        time(state, {note, token}){
+        setTimePrototype(state, {note, token}){
             token.time = toTime(token.time, note);
         }
     },

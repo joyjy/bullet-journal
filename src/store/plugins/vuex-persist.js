@@ -6,7 +6,7 @@ const vuexPersist = new VuexPersist({
     key: "bullet-note",
     storage: window.localStorage,
     reducer: (state) => ({
-        agenda: state.agenda,
+        // agenda: state.agenda,
         // flattern: state.flattern,
         notes: state.notes,
         saved: state.saved,

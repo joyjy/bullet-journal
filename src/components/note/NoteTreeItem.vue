@@ -109,7 +109,7 @@ export default {
             return false;
         },
         col: function(){
-            if(this.note.notes.length > 0 && !this.note.display.collapse){
+            if(this.collapsed === "expand" || this.collapsed === "filtered"){
                 return 0;
             }
             if(this.parent.notes.length >= 30){

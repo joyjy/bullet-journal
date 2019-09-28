@@ -67,8 +67,6 @@ export default {
             return events;
         }
         ,noteCountAtDay: (state, getters, rootState, rootGetters) => (day) => {
-            let events = [];
-
             if(typeof day === "string"){
                 day = moment(day);
             }
