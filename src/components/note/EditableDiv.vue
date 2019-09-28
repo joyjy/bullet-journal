@@ -18,6 +18,7 @@
 
 <script>
 import Vue from "vue";
+import { mapState, mapGetters, mapMutations } from "vuex"
 import _ from "lodash";
 import moment from "moment";
 
@@ -44,6 +45,7 @@ export default {
         }
     },
     computed: {
+        ...mapGetters('state', ["nextState"]),
         text(){
             if(this.type == "content"){
                 return this.note.content;
@@ -55,7 +57,7 @@ export default {
                 return this.note.display.content.cursor;
             }
             return this.note.display.text.cursor;
-        }
+        },
     },
     watch: {
         match: function(){
@@ -70,7 +72,7 @@ export default {
             }
         },
         cursor: function(to, from){
-            if(this.cursor > -1){ // after other note event, may lead this getting focus
+            if(!this.editing && this.cursor > -1){ // after other note event, may lead this getting focus
                 this.$nextTick(() => {
                     range.focus(this.$el, this.cursor)
                 })
@@ -211,6 +213,22 @@ export default {
             }
         },
         click(type, e){
+            if(navigator.platform.indexOf('Mac') > -1 && event.metaKey || event.ctrlKey){
+                if(e.target.classList.contains("state") 
+                    || e.target.classList.contains("matched") && e.target.parentElement.classList.contains("state")){
+                        
+                    let nextStateText = this.nextState(this.note);
+                    if(nextStateText){
+                        this.$emit("input", { 
+                            text: nextStateText,
+                            position: -1,
+                            type: this.type,
+                        })
+                    }
+                }
+                return;
+            }
+
             if(type != this.$store.state.settings.note.clickType){
                 return;
             }

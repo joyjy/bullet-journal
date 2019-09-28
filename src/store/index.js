@@ -18,6 +18,7 @@ import savedModule from "./note/saved";
 import tagModule from "./tag/tag";
 import agendaModule from "./agenda/agenda";
 import settingsModule from "./settings/display";
+import stateModule from "./settings/state"
 import userModule from "./user/user";
 
 import { toNote } from "@/model/note";
@@ -33,6 +34,7 @@ export default new Vuex.Store({
         agenda: agendaModule,
         tag: tagModule,
         user: userModule,
+        state: stateModule,
         settings: settingsModule,
     },
     state: {
