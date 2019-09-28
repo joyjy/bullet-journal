@@ -85,12 +85,12 @@
           <v-list-item-title>Saved Filter</v-list-item-title>
         </v-list-item>
 
-        <!--v-list-item :to="{name:'agenda'}">
+        <v-list-item :to="{name:'agenda'}">
           <v-list-item-icon>
             <v-icon>mdi-calendar</v-icon>
           </v-list-item-icon>
           <v-list-item-title>Agenda</v-list-item-title>
-        </v-list-item-->
+        </v-list-item>
 
         <!--v-list-group prepend-icon="mdi-book" value="true" no-action>
           <template v-slot:activator>

@@ -12,7 +12,7 @@
                 <v-icon small>mdi-chevron-right</v-icon>
             </v-btn>
 
-            <v-toolbar-title>{{ }}</v-toolbar-title>
+            <v-toolbar-title>{{ title }}</v-toolbar-title>
         </template>
 
         <template v-slot:toolbar-items>
@@ -37,8 +37,38 @@
 
         <v-calendar ref="calendar" :type="type" :weekdays="weekdays" @change="update"
             v-model="now" :start="start" :end="end" :events = "events" :event-color="eventColor"
-            class="border-top border-left" :style="{'width':'100%'}" >
+            :interval-style="intervalStyle" :interval-height="30"
+            class="border-top border-left" :style="{width:'100%'}" >
+
+            <template v-slot:day-label="{date, day}">
+                <v-btn text icon>
+                    {{day}}
+                </v-btn>
+                <div class="badge" v-show="noteCountAtDay(date) > 0" :title="'Created ' + noteCountAtDay(date) + ' notes' ">
+                    {{ noteCountAtDay(date) }}
+                </div>
+            </template>
+            <template v-slot:day="{date}">
+                <div v-for="event in eventsAtDay(date)" :key="event.name" class='event'>
+                    {{event.name}}
+                </div>
+            </template>
+
+            <template v-slot:day-body="{date, present, timeToY, minutesToPixels}">
+                <div v-for="event in eventsAtDay(date)" :key="event.name" class='event'
+                    :style="{ top: timeToY(event.startMinutes()) + 'px', height: minutesToPixels(event.duration()) + 'px' }">
+                    {{event.name}}
+                </div>
+                <div v-if="present" class="indicator" :style="{ left:indicator.x + 'px', top:indicator.y + 'px' }"></div>
+            </template>
+            <template v-slot:day-month>
+                <div>day-month</div>
+            </template>
+            <template v-slot:day-header>
+                <div>day-header</div>
+            </template>
         </v-calendar>
+
     </app-layout>
 </template>
 
@@ -58,15 +88,31 @@ export default {
         current: moment(),
         start: null,
         end: null,
-        events: []
+        events: [],
+        timer: null,
+        indicator: {
+            x:0,
+            y:0
+        }
     }),
     components: {
         AppLayout
     },
     created: function(){
     },
+    mounted: function(){
+        let calendar = this.$refs.calendar
+        let indicator = this.indicator;
+        this.timer = setInterval(() => {
+            let time = moment();
+            indicator.y = calendar.timeToY({hour: time.hour(), minute: time.minute()});
+        }, 1000);
+    },
+    destroyed: function(){
+        clearInterval(this.timer)
+    },
     computed: {
-        ...mapGetters('agenda', ['eventsAtDay']),
+        ...mapGetters('agenda', ['eventsAtDay', 'noteCountAtDay']),
         now: {
             get(){
                 this.current.format("YYYY-MM-DD")
@@ -94,7 +140,35 @@ export default {
             set(value){
                 this.$store.commit("agendaType", value)
             }
-        }
+        },
+        title () {
+            const { start, end } = this
+            if (!start || !end) {
+                return ''
+            }
+
+            let startMoment = moment(start);
+            let endMoment = moment(end);
+
+            const startMonth = startMoment.format("MMM")
+            const endMonth = endMoment.format("MMM")
+            const suffixMonth = startMonth === endMonth ? '' : endMonth
+
+            const startYear = startMoment.year()
+            const endYear = endMoment.year()
+            const suffixYear = startYear === endYear ? '' : endYear
+
+            const startDay = startMoment.format("Do")
+            const endDay = endMoment.format("Do");
+
+            switch (this.type) {
+            case 'month':
+                return `${startMonth} ${startYear}`
+            case 'week':
+                return `${startMonth} ${startDay} ${startYear} - ${suffixMonth} ${endDay} ${suffixYear}`
+            }
+            return ''
+      },
     },
     methods: {
         setToday(){
@@ -106,7 +180,16 @@ export default {
             }
             this.start = start.date;
             this.end = end.date;
-            this.refreshEvents();
+            //this.refreshEvents();
+        },
+        intervalStyle({date, day, future, hasDay, hasTime, hour, minute, month, past, present, weekday, year}){
+            if(hour < 6 || hour > 21){
+                return {
+                    backgroundColor: '#EEEEEE'
+                }
+            }
+
+            return undefined;
         },
         refreshEvents(){
             this.events = [];
@@ -129,5 +212,38 @@ export default {
 </script>
 
 <style>
-
+.indicator{
+    position: absolute;;
+    height: 2px;
+    background-color:red;
+    width: 100%;
+    z-index: 100;
+}
+.event{
+    position:absolute;
+    width:100%;
+    border:1px solid black;
+    background-color: white;
+    word-break: break-all;
+    border-radius:.25rem;
+    padding:.25rem;
+    font-size: 13px;
+}
+.v-calendar-daily_head-day-label>.v-btn{
+    width: 48px!important;
+    height: 48px!important;
+}
+.v-calendar-weekly__day{
+    position: relative;
+}
+.badge{
+    position: absolute;
+    top: 0;
+    right: 0;
+    background-color:lightgrey;
+    border-radius: 0 0 0 1.1rem/1rem;
+    font-size: .85rem;
+    padding: 0 2px 0 5px;
+    min-width: 22px;
+}
 </style>

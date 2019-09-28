@@ -42,6 +42,9 @@ export default {
     padding-left: 16px;
     margin-left: 8px;
     border-left: 1px solid #EEEEEE;
+    display: flex;
+    flex: 0 0;
+    flex-wrap: wrap;
 }
 
 .sortable-ghost{

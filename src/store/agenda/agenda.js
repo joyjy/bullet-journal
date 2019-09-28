@@ -66,6 +66,26 @@ export default {
 
             return events;
         }
+        ,noteCountAtDay: (state, getters, rootState, rootGetters) => (day) => {
+            let events = [];
+
+            if(typeof day === "string"){
+                day = moment(day);
+            }
+
+            let nextDay = day.clone().add(1, "d");
+
+            let count = 0;
+
+            traversal.each(rootState.notes, (note) => {
+                let time = moment(note.id)
+                if(time.isValid() && time.isBetween(day, nextDay)){
+                    count++;
+                }
+            });
+
+            return count;
+        }
     },
     mutations:{
         add(state, {note, time}){

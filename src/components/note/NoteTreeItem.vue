@@ -1,5 +1,5 @@
 <template>
-    <li class="note-item">
+    <li :class="['note-item', col>0?'note-col-'+col:'']" >
         <div v-show="filtered || ignoreFiltered" class="note-wrapper"> 
             <note-bullet :note="note" :collapsed = "collapsed"
                 @collapse-note="switchCollapse"
@@ -107,6 +107,21 @@ export default {
                 return this.note.content.text;
             }
             return false;
+        },
+        col: function(){
+            if(this.note.notes.length > 0 && !this.note.display.collapse){
+                return 0;
+            }
+            if(this.parent.notes.length >= 30){
+                return 3;
+            }
+            if(this.parent.notes.length >= 20){
+                return 4;
+            }
+            if(this.parent.notes.length >= 10){
+                return 6;
+            }
+            return 0;
         }
     },
     watch: {
@@ -212,7 +227,7 @@ export default {
             if(!this.parent.id){
                 return;
             }
-            if(!payload.position){
+            if(payload.position === undefined){
                 payload.position = payload.curPosition;
             }
             payload.parent = this.parent;
@@ -266,6 +281,16 @@ export default {
 .note-item {
     list-style: none;
     position: relative;
+    width: 100%;
+}
+.note-col-6{
+    max-width: 50%!important;
+}
+.note-col-4{
+    max-width: 33%!important;
+}
+.note-col-3{
+    max-width: 25%!important;
 }
 .note-wrapper{
     display: flex;
