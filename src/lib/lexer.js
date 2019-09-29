@@ -91,6 +91,7 @@ export default {
             switch (ch) {
                 case " ":
                 case "\xa0":
+                case "\n":
                     if(state === "$start" || state === "$split"){ // position has no content
                         state = "empty";
                     }else if(state === "text" || state === "tag"){ // no close symbol content

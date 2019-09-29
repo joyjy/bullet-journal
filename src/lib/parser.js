@@ -32,17 +32,19 @@ const addMatchTag = function(text, match, textOffset){
     return clarify(text);
 }
 
-const textHtml = function(note, match){
+const urlReg = new RegExp(/[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)?/gi);
 
-    if(!note.tokens || note.tokens.length === 0){
-        return clarify(note.text);
+const parseHtml = function(tokens, match){
+
+    if(tokens.length === 0){
+        return "";
     }
 
     let htmlContent = "";
     let textOffset = 0;
-    for (let i = 0; i < note.tokens.length; i++) {
+    for (let i = 0; i < tokens.length; i++) {
 
-        let token = note.tokens[i];
+        let token = tokens[i];
 
         switch (token.type) {
             case "tag":
@@ -61,8 +63,16 @@ const textHtml = function(note, match){
                 }
                 htmlContent += '<span class="'+elClass+'">' + addMatchTag(token.text, match, textOffset) +"</span>";
                 break;
-            case "text":
             case "empty":
+                htmlContent += token.text;
+                break;
+            case "text":
+                if (token.text.match(urlReg)) {
+                    htmlContent += '<a class="link" href="'+token.text+'">'+addMatchTag(token.text, match, textOffset)+"</a>";
+                } else {
+                    htmlContent += addMatchTag(token.text, match, textOffset);
+                }
+                break;
             default:
                 htmlContent += addMatchTag(token.text, match, textOffset);
                 break;
@@ -74,20 +84,13 @@ const textHtml = function(note, match){
     return htmlContent;
 }
 
-const contentHtml = function(note, match){
-    if(note.content && note.content.text){
-        return clarify(note.content.text);
-    }
-    return undefined;
-}
-
 export default {
     parse: lexer.tokenize,
     html(note, match, type){
         if(type === "content"){
-            return contentHtml(note, match);
+            return parseHtml(note.content.tokens, match);
         }
 
-        return textHtml(note, match);
+        return parseHtml(note.tokens, match);
     }
 }

@@ -5,7 +5,7 @@ import { toTime } from "@/model/time";
 
 export default {
     mutations:{
-        saveText(state, {note, text, tokens, notes, position, time}){
+        saveText(state, {note, text, tokens, notes, time}){
 
             note.text = text;
             note.tokens = tokens;
@@ -20,16 +20,17 @@ export default {
                 Vue.delete(note, "time");
             }
         },
-        saveContent(state, {note, text, tokens, position, time}){
+        saveContent(state, {note, text, tokens, time}){
 
-            if(!note.content){
-                Vue.set(note, "content", { text:"", tokens:[] });
-            }
-
+            _.each(tokens, function(token){
+                if(token.type === "state" && !token.time || token.time && token.time.type === "stamp"){
+                    token.type = "text"
+                }
+            });
             note.content.text = text;
             note.content.tokens = tokens;
 
-            if(time){
+            if(time && time.type == 'schedule'){
                 Vue.set(note, "schedule", time);
             }else{
                 Vue.delete(note, "schedule");

@@ -48,7 +48,7 @@ export default {
         ...mapGetters('state', ["nextState"]),
         text(){
             if(this.type == "content"){
-                return this.note.content;
+                return this.note.content.text;
             }
             return this.note.text;
         },
@@ -122,6 +122,14 @@ export default {
         },
         pressEnter(e){
             if(this.type == "content"){
+
+                let payload = { 
+                    text: e.target.innerText + "\n",
+                    position: range.position(this.$el)+1, // change innerHtml must keep position
+                    type: this.type,
+                };
+
+                this.$emit("input", payload)
                 return;
             }
 
@@ -213,10 +221,12 @@ export default {
                 e.stopPropagation();
             }
         },
+        targetType(dom, target){
+            return dom.classList.contains(target) || dom.classList.contains("matched") && dom.parentElement.classList.contains(target)
+        },
         click(type, e){
             if(navigator.platform.indexOf('Mac') > -1 && event.metaKey || event.ctrlKey){
-                if(e.target.classList.contains("state") 
-                    || e.target.classList.contains("matched") && e.target.parentElement.classList.contains("state")){
+                if(this.targetType(e.target, "state")){
                         
                     let nextStateText = this.nextState(this.note);
                     if(nextStateText){
@@ -226,6 +236,8 @@ export default {
                             type: this.type,
                         })
                     }
+                }else if(this.targetType(e.target, "link")){
+                    window.open(e.target.getAttribute("href"), "_blank");
                 }
                 return;
             }

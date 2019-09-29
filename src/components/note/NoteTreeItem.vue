@@ -281,6 +281,9 @@ export default {
         },
         deleteContent(){
             this.focusContent = false;
+            if(this.note.content.text.length === 1 && this.note.content.text[0] === '\n'){
+                this.$store.dispatch("saveNote", { note: this.note, text: "", type:"content", position: -1});
+            }
             this.$store.commit("focus", {note: this.note, position: this.note.text.length})
         }
     }
