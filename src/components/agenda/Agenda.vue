@@ -50,12 +50,12 @@
                 </div>
             </template>
             <template v-slot:day="{date}" >
-                <div v-for="(event, index) in eventsAtDay(date)" :key="event.name" class='event'
-                    v-show="index < 2 || eventsAtDay(date).length<=3 && index < 3">
+                <div v-for="(event, index) in dayEvents(date)" :key="event.name" class='event'
+                    v-show="index < 3 || dayEvents(date).length <= 4 && index < 3">
                     {{event.name}}
                 </div>
-                <div v-if="eventsAtDay(date).length > 3" class="event">
-                    {{eventsAtDay(date).length - 2}} more...
+                <div v-if="dayEvents(date).length > 4" class="event">
+                    {{dayEvents(date).length - 3}} more...
                 </div>
             </template>
 
@@ -64,9 +64,12 @@
                 <div class="badge" v-show="noteCountAtDay(date) > 0" :title="'Created ' + noteCountAtDay(date) + ' notes' ">
                     {{ noteCountAtDay(date) }}
                 </div>
+                <div v-for="event in eventsAtDay(date)" :key="event.name" class='event'>
+                    {{event.name}}
+                </div>
             </template>
             <template v-slot:day-body="{date, present, timeToY, minutesToPixels}">
-                <div v-for="event in eventsAtDay(date)" :key="event.name" class='event'
+                <div v-for="event in eventsInDay(date)" :key="event.name" class='event'
                     :style="eventStyle(event, date, timeToY, minutesToPixels)">
                     {{event.name}}
                 </div>
@@ -90,7 +93,7 @@ import moment from "moment"
 
 const last = {
     date: '',
-    bottom: 0
+    bottom: 0,
 }
 
 export default {
@@ -130,7 +133,7 @@ export default {
             agendaType: state => state.settings.agenda.type,
             weekStart: state => state.settings.agenda.weekStart,
         }),
-        ...mapGetters('agenda', ['eventsAtDay', 'noteCountAtDay']),
+        ...mapGetters('agenda', ['eventsAtDay', 'eventsInDay', 'noteCountAtDay']),
         now: {
             get(){
                 this.current.format("YYYY-MM-DD")
@@ -207,6 +210,10 @@ export default {
             this.start = start.date;
             this.end = end.date;
         },
+        dayEvents(date){
+            console.log(date)
+            return this.eventsAtDay(date).concat(this.eventsInDay(date));
+        },
         intervalStyle({date, day, future, hasDay, hasTime, hour, minute, month, past, present, weekday, year}){
             if(hour < 6 || hour > 21){
                 return {
@@ -218,7 +225,17 @@ export default {
         },
         eventStyle(event, date, timeToY, minutesToPixels){
 
-            let top = timeToY(event.startMinutes());
+            let continuous = false;
+            let top = 0;
+
+            let startMinutes = event.startMinutes(date);
+            if(startMinutes === -1){
+                top = timeToY(0);
+                continuous = true;
+            }else{
+                top = timeToY(startMinutes);
+            }
+
             let duration = event.duration();
             let height = 18;
             let realHeight = minutesToPixels(event.duration());
@@ -231,17 +248,24 @@ export default {
                 overlap = true;
             }
             last.date = date;
-            last.bottom = top+height;
+            if(top+height>last.bottom){
+                last.bottom = top+height;
+            }
+
+            let style = { top: top + 'px', height: height + 'px', width: '96%'}
 
             if(overlap){
-                return { 
-                        top: top + 'px', 
-                        height: height + 'px',
-                        left: '4px',
-                    };
+                style.left = '4px';
+                style.width = 'calc(98% - 4px)';
+            }
+
+            if(continuous){
+                style["border-top-left-radius"] = 0;
+                style["border-top-right-radius"] = 0;
+                style["border-top"] = 0;
             }
             
-            return { top: top + 'px', height: height + 'px'}
+            return style;
         },
         prev(){
             if(this.type == 'month'){
@@ -263,7 +287,7 @@ export default {
     z-index: 100;
 }
 .v-calendar-weekly__day .event{
-    height: 1.5rem;
+    height: 18px;
 }
 .v-calendar-daily__day .event{
     position:absolute;

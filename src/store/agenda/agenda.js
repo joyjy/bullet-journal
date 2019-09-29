@@ -14,8 +14,11 @@ class Event{
         this.source = source;
     }
 
-    startMinutes(){
+    startMinutes(date){
         let m = moment(this.start);
+        if(date !== m.format("YYYY-MM-DD")){
+            return -1;
+        }
         return (m.hours()*60)+m.minutes();
     }
 
@@ -29,10 +32,33 @@ class Event{
 export default {
     namespaced: true,
     state: {
-        timestamps: {},
-        schedules: {},
     },
     getters:{
+        eventsInDay: (state, getters, rootState, rootGetters) => (day) => {
+            let events = [];
+
+            if(typeof day === "string"){
+                day = moment(day);
+            }
+
+            let times = state[day.format("YYYY-MM-DD")];
+
+            _.each(times, (t) => {
+                if(!t.startTime){
+                    return;
+                }
+                let time = toTime(t);
+                let note = rootGetters.findNoteById(time.context.id);
+                events.push(new Event({
+                    name: note.text,
+                    start: time.startFormat(),
+                    end: time.endFormat(),
+                    source: note,
+                }));
+            })
+
+            return _.sortBy(events, e => e.startMinutes(day.format("YYYY-MM-DD")));
+        },
         eventsAtDay: (state, getters, rootState, rootGetters) => (day) => {
             let events = [];
 
@@ -40,33 +66,25 @@ export default {
                 day = moment(day);
             }
 
-            let nextDay = day.clone().add(1, "d");
+            let times = state[day.format("YYYY-MM-DD")];
 
-            traversal.each(rootState.notes, (note) => {
-                let time = toTime(state.timestamps[note.id], note);
-                if(time && time.isBetween(day, nextDay)){
-                    events.push(new Event({
-                        name: note.text,
-                        start: time.startFormat(),
-                        end: time.endFormat(),
-                        source: note,
-                    }));
+            _.each(times, (t) => {
+                if(t.startTime){
+                    return;
                 }
-
-                let schedule = toTime(state.schedules[note.id], note);
-                if(schedule && schedule.isBetween(day, nextDay)){
-                    events.push(new Event({
-                        name: note.text,
-                        start: schedule.startFormat(),
-                        end: schedule.endFormat(),
-                        source:note,
-                    }));
-                }
-            });
+                let time = toTime(t);
+                let note = rootGetters.findNoteById(time.context.id);
+                events.push(new Event({
+                    name: note.text,
+                    start: time.startFormat(),
+                    end: time.endFormat(),
+                    source: note,
+                }));
+            })
 
             return events;
-        }
-        ,noteCountAtDay: (state, getters, rootState, rootGetters) => (day) => {
+        },
+        noteCountAtDay: (state, getters, rootState, rootGetters) => (day) => {
             if(typeof day === "string"){
                 day = moment(day);
             }
@@ -87,12 +105,23 @@ export default {
     },
     mutations:{
         add(state, {note, time}){
-            let map = time.type === "stamp" ? state.timestamps : state.schedules;
-            Vue.set(map, note.id, time);
+            let startDate = time.start().format("YYYY-MM-DD");
+            if(!state[startDate]){
+                Vue.set(state, startDate, []);
+            }
+            state[startDate].push(time);
+            let endDate = time.end()
+            if(endDate){
+                endDate = endDate.format("YYYY-MM-DD");
+                if(endDate !== startDate){
+                    if(!state[endDate]){
+                        Vue.set(state, endDate, []);
+                    }
+                    state[endDate].push(time);
+                }    
+            }
         },
         remove(state, {note}){
-            Vue.delete(state.timestamps, note.id);
-            Vue.delete(state.schedules, note.id);
         }
     }
 }

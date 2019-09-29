@@ -9,6 +9,7 @@ const vuexPersist = new VuexPersist({
         notes: state.notes,
         saved: state.saved,
         tag: state.tag,
+        //agenda: state.agenda,
         settings: state.settings,
     }),
 });

@@ -3,7 +3,7 @@ import Vue from "vue";
 import Vuex from "vuex";
 Vue.use(Vuex);
 
-import {vuexPersist, vuexPersistCookie} from "./plugins/vuex-persist"
+import {vuexPersist, vuexPersistCookie} from "./plugins/vuex-persist";
 import undoRedoPlugin, {undoRedoHistory} from "./plugins/undo";
 
 import _ from "lodash";
@@ -43,10 +43,10 @@ export default new Vuex.Store({
     },
     getters: {
         findNoteById: (state) => (id) => {
-            return traversal.find(state.notes, (note) => note.id === parseInt(id));
+            return traversal.find(state.notes, (note) => note.id === parseInt(id, 10));
         },
         findNoteStackById: (state) => (id) => {
-            return traversal.path(state.notes, (note) => note.id === parseInt(id));
+            return traversal.path(state.notes, (note) => note.id === parseInt(id, 10));
         },
         findNoteByText: (state) => (text, parent) => {
             let from = parent || state;
@@ -59,14 +59,14 @@ export default new Vuex.Store({
         findPrevNote: (state) => (note) => {
             let index = _.indexOf(state.flattern, note);
             if(index === 0 || index === -1){
-                return undefined;
+                return null;
             }
             return state.flattern[index-1];
         },
         findNextNote: (state) => (note) => {
             let index = _.indexOf(state.flattern, note);
             if(index === state.flattern.length-1 || index === -1){
-                return undefined;
+                return null;
             }
             return state.flattern[index+1];
         }
@@ -80,7 +80,7 @@ export default new Vuex.Store({
         },
         mergeNotes(state, {notes}){
             notes = traversal.dup(notes, (n) => toNote(n));
-            if(state.notes.length === 1 && state.notes[0].text ==""){
+            if(state.notes.length === 1 && state.notes[0].text === ""){
                 Vue.set(state, "notes", notes);
             }else{
                 state.notes = state.notes.concat(notes);
@@ -107,7 +107,7 @@ export default new Vuex.Store({
                         if(typeof t.time === "object"){
                             commit("setTimePrototype", {note:n, token:t});
                         }
-                        commit('agenda/add', {note: n, time: t.time})
+                        commit("agenda/add", {note: n, time: t.time});
                     }
                 });
                 //commit("tag/add", {tags});

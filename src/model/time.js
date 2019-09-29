@@ -16,14 +16,11 @@ class Time{
         this.repeat = null;
     }
 
-    isBetween(from, to) {
-        let start = this.start();
-        let end = this.end();
-        return start.isValid() && start.isBetween(from, to);
-    }
-
     start(){
         let date = moment(this.startDate || this.context.baseDate || this.context.id);
+        if(this.startDate && this.startDate.length <= 5){
+            date.set("year", moment(this.context.baseDate || this.context.id).year());
+        }
         if(!this.startTime){
             return date;
         }

@@ -36,12 +36,12 @@ const parseTime = function (state){
     time.type = ch === "(" ? "stamp": "schedule"; // (stamp), <schedule>,
 
     let text = state.text;
-    let regexp = /(\d{4}-\d{1,2}-\d{1,2})\.{0,1}|(\d{2}:\d{2})~{0,1}/g;
+    let regexp = /(\d{4}-\d{1,2}-\d{1,2})\.{0,1}|(\d{2}-\d{2})|(\d{2}:\d{2})~{0,1}/g;
 
     let matchGroups = text.matchAll(regexp);
     for (const group of matchGroups) {
         let value = group[2] || group[1] || group[0];
-        if(value.length <= 5){ // time
+        if(value.includes(":")){ // time
             if(time.startTime === null){
                 time.startTime = value;
             }else if(time.endTime === null){
