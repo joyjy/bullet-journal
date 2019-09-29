@@ -190,7 +190,6 @@ export default {
     },
     watch: {
         type: function(to, from){
-            console.log(from, to)
             if(from === 'month' && to === 'week'){
                 let offset = this.current.day() - this.weekStart;
                 this.start = this.current.subtract(offset, 'd').format("YYYY-MM-DD");
@@ -222,8 +221,9 @@ export default {
             let top = timeToY(event.startMinutes());
             let duration = event.duration();
             let height = 18;
-            if(duration){
-                height = minutesToPixels(duration);
+            let realHeight = minutesToPixels(event.duration());
+            if(realHeight > height){
+                height = realHeight;
             }
 
             let overlap = false
@@ -275,7 +275,7 @@ export default {
     background-color: white;
     word-break: break-all;
     border-radius:.25rem;
-    font-size: 13px;
+    font-size: 12px;
 }
 .v-calendar-daily_head-day-label>.v-btn{
     width: 36px!important;

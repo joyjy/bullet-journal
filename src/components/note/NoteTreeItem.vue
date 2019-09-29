@@ -20,8 +20,11 @@
                 <div class="debug">
                     cursor: {{ note.display.text.cursor }}
                 </div>
-                <editable-div v-show="displayContent || focusContent" :type="'content'"
-                    :note="note" :match="match" @input="saveNote" @editing="focusContent = $event">
+                <editable-div v-show="displayContent || focusContent"
+                    :type="'content'" :note="note" :match="match"
+                    @input="saveNote"
+                    @editing="focusContent = $event"
+                    @del-content="deleteContent">
                 </editable-div>
             </div>
         </div>
@@ -150,6 +153,9 @@ export default {
                     this.$store.commit("saved/updateNote", {note: this.note})
                 }
             })
+            if(payload.type === "content"){
+                this.focusContent = true;
+            }
         },
         newNote: function(payload){
             if(this.note.text == ""){
@@ -273,6 +279,10 @@ export default {
                 this.$store.commit("focus", {note: target, position: position})
             })
         },
+        deleteContent(){
+            this.focusContent = false;
+            this.$store.commit("focus", {note: this.note, position: this.note.text.length})
+        }
     }
 }
 </script>

@@ -83,7 +83,7 @@ const contentHtml = function(note, match){
 
 export default {
     parse: lexer.tokenize,
-    html: function(note, match, type){
+    html(note, match, type){
         if(type === "content"){
             return contentHtml(note, match);
         }

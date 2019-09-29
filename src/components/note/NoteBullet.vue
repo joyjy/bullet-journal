@@ -17,8 +17,8 @@
             </template>
             <v-list subheader dense>
                 <v-list-item v-if="note.time || note.schedule">
-                    <v-list-item-content class="caption font-italic">
-                        {{ timestamp }}
+                    <v-list-item-content class="caption font-italic"
+                        v-html="timestamp">
                     </v-list-item-content>
                 </v-list-item>
                 <v-divider v-if="note.time || note.schedule"></v-divider>
@@ -71,12 +71,20 @@ export default {
             time = toTime(time, this.note);
 
             let start = time.start();
-            let value = start.format(time.startTime ? "YYYY-MM-DD ddd HH:mm" : "YYYY-MM-DD ddd");
+            let value = start.format(time.startTime ? "YYYY-MM-DD(ddd) HH:mm" : "YYYY-MM-DD(ddd)");
 
             let end = time.end()
             if(end && end.isValid()){
-                value += end.format(time.endTime ? " -> YYYY-MM-DD ddd HH:mm, ~" : " -> YYYY-MM-DD ddd, ~")
-                         + moment.duration(end.diff(start)).humanize();
+                let endFormat = "YYYY-MM-DD(ddd) HH:mm"
+                if(time.endTime){
+                    if(end.isSame(start, 'd')){
+                        endFormat = "HH:mm"
+                    }
+                }else{
+                    endFormat = "YYYY-MM-DD(ddd)"
+                }
+
+                value += " -> " + end.format(endFormat) + ", ~" + moment.duration(end.diff(start)).humanize();
             }
 
             return value;

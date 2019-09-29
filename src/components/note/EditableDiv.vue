@@ -88,6 +88,7 @@ export default {
                 }else{
                     this.$store.commit("unfocus", {note:this.note});
                 }
+                this.$emit('editing', this.editing)
             }
         }
     },
@@ -106,16 +107,16 @@ export default {
             this.$emit("input", payload)
         },
         pressDelete(e){
-            if(this.type == "content"){
-                return;
-            }
-
             if(e.isComposing){ // ime hasn"t submit 
                 return;
             }
 
             if(range.position(this.$el) == 0){
-                this.$emit("del-note", { keyboard:true })
+                if(this.type == "content"){
+                    this.$emit("del-content")
+                }else{
+                    this.$emit("del-note", { keyboard:true })
+                }
                 e.preventDefault();
             }
         },

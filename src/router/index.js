@@ -14,8 +14,7 @@ export default new VueRouter({
     mode: "history",
     routes: [
         { path: "/note/:id?", name: "note", component: NoteTree },
-        { path: "/agenda/:type?/:start", name: "agenda", component: Agenda},
-        { path: "/agenda", name: "agenda", component: Agenda},
+        { path: "/agenda/:type?/:start?", name: "agenda", component: Agenda},
         { path: "/notebook/", name: "notebooks"},
         { path: "/notebook/:name", name: "notebook", component: Diary },
         { path: "/setting", name: "setting", component: Setting },
