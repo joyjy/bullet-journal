@@ -113,6 +113,7 @@ export default new Vuex.Store({
                 });
                 commit("tag/add", {tags});
 
+                commit("agenda/count", {note: n})
                 commit("agenda/add", {note: n, time: n.time})
                 commit("agenda/add", {note: n, time: n.schedule})
             });

@@ -38,7 +38,7 @@
         <v-sheet height="702"><!--todo-->
         <v-calendar ref="calendar" :type="type" :weekdays="weekdays" @change="update"
             v-model="now" :start="start" :end="end" :interval-style="intervalStyle" :interval-height="36"
-            class="border-top border-left border-bottom" :style="{height:'100%'}">
+            :class="['border-top', 'border-left', type=='week'?'border-bottom':'']" :style="{height:'100%'}">
 
             <!--month-->
             <template v-slot:day-label="{date, day}">
@@ -50,9 +50,12 @@
                 </div>
             </template>
             <template v-slot:day="{date}" >
-                <div v-for="(event, index) in dayEvents(date)" :key="event.name" class='event'
-                    v-show="index < 3 || dayEvents(date).length <= 4 && index < 3">
-                    {{event.name}}
+                <div v-for="(event) in dayEvents(date)" :key="event.name"
+                    :class="['event', eventLongDayClass(event)]">
+                    <span v-if="!event.index || event.index == 0 || date == start"
+                        :style="eventLongDayStyle(event, date)">
+                        {{event.name}}
+                    </span>
                 </div>
                 <div v-if="dayEvents(date).length > 4" class="event">
                     {{dayEvents(date).length - 3}} more...
@@ -64,11 +67,12 @@
                 <div class="badge" v-show="noteCountAtDay(date) > 0" :title="'Created ' + noteCountAtDay(date) + ' notes' ">
                     {{ noteCountAtDay(date) }}
                 </div>
-                <div class="day-header">
-                    <div v-for="event in eventsAtDay(date)" :key="event.name"
-                        :class="['event', eventLongDayClass(event)]" :style="eventHeightLevel(event, date)">
-                        <span v-if="!event.index || event.index == 0">{{event.name}}</span>
-                    </div>
+                <div v-for="event in eventsAtDay(date)" :key="event.name"
+                    :class="['event', eventLongDayClass(event)]">
+                    <span v-if="!event.index || event.index == 0 || date == start"
+                        :style="eventLongDayStyle(event, date)">
+                        {{event.name}}
+                    </span>
                 </div>
             </template>
             <template v-slot:day-body="{date, present, timeToY, minutesToPixels}">
@@ -263,14 +267,10 @@ export default {
 
             return 'event-mid'
         },
-        eventHeightLevel(event, date){
-            // let id = event.source.id;
-            // if(heightLevel[id] === undefined){
-            //     heightLevel[id] = Object.keys(heightLevel).length; // todo
-            //     this.dayHeaderHeight += 18;
-            // }else{
-            //     return {"top": (heightLevel[id]*18) + "px"}
-            // }
+        eventLongDayStyle(event, date){
+            if(event.total){
+                return { width: "calc("+100*(event.total-event.index+1)+"%)"}
+            }
         },
         prev(){
             if(this.type == 'month'){
@@ -295,18 +295,6 @@ export default {
     width: 100%;
     z-index: 100;
 }
-/* month view */
-.v-calendar-weekly__day .event, .v-calendar-daily_head-day .event{
-    height: 18px;
-}
-/* week view */
-.v-calendar-daily__day .event{
-    position: absolute;
-}
-.day-header{
-    position: relative;
-    width: 100%;
-}
 .event{
     padding:0 .25rem;
     width:100%;
@@ -317,23 +305,38 @@ export default {
     overflow: hidden;
     word-break: break-all;
 }
-.event-start{
+.v-calendar{
+    overflow: hidden;
+}
+/* all day events fixed height 1 line*/
+.v-calendar-weekly__day .event, .v-calendar-daily_head-day .event{
+    height: 18px;
     white-space: nowrap;
-    overflow: visible;
+}
+/* week view event with time using absolute top & height */
+.v-calendar-daily__day .event{
     position: absolute;
+}
+.event>span{
+    display: inline-block;
+    overflow: hidden; /* width already cross cell*/
+    position: relative;
     z-index: 100;
+}
+.event-start, .event-mid, .v-calendar-weekly__day{
+    overflow: visible;
+}
+.event-start{
     border-right: 0;
     border-top-right-radius: 0;
     border-bottom-right-radius: 0;
 }
 .event-mid{
-    /* position: absolute; */
     border-radius: 0;
     border-left: 0;
     border-right: 0;
 }
 .event-end{
-    /* position: absolute; */
     border-left: 0;
     border-top-left-radius: 0;
     border-bottom-left-radius: 0;
@@ -342,6 +345,7 @@ export default {
     width: 36px!important;
     height: 36px!important;
 }
+/* week view badge position based */
 .v-calendar-weekly__day,.v-calendar-daily_head-day{
     position: relative;
 }

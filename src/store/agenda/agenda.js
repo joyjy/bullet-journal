@@ -7,9 +7,10 @@ import {toTime} from "@/model/time";
 
 class Event {
 
-    constructor({note, start, end, index, total, order}){
+    constructor({note, hasTime, start, end, index, total, order}){
         this.name = note.text;
         this.source = note;
+        this.hasTime = hasTime
         this.start = start;
         this.end = end;
         this.index = index;
@@ -65,13 +66,21 @@ export default {
         }
     },
     mutations:{
+        count(state, {note}){
+            let date = moment(note.id).format("YYYY-MM-DD");
+            if(!state.count[date]){
+                Vue.set(state.count, date, 0);
+            }
+            state.count[date]++;
+        },
         add(state, {note, time}){
             if(!time){
                 return;
             }
             time = toTime(time, note);
+            let hasTime = Boolean(time.startTime)
 
-            let target = time.startTime ? state.time : state.day;
+            let target = hasTime ? state.time : state.day;
 
             let startDate = time.start().clone().hour(0).minute(0)
             let m = startDate.clone();
@@ -88,6 +97,7 @@ export default {
                     }
                     let event = new Event({
                         note: note,
+                        hasTime: hasTime,
                         start: time.startFormat(),
                         end: time.endFormat(),
                         index: i,
@@ -95,7 +105,7 @@ export default {
                         order: 0,
                     })
 
-                    insert(target, date, event, time.startTime)
+                    insert(target, date, event, hasTime)
 
                     m.add(1, 'd')
                 }
@@ -106,12 +116,13 @@ export default {
                 }
                 let event = new Event({
                     note: note,
+                    hasTime: hasTime,
                     start: time.startFormat(),
                     end: time.endFormat(),
                     order: 0,
                 })
 
-                insert(target, date, event, time.startTime)
+                insert(target, date, event, hasTime)
             }
         },
         remove(state, {time}){
