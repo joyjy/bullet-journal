@@ -101,7 +101,7 @@ export default {
     cursor: pointer;
     width: 21px;
     height: 21px;
-    align-self: center;
+    margin-top: 2px;
     flex-shrink: 0;
     display: flex;
     position: relative;

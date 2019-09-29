@@ -116,7 +116,7 @@ export default {
     mounted: function(){
         let time = moment();
         this.indicator.y = this.$refs.calendar.timeToY({hour: time.hour(), minute: time.minute()});
-        this.$refs.calendar.scrollToTime({hour: time.hour(), minute: time.minute()}) // todo
+        this.$refs.calendar.scrollToTime({hour: time.hour(), minute: time.minute()})
         this.timer = setInterval(() => {
             let time = moment();
             this.indicator.y = this.$refs.calendar.timeToY({hour: time.hour(), minute: time.minute()});
