@@ -211,7 +211,6 @@ export default {
             this.end = end.date;
         },
         dayEvents(date){
-            console.log(date)
             return this.eventsAtDay(date).concat(this.eventsInDay(date));
         },
         intervalStyle({date, day, future, hasDay, hasTime, hour, minute, month, past, present, weekday, year}){

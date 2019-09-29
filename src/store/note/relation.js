@@ -1,5 +1,6 @@
 import Vue from "vue";
 import _ from "lodash";
+import traversal from "@/lib/tree"
 import { Note } from "@/model/note";
 
 export default {
@@ -60,6 +61,10 @@ export default {
             return Promise.resolve(payload.note);
         },
         deleteNote({state, commit, rootState}, payload){
+
+            traversal.each(payload.note.notes, (n) => {
+                commit("tag/remove", {tags: _.filter(n.tokens, ["type","tag"])});
+            })
 
             commit("tag/remove", {tags: _.filter(payload.note.tokens, ["type","tag"])});
             commit("deleteNote", payload);

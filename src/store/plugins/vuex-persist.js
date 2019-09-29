@@ -8,7 +8,7 @@ const vuexPersist = new VuexPersist({
     reducer: (state) => ({
         notes: state.notes,
         saved: state.saved,
-        tag: state.tag,
+        //tag: state.tag,
         //agenda: state.agenda,
         settings: state.settings,
     }),
