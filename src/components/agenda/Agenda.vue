@@ -64,10 +64,9 @@
                 <div class="badge" v-show="noteCountAtDay(date) > 0" :title="'Created ' + noteCountAtDay(date) + ' notes' ">
                     {{ noteCountAtDay(date) }}
                 </div>
-                <div class="day-header" :style="{height:dayHeaderHeight+'px'}">
+                <div class="day-header">
                     <div v-for="event in eventsAtDay(date)" :key="event.name"
-                        :class="['event', eventLongDayClass(event)]"
-                        :style="eventHeightLevel(event, date)">
+                        :class="['event', eventLongDayClass(event)]" :style="eventHeightLevel(event, date)">
                         <span v-if="!event.index || event.index == 0">{{event.name}}</span>
                     </div>
                 </div>
@@ -95,15 +94,6 @@ import AppLayout from "../app/Layout"
 
 import moment from "moment"
 
-const last = {
-    date: '',
-    bottom: 0,
-}
-
-var heightLevel = {
-  //<id> :
-}
-
 export default {
     data:() =>({
         typeLabels: {
@@ -118,7 +108,6 @@ export default {
             x:0,
             y:-1
         },
-        dayHeaderHeight:0
     }),
     components: {
         AppLayout
@@ -235,16 +224,7 @@ export default {
         },
         eventStyle(event, date, timeToY, minutesToPixels){
 
-            let continuous = false;
-            let top = 0;
-
-            let startMinutes = event.startMinutes(date);
-            if(startMinutes === -1){
-                top = timeToY(0);
-                continuous = true;
-            }else{
-                top = timeToY(startMinutes);
-            }
+            let top = timeToY(event.startMinutes(date));
 
             let duration = event.duration();
             let height = 18;
@@ -253,23 +233,14 @@ export default {
                 height = realHeight;
             }
 
-            let overlap = false
-            if(last.date === date && top+1 < last.bottom){
-                overlap = true;
-            }
-            last.date = date;
-            if(top+height>last.bottom){
-                last.bottom = top+height;
-            }
-
             let style = { top: top + 'px', height: height + 'px', width: '96%'}
 
-            if(overlap){
+            if(event.overlap){
                 style.left = '4px';
                 style.width = 'calc(98% - 4px)';
             }
 
-            if(continuous){
+            if(event.index > 0){
                 style["border-top-left-radius"] = 0;
                 style["border-top-right-radius"] = 0;
                 style["border-top"] = 0;
@@ -286,24 +257,22 @@ export default {
                 return 'event-start';
             }
 
-            if(event.index == event.total-1){
+            if(event.index == event.total){
                 return 'event-end';
             }
 
             return 'event-mid'
         },
         eventHeightLevel(event, date){
-            let id = event.source.id;
-            if(heightLevel[id] === undefined){
-                heightLevel[id] = Object.keys(heightLevel).length; // todo
-                this.dayHeaderHeight += 18;
-            }else{
-                return {"top": (heightLevel[id]*18) + "px"}
-            }
+            // let id = event.source.id;
+            // if(heightLevel[id] === undefined){
+            //     heightLevel[id] = Object.keys(heightLevel).length; // todo
+            //     this.dayHeaderHeight += 18;
+            // }else{
+            //     return {"top": (heightLevel[id]*18) + "px"}
+            // }
         },
         prev(){
-            heightLevel = {}
-            this.dayHeaderHeight = 0;
             if(this.type == 'month'){
                 this.$refs.calendar.prev();
             }else{
@@ -312,8 +281,6 @@ export default {
             
         },
         next(){
-            heightLevel = {}
-            this.dayHeaderHeight = 0;
             this.$refs.calendar.next();
         }
     }
@@ -328,11 +295,13 @@ export default {
     width: 100%;
     z-index: 100;
 }
+/* month view */
 .v-calendar-weekly__day .event, .v-calendar-daily_head-day .event{
     height: 18px;
 }
+/* week view */
 .v-calendar-daily__day .event{
-    position:absolute;
+    position: absolute;
 }
 .day-header{
     position: relative;
@@ -341,12 +310,12 @@ export default {
 .event{
     padding:0 .25rem;
     width:100%;
-    overflow: hidden;
     border:1px solid black;
     background-color: white;
-    word-break: break-all;
     border-radius:.25rem;
     font-size: 12px;
+    overflow: hidden;
+    word-break: break-all;
 }
 .event-start{
     white-space: nowrap;
@@ -358,13 +327,13 @@ export default {
     border-bottom-right-radius: 0;
 }
 .event-mid{
-    position: absolute;
+    /* position: absolute; */
     border-radius: 0;
     border-left: 0;
     border-right: 0;
 }
 .event-end{
-    position: absolute;
+    /* position: absolute; */
     border-left: 0;
     border-top-left-radius: 0;
     border-bottom-left-radius: 0;

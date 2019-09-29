@@ -5,21 +5,22 @@ import moment from "moment";
 import traversal from "@/lib/tree";
 import {toTime} from "@/model/time";
 
-class Event{
+class Event {
 
-    constructor({time, name, source}){
-        this.name = name;
-        this.source = source;
-        this.start = time.startFormat();
-        this.end = time.endFormat();
-        this.index = time.index;
-        this.total = time.total;
+    constructor({note, start, end, index, total, order}){
+        this.name = note.text;
+        this.source = note;
+        this.start = start;
+        this.end = end;
+        this.index = index;
+        this.total = total;
+        this.order = order;
     }
 
     startMinutes(date){
         let m = moment(this.start);
         if(date !== m.format("YYYY-MM-DD")){
-            return -1;
+            return 0;
         }
         return (m.hours()*60)+m.minutes();
     }
@@ -31,78 +32,36 @@ class Event{
     }
 }
 
+const insert = function(target, date, event, orderByTime){
+
+    let index = _.sortedIndexBy(target[date], event, e => {
+        return orderByTime ? e.startMinutes(date): e.start
+    });
+    if(index > 0 && orderByTime){
+        let lastEvent = target[date][index-1];
+        if(moment(event.start).isBefore(moment(lastEvent.start).add(30,'m'))){
+            event.overlap = true;
+        }
+    }
+    target[date].splice(index, 0, event)
+}
+
 export default {
     namespaced: true,
     state: {
+        day: {},
+        time: {},
+        count: {},
     },
     getters:{
-        //[has time]
-        eventsInDay: (state, getters, rootState, rootGetters) => (day) => {
-            let events = [];
-
-            if(typeof day === "string"){
-                day = moment(day);
-            }
-
-            let times = state[day.format("YYYY-MM-DD")];
-
-            _.each(times, (t) => {
-                if(!t.startTime){
-                    return;
-                }
-                let time = toTime(t);
-                let note = rootGetters.findNoteById(time.context.id);
-                events.push(new Event({
-                    time: time,
-                    name: note.text,
-                    source: note,
-                }));
-            })
-
-            return _.sortBy(events, e => e.startMinutes(day.format("YYYY-MM-DD")));
+        eventsInDay: (state, getters, rootState, rootGetters) => (date) => {
+            return state.time[date] || [];
         },
-        //[only date]
-        eventsAtDay: (state, getters, rootState, rootGetters) => (day) => {
-            let events = [];
-
-            if(typeof day === "string"){
-                day = moment(day);
-            }
-
-            let times = state[day.format("YYYY-MM-DD")];
-
-            _.each(times, (t) => {
-                if(t.startTime){
-                    return;
-                }
-                let time = toTime(t);
-                let note = rootGetters.findNoteById(time.context.id);
-                events.push(new Event({
-                    time: time,
-                    name: note.text,
-                    source: note,
-                }));
-            })
-
-            return events;
+        eventsAtDay: (state, getters, rootState, rootGetters) => (date) => {
+            return state.day[date] || [];
         },
-        noteCountAtDay: (state, getters, rootState, rootGetters) => (day) => {
-            if(typeof day === "string"){
-                day = moment(day);
-            }
-
-            let nextDay = day.clone().add(1, "d");
-
-            let count = 0;
-
-            traversal.each(rootState.notes, (note) => {
-                let time = moment(note.id)
-                if(time.isValid() && time.isBetween(day, nextDay)){
-                    count++;
-                }
-            });
-
-            return count;
+        noteCountAtDay: (state, getters, rootState, rootGetters) => (date) => {
+            return state.count[date];
         }
     },
     mutations:{
@@ -111,51 +70,53 @@ export default {
                 return;
             }
             time = toTime(time, note);
-            let startMoment = time.start();
-            let startDate = startMoment.format("YYYY-MM-DD");
-            if(!state[startDate]){
-                Vue.set(state, startDate, []);
-            }
-            state[startDate].push(time);
-            let endMoment = time.end()
-            if(endMoment){
-                let days = moment.duration(endMoment.diff(startDate)).asDays()
-                if(days > 0){
-                    time.index = 0;
-                    time.total = days;
-                }
-                for (let i = 0; i < days; i++) {
-                    let date = startMoment.format("YYYY-MM-DD");
-                    if(date !== startDate){
-                        if(!state[date]){
-                            Vue.set(state, date, []);
-                        }
-                        let cloned = _.clone(time);
-                        cloned.index = i;
-                        cloned.total = days;
-                        state[date].push(cloned);
+
+            let target = time.startTime ? state.time : state.day;
+
+            let startDate = time.start().clone().hour(0).minute(0)
+            let m = startDate.clone();
+            
+            if(time.endDate || time.endTime){
+
+                let endDate = time.end().clone().hour(0).minute(0)
+                let total = moment.duration(endDate.diff(startDate)).asDays();
+
+                for (let i = 0; i <= total; i++) {
+                    let date = m.format("YYYY-MM-DD");
+                    if(!target[date]){
+                        Vue.set(target, date, []);
                     }
-                    startMoment.add(1, 'd')
+                    let event = new Event({
+                        note: note,
+                        start: time.startFormat(),
+                        end: time.endFormat(),
+                        index: i,
+                        total: total,
+                        order: 0,
+                    })
+
+                    insert(target, date, event, time.startTime)
+
+                    m.add(1, 'd')
                 }
+            }else{
+                let date = m.format("YYYY-MM-DD");
+                if(!target[date]){
+                    Vue.set(target, date, []);
+                }
+                let event = new Event({
+                    note: note,
+                    start: time.startFormat(),
+                    end: time.endFormat(),
+                    order: 0,
+                })
+
+                insert(target, date, event, time.startTime)
             }
         },
         remove(state, {time}){
             if(!time){
                 return;
-            }
-
-            let startDate = time.start().format("YYYY-MM-DD");
-            _.remove(state[startDate], t => {
-                return t.type === time.type && t.context.id === time.context.id;
-            })
-            let endDate = time.end()
-            if(endDate){
-                endDate = endDate.format("YYYY-MM-DD");
-                if(endDate !== startDate){
-                    _.remove(state[endDate], t => {
-                        return t.type === time.type && t.context.id === time.context.id;
-                    })
-                }
             }
         }
     }
