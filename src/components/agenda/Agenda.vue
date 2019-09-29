@@ -8,7 +8,7 @@
             <v-btn fab text small @click="prev">
                 <v-icon small>mdi-chevron-left</v-icon>
             </v-btn>
-            <v-btn fab text small @click="$refs.calendar.next()">
+            <v-btn fab text small @click="next">
                 <v-icon small>mdi-chevron-right</v-icon>
             </v-btn>
 
@@ -64,8 +64,12 @@
                 <div class="badge" v-show="noteCountAtDay(date) > 0" :title="'Created ' + noteCountAtDay(date) + ' notes' ">
                     {{ noteCountAtDay(date) }}
                 </div>
-                <div v-for="event in eventsAtDay(date)" :key="event.name" class='event'>
-                    {{event.name}}
+                <div class="day-header" :style="{height:dayHeaderHeight+'px'}">
+                    <div v-for="event in eventsAtDay(date)" :key="event.name"
+                        :class="['event', eventLongDayClass(event)]"
+                        :style="eventHeightLevel(event, date)">
+                        <span v-if="!event.index || event.index == 0">{{event.name}}</span>
+                    </div>
                 </div>
             </template>
             <template v-slot:day-body="{date, present, timeToY, minutesToPixels}">
@@ -96,6 +100,10 @@ const last = {
     bottom: 0,
 }
 
+var heightLevel = {
+  //<id> :
+}
+
 export default {
     data:() =>({
         typeLabels: {
@@ -109,7 +117,8 @@ export default {
         indicator: {
             x:0,
             y:-1
-        }
+        },
+        dayHeaderHeight:0
     }),
     components: {
         AppLayout
@@ -201,7 +210,9 @@ export default {
     },
     methods: {
         setToday(){
-            this.now = moment()
+            let now = moment();
+            this.now = now
+            this.$refs.calendar.scrollToTime({hour: now.hour(), minute: now.minute()})
         },
         update({start, end}){
             if(this.start == start.date && this.end == end.date){
@@ -266,12 +277,44 @@ export default {
             
             return style;
         },
+        eventLongDayClass(event){
+            if(!event.total){
+                return '';
+            }
+
+            if(event.index == 0){
+                return 'event-start';
+            }
+
+            if(event.index == event.total-1){
+                return 'event-end';
+            }
+
+            return 'event-mid'
+        },
+        eventHeightLevel(event, date){
+            let id = event.source.id;
+            if(heightLevel[id] === undefined){
+                heightLevel[id] = Object.keys(heightLevel).length; // todo
+                this.dayHeaderHeight += 18;
+            }else{
+                return {"top": (heightLevel[id]*18) + "px"}
+            }
+        },
         prev(){
+            heightLevel = {}
+            this.dayHeaderHeight = 0;
             if(this.type == 'month'){
                 this.$refs.calendar.prev();
             }else{
                 this.start = moment(this.start).subtract(7, 'd').format("YYYY-MM-DD");
             }
+            
+        },
+        next(){
+            heightLevel = {}
+            this.dayHeaderHeight = 0;
+            this.$refs.calendar.next();
         }
     }
 }
@@ -285,20 +328,46 @@ export default {
     width: 100%;
     z-index: 100;
 }
-.v-calendar-weekly__day .event{
+.v-calendar-weekly__day .event, .v-calendar-daily_head-day .event{
     height: 18px;
 }
 .v-calendar-daily__day .event{
     position:absolute;
 }
+.day-header{
+    position: relative;
+    width: 100%;
+}
 .event{
     padding:0 .25rem;
+    width:100%;
     overflow: hidden;
     border:1px solid black;
     background-color: white;
     word-break: break-all;
     border-radius:.25rem;
     font-size: 12px;
+}
+.event-start{
+    white-space: nowrap;
+    overflow: visible;
+    position: absolute;
+    z-index: 100;
+    border-right: 0;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+}
+.event-mid{
+    position: absolute;
+    border-radius: 0;
+    border-left: 0;
+    border-right: 0;
+}
+.event-end{
+    position: absolute;
+    border-left: 0;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
 }
 .v-calendar-daily_head-day-label>.v-btn{
     width: 36px!important;

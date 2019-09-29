@@ -17,6 +17,7 @@ import noteDisplayModule from "./note/display";
 import savedModule from "./note/saved";
 import tagModule from "./tag/tag";
 import agendaModule from "./agenda/agenda";
+import notebookModule from "./notebook/notebook"
 import settingsModule from "./settings/display";
 import stateModule from "./settings/state"
 import userModule from "./user/user";
@@ -31,8 +32,9 @@ export default new Vuex.Store({
         "note-relation": noteRelationModule,
         "note-display": noteDisplayModule,
         saved: savedModule,
-        agenda: agendaModule,
         tag: tagModule,
+        agenda: agendaModule,
+        notebook: notebookModule,
         user: userModule,
         state: stateModule,
         settings: settingsModule,
@@ -106,11 +108,13 @@ export default new Vuex.Store({
                     }else if(t.time){
                         if(typeof t.time === "object"){
                             commit("setTimePrototype", {note:n, token:t});
-                        }
-                        commit("agenda/add", {note: n, time: t.time});
+                        };
                     }
                 });
                 commit("tag/add", {tags});
+
+                commit("agenda/add", {note: n, time: n.time})
+                commit("agenda/add", {note: n, time: n.schedule})
             });
             return Promise.resolve();
         },

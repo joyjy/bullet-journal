@@ -39,6 +39,9 @@ class Time{
             return undefined;
         }
         let date = moment(this.endDate || this.startDate || this.context.baseDate || this.context.id);
+        if(this.endDate && this.endDate.length <= 5){
+            date.set("year", moment(this.context.baseDate || this.context.id).year());
+        }
         if(!this.endTime){
             return date;
         }

@@ -86,32 +86,44 @@
         </v-list-item>
 
         <v-list-item :to="{name:'agenda'}">
-          <v-list-item-icon>
-            <v-icon>mdi-calendar</v-icon>
-          </v-list-item-icon>
-          <v-list-item-title>Agenda</v-list-item-title>
+            <v-list-item-icon>
+                <v-icon>mdi-calendar</v-icon>
+            </v-list-item-icon>
+            <v-list-item-title>Agenda</v-list-item-title>
+            <v-list-item-action @click.stop.prevent="">
+                <v-tooltip right max-width="200">
+                    <template v-slot:activator={on}>
+                        <v-icon dense v-on="on">mdi-information-outline</v-icon>
+                    </template>
+                    <span>Note with (timestamp) or &lt;scheduled> will show in agenda view.</span>
+                </v-tooltip>
+            </v-list-item-action>
         </v-list-item>
 
-        <!--v-list-group prepend-icon="mdi-book" value="true" no-action>
-          <template v-slot:activator>
-            <v-list-item-content>
-              <v-list-item-title>Notebook</v-list-item-title>
-            </v-list-item-content>
-          </template>
+        <v-list-group prepend-icon="mdi-book" value="true" no-action>
+            <template v-slot:activator>
+                <v-list-item-title>Notebook</v-list-item-title>
+            </template>
 
-          <v-list-item :to="{name:'notebook', params:{name:'diary'}}">
-            <v-list-item-content>
-              <v-list-item-title>Diary</v-list-item-title>
-            </v-list-item-content>
-          </v-list-item>
+            <v-list-item v-for="notebook in $store.state.notebook.list" :key="notebook.name">
+                <v-list-item-title>
+                    {{ notebook.name }}
+                </v-list-item-title>
+            </v-list-item>
 
-          <v-list-item @click="">
-            <v-list-item-content>
-              <v-list-item-title>Add...</v-list-item-title>
-            </v-list-item-content>
-          </v-list-item>
+            <v-list-item @click="">
+                <v-list-item-title>Add...</v-list-item-title>
+                <v-list-item-action>
+                    <v-tooltip right max-width="200">
+                        <template v-slot:activator={on}>
+                            <v-icon dense v-on="on">mdi-information-outline</v-icon>
+                        </template>
+                        <span>Notebook provides variety of view to organize notes.</span>
+                    </v-tooltip>
+                </v-list-item-action>
+            </v-list-item>
 
-        </v-list-group-->
+        </v-list-group>
 
       </v-list>
       
@@ -150,3 +162,9 @@ export default {
     }
 }
 </script>
+
+<style>
+#addNotebook{
+    margin-top:-.5rem;
+}
+</style>
