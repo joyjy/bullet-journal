@@ -27,6 +27,15 @@
                     @del-content="deleteContent">
                 </editable-div>
             </div>
+            <div class="toolbar" v-if="note.notes.length > 0">
+                <v-menu>
+                    <template v-slot:activator="{on}">
+                        <v-btn text icon small v-on="on">
+                            <v-icon>mdi-dots-horizontal</v-icon>
+                        </v-btn>
+                    </template>
+                </v-menu>
+            </div>
         </div>
         <draggable tag="ul" v-model="noteList" :group="{ name: 'note-tree' }"
             v-show="collapsed == 'expand' || collapsed == 'filtered'">
@@ -40,8 +49,8 @@
 
 <script>
 import { mapMutations, mapGetters } from "vuex"
-import draggable from "vuedraggable"
 import _ from "lodash"
+import draggable from "vuedraggable"
 
 import NoteBullet from "./NoteBullet.vue"
 import EditableDiv from "./EditableDiv.vue"
@@ -112,6 +121,9 @@ export default {
             return false;
         },
         col: function(){
+            if(!this.parent.display || !this.parent.display.column){
+                return 0;
+            }
             if(this.collapsed === "expand" || this.collapsed === "filtered"){
                 return 0;
             }
@@ -148,9 +160,20 @@ export default {
         },
         saveNote: function(payload){
             payload.note = this.note;
-            this.$store.dispatch("saveNote", payload).then(() => {
+            this.$store.dispatch("saveNote", payload)
+            .then(() => {
                 if(this.isStarred(this.note.id)){
                     this.$store.commit("saved/updateNote", {note: this.note})
+                }
+            })
+            .then(() => {
+                let lastToken = this.note.tokens[this.note.tokens.length-1];
+                if(!lastToken){
+                    return;
+                }
+                if(lastToken.text === ":"){
+                    let rect = this.$refs.emoji.$el.getBoundingClientRect();
+                    this.$refs.emoji.toggle({clientX: rect.left, clientY: rect.top})
                 }
             })
             if(payload.type === "content"){
@@ -307,6 +330,13 @@ export default {
 }
 .note-wrapper{
     display: flex;
+}
+.toolbar{
+    margin-right: 1.5rem;
+    opacity: .2;
+}
+.toolbar:hover{
+    opacity: .8;
 }
 .debug{
     display: none;

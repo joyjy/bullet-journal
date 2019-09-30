@@ -1,5 +1,6 @@
 
-import traversal from "@/lib/tree"
+import Vue from "vue";
+import traversal from "@/lib/tree";
 
 export default {
 
@@ -8,14 +9,14 @@ export default {
 
     mutations: {
         collapse({state}, {note}){
-            note.display.collapse = !note.display.collapse
+            note.display.collapse = !note.display.collapse;
         },
         switchOutline({state}, payload){
             traversal.each(payload.notes, (note, depth) => {
                 if(note.notes.length > 0){
-                    note.display.collapse = depth == payload.level
+                    note.display.collapse = depth == payload.level;
                 }
-            }, {level: payload.level})
+            }, {level: payload.level});
         },
         focus({state}, {note, position, type}){
             
@@ -30,5 +31,8 @@ export default {
             note.display.text.focus = false;
             note.display.text.cursor = -1;
         },
+        displayColumn({state}, {note, value}){
+            Vue.set(note.display,"column", value);
+        }
     }
 }

@@ -71,6 +71,21 @@ const insert = function(target, date, event, orderByTime){
     return index;
 }
 
+const eventRange = function(state, time){
+
+    let hasTime = Boolean(time.startTime);
+    let target = hasTime ? state.time : state.day;
+    let startDate = time.start().clone().hour(0).minute(0);
+    let m = startDate.clone();
+    let total = 0;
+    if(time.endDate || time.endTime){
+        let endDate = time.end().clone().hour(0).minute(0);
+        total = moment.duration(endDate.diff(startDate)).asDays();
+    }
+
+    return {hasTime, target, m, total}
+}
+
 export default {
     namespaced: true,
     state: {
@@ -101,18 +116,9 @@ export default {
             if(!time){
                 return;
             }
+            
             time = toTime(time, note);
-
-            let hasTime = Boolean(time.startTime);
-            let target = hasTime ? state.time : state.day;
-            let startDate = time.start().clone().hour(0).minute(0)
-            let m = startDate.clone();
-            let total = 0;
-            if(time.endDate || time.endTime){
-
-                let endDate = time.end().clone().hour(0).minute(0);
-                total = moment.duration(endDate.diff(startDate)).asDays();
-            }
+            let {hasTime, target, total, m} = eventRange(state, time);
             
             let order = -1;
             for (let i = 0; i <= total; i++) {
@@ -128,29 +134,21 @@ export default {
                     end: time.endFormat(),
                     index: i,
                     total: total,
-                })
+                });
                 if(order > -1){
                     event.order = order;
                 }
-                order = insert(target, date, event, hasTime)
-                m.add(1, 'd')
+                order = insert(target, date, event, hasTime);
+                m.add(1, "d");
             }
         },
         remove(state, {note, time}){
             if(!time){
                 return;
             }
-            time = toTime(time, note);
 
-            let hasTime = Boolean(time.startTime);
-            let target = hasTime ? state.time : state.day;
-            let startDate = time.start().clone().hour(0).minute(0)
-            let m = startDate.clone();
-            let total = 0;
-            if(time.endDate || time.endTime){
-                let endDate = time.end().clone().hour(0).minute(0);
-                total = moment.duration(endDate.diff(startDate)).asDays();
-            }
+            time = toTime(time, note);
+            let {target, total, m} = eventRange(state, time);
 
             for (let i = 0; i <= total; i++) {
                 let date = m.format("YYYY-MM-DD");
@@ -159,7 +157,7 @@ export default {
                 }
                 let index = _.findIndex(target[date], (e) => e.type === time.type && e.source.id === note.id);
                 target[date].splice(index, 1); // todo after order
-                m.add(1, 'd')
+                m.add(1, "d");
             }
         }
     }

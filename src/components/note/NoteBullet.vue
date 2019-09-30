@@ -6,7 +6,7 @@
             </v-icon>
         </div>
         
-        <v-menu open-on-hover offset-y open-delay="1000">
+        <v-menu open-on-hover offset-y open-delay="1000" :close-on-content-click="false">
             <template v-slot:activator="{ on }">
                 <div :class="['note-bullet', {time: note.time || note.schedule}]" 
                     @dblclick="click('dbl', $event)" @click.capture="click('sgl', $event)"
@@ -16,15 +16,34 @@
                 </div>
             </template>
             <v-list subheader dense>
+
                 <v-list-item v-if="note.time || note.schedule">
                     <v-list-item-content class="caption font-italic"
                         v-html="timestamp">
                     </v-list-item-content>
                 </v-list-item>
                 <v-divider v-if="note.time || note.schedule"></v-divider>
+
                 <v-list-item @click="$emit('del-note')">
                     <v-list-item-title>
                         Delete
+                    </v-list-item-title>
+                    <v-list-item-action-text>
+                    </v-list-item-action-text>
+                </v-list-item>
+
+                <v-divider></v-divider>
+
+                <v-list-item>
+                    <v-list-item-title @click.prevent="displayColumn = !displayColumn" >
+                        <input type="checkbox" :checked="displayColumn" /> Show sub in columns
+                    </v-list-item-title>
+                    <v-list-item-action-text>
+                    </v-list-item-action-text>
+                </v-list-item>
+                <v-list-item>
+                    <v-list-item-title @click.prevent="displayCompleted = !displayCompleted">
+                        <input type="checkbox" :checked="displayCompleted"/> Show completed
                     </v-list-item-title>
                     <v-list-item-action-text>
                     </v-list-item-action-text>
@@ -88,6 +107,21 @@ export default {
             }
 
             return value;
+        },
+        displayColumn:{
+            get(){ 
+                return this.note.display.column;
+            },
+            set(value){
+                this.$store.commit('displayColumn', {note:this.note, value: value})
+            }
+        },
+        displayCompleted:{
+            get(){ 
+                return false 
+            },
+            set(value){
+            }
         }
     },
     methods: {
