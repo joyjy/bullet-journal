@@ -50,15 +50,16 @@
                 </div>
             </template>
             <template v-slot:day="{date}" >
-                <div v-for="(event) in dayEvents(date)" :key="event.name"
-                    :class="['event', eventLongDayClass(event)]">
-                    <span v-if="!event.index || event.index == 0 || date == start"
-                        :style="eventLongDayStyle(event, date)">
+                <div v-for="(event, index) in dayEvents(date)" :key="index"
+                    :class="['event', eventLongDayClass(event)]"
+                    v-show=" dayEvents(date).length<=4 || index<3">
+                    <span v-if="event && (!event.index || event.index == 0 || date == displayedStart)"
+                        :style="longDayTextWidth(event, date)">
                         {{event.name}}
                     </span>
                 </div>
-                <div v-if="dayEvents(date).length > 4" class="event">
-                    {{dayEvents(date).length - 3}} more...
+                <div v-if="dayEvents(date).length>4" class="event">
+                    more...
                 </div>
             </template>
 
@@ -67,10 +68,10 @@
                 <div class="badge" v-show="noteCountAtDay(date) > 0" :title="'Created ' + noteCountAtDay(date) + ' notes' ">
                     {{ noteCountAtDay(date) }}
                 </div>
-                <div v-for="event in eventsAtDay(date)" :key="event.name"
+                <div v-for="(event,index) in eventsAtDay(date)" :key="index"
                     :class="['event', eventLongDayClass(event)]">
-                    <span v-if="!event.index || event.index == 0 || date == start"
-                        :style="eventLongDayStyle(event, date)">
+                    <span v-if="event && (!event.index || event.index == 0 || date == displayedStart)"
+                        :style="longDayTextWidth(event, date)">
                         {{event.name}}
                     </span>
                 </div>
@@ -191,7 +192,15 @@ export default {
                 return `${startMonth} ${startDay} ${startYear} - ${suffixMonth} ${endDay} ${suffixYear}`
             }
             return ''
-      },
+        },
+        displayedStart(){
+            if(this.type == "month"){ // month view start always 1 but
+                let _1st = moment(this.start);
+                let offset = _1st.day() - this.weekStart;
+                return _1st.subtract(offset, 'd').format("YYYY-MM-DD");
+            }
+            return this.start;
+        }
     },
     watch: {
         type: function(to, from){
@@ -253,6 +262,10 @@ export default {
             return style;
         },
         eventLongDayClass(event){
+            if(!event){
+                return 'invisible'
+            }
+            
             if(!event.total){
                 return '';
             }
@@ -267,7 +280,7 @@ export default {
 
             return 'event-mid'
         },
-        eventLongDayStyle(event, date){
+        longDayTextWidth(event, date){
             if(event.total){
                 return { width: "calc("+100*(event.total-event.index+1)+"%)"}
             }
@@ -288,16 +301,20 @@ export default {
 </script>
 
 <style>
+.invisible{
+    visibility: hidden;
+}
 .indicator{
     position: absolute;;
     height: 2px;
     background-color:red;
     width: 100%;
-    z-index: 100;
+    z-index: 5;
 }
 .event{
     padding:0 .25rem;
-    width:100%;
+    margin-bottom: 1px;
+    width:98%;
     border:1px solid black;
     background-color: white;
     border-radius:.25rem;
@@ -321,17 +338,21 @@ export default {
     display: inline-block;
     overflow: hidden; /* width already cross cell*/
     position: relative;
-    z-index: 100;
+    z-index: 4;
 }
 .event-start, .event-mid, .v-calendar-weekly__day{
     overflow: visible;
 }
 .event-start{
+    width: 100%;
     border-right: 0;
     border-top-right-radius: 0;
     border-bottom-right-radius: 0;
+    position: relative;
+    z-index: 5;
 }
 .event-mid{
+    width: 100%;
     border-radius: 0;
     border-left: 0;
     border-right: 0;
@@ -340,6 +361,9 @@ export default {
     border-left: 0;
     border-top-left-radius: 0;
     border-bottom-left-radius: 0;
+}
+.v-calendar-weekly__day-label>.v-btn{
+    margin-top:-2px; /* exactly 4 in month */
 }
 .v-calendar-daily_head-day-label>.v-btn{
     width: 36px!important;

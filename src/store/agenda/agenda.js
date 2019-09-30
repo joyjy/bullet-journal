@@ -35,16 +35,52 @@ class Event {
 
 const insert = function(target, date, event, orderByTime){
 
-    let index = _.sortedIndexBy(target[date], event, e => {
+    let index = findInsertIndex(target[date], event, e => {
         return orderByTime ? e.startMinutes(date): e.start
-    });
-    if(index > 0 && orderByTime){
-        let lastEvent = target[date][index-1];
-        if(moment(event.start).isBefore(moment(lastEvent.start).add(30,'m'))){
-            event.overlap = true;
+    })
+
+    if(event.index === 0){
+        event.order = index;
+    }
+
+    if(event.order > target[date].length){
+        target[date].splice(event.order);
+    }
+
+    if(target[date][index] === undefined){
+        target[date][index] = event;
+    }else{
+        target[date].splice(index, 0, event); // todo 
+    }
+
+    console.log(date, JSON.stringify(_.map(target[date], function(e){
+        if(!e){
+            return "slot";
+        }
+        let cloned = _.clone(e);
+        delete cloned.name;
+        delete cloned.source;
+        delete cloned.hasTime;
+        return cloned;
+    })))
+
+    return event.order;
+}
+
+const findInsertIndex = function(array, event, orderBy){
+    if(event.order){
+        return event.order;
+    }
+    let orderByVal = orderBy(event);
+    for (let i = array.length; i>0; i--) {
+        const curVal = orderBy(array[i-1]);
+        console.log(orderByVal, curVal)
+        if(orderByVal > curVal){
+            return i;
         }
     }
-    target[date].splice(index, 0, event)
+
+    return array.length;
 }
 
 export default {
@@ -90,6 +126,7 @@ export default {
                 let endDate = time.end().clone().hour(0).minute(0)
                 let total = moment.duration(endDate.diff(startDate)).asDays();
 
+                let order = -1;
                 for (let i = 0; i <= total; i++) {
                     let date = m.format("YYYY-MM-DD");
                     if(!target[date]){
@@ -102,10 +139,12 @@ export default {
                         end: time.endFormat(),
                         index: i,
                         total: total,
-                        order: 0,
                     })
 
-                    insert(target, date, event, hasTime)
+                    if(order > -1){
+                        event.order = order;
+                    }
+                    order = insert(target, date, event, hasTime)
 
                     m.add(1, 'd')
                 }
@@ -119,7 +158,6 @@ export default {
                     hasTime: hasTime,
                     start: time.startFormat(),
                     end: time.endFormat(),
-                    order: 0,
                 })
 
                 insert(target, date, event, hasTime)
