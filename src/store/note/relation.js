@@ -64,9 +64,14 @@ export default {
 
             traversal.each(payload.note.notes, (n) => {
                 commit("tag/remove", {tags: _.filter(n.tokens, ["type","tag"])});
+                commit("agenda/remove", {time: n.time, note: n});
+                commit("agenda/remove", {time: n.schedule, note: n});
             })
 
             commit("tag/remove", {tags: _.filter(payload.note.tokens, ["type","tag"])});
+            commit("agenda/remove", {time: payload.note.time, note: payload.note});
+            commit("agenda/remove", {time: payload.note.schedule, note: payload.note});
+
             commit("deleteNote", payload);
             commit("flattern");
 

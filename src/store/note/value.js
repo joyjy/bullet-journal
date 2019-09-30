@@ -22,15 +22,15 @@ export default {
         },
         saveContent(state, {note, text, tokens, time}){
 
-            _.each(tokens, function(token){
+            _.each(tokens, function(token){ // filter except schedule state
                 if(token.type === "state" && !token.time || token.time && token.time.type === "stamp"){
-                    token.type = "text"
+                    token.type = "text";
                 }
             });
             note.content.text = text;
             note.content.tokens = tokens;
 
-            if(time && time.type == 'schedule'){
+            if(time && time.type === 'schedule'){
                 Vue.set(note, "schedule", time);
             }else{
                 Vue.delete(note, "schedule");
@@ -54,16 +54,16 @@ export default {
 
             if(payload.type === "content"){
                 commit("tag/remove", {tags: _.filter(payload.note.content.tokens, ["type","tag"])});
-                commit("agenda/remove", {time: payload.note.time})
+                commit("agenda/remove", {time: payload.note.time, note: payload.note});
                 commit("saveContent", payload);
-                commit("agenda/add", {time: payload.note.time})
+                commit("agenda/add", {time: payload.note.time, note: payload.note});
                 commit("focus", payload);
 
             } else { // text
                 commit("tag/remove", {tags: _.filter(payload.note.tokens, ["type","tag"])});
-                commit("agenda/remove", {time: payload.note.schedule})
+                commit("agenda/remove", {time: payload.note.schedule, note: payload.note});
                 commit("saveText", payload);
-                commit("agenda/add", {time: payload.note.schedule})
+                commit("agenda/add", {time: payload.note.schedule, note: payload.note});
                 commit("focus", payload);
             }
             
