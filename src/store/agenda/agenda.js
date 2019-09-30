@@ -7,7 +7,7 @@ import {toTime} from "@/model/time";
 class Event {
 
     constructor({note, type, hasTime, start, end, index, total, order}){
-        this.name = note.text;
+        this.name = note.text.substring(note.tokens[0].text.length);
         this.source = note;
         this.type = type;
         this.hasTime = hasTime;

@@ -52,13 +52,14 @@
             <template v-slot:day="{date}" >
                 <div v-for="(event, index) in dayEvents(date)" :key="index"
                     :class="['event', eventLongDayClass(event)]"
-                    v-show=" dayEvents(date).length<=4 || index<3">
+                    v-show=" dayEvents(date).length<=4 || index<3"
+                    @click="showEvent(event, $event)">
                     <span v-if="event && (!event.index || event.index == 0 || date == displayedStart)"
                         :style="longDayTextWidth(event, date)">
-                        {{event.name}}
+                        <v-icon v-show="event.type === 'schedule'" small>mdi-alarm</v-icon>{{event.name}}
                     </span>
                 </div>
-                <div v-if="dayEvents(date).length>4" class="event">
+                <div v-if="dayEvents(date).length>4" class="event" @click="">
                     more...
                 </div>
             </template>
@@ -69,17 +70,19 @@
                     {{ noteCountAtDay(date) }}
                 </div>
                 <div v-for="(event,index) in eventsAtDay(date)" :key="index"
-                    :class="['event', eventLongDayClass(event)]">
+                    :class="['event', eventLongDayClass(event)]"
+                    @click="showEvent(event, $event)">
                     <span v-if="event && (!event.index || event.index == 0 || date == displayedStart)"
                         :style="longDayTextWidth(event, date)">
-                        {{event.name}}
+                        <v-icon v-show="event.type === 'schedule'" small>mdi-alarm</v-icon>{{event.name}}
                     </span>
                 </div>
             </template>
             <template v-slot:day-body="{date, present, timeToY, minutesToPixels}">
-                <div v-for="event in eventsInDay(date)" :key="event.name" class='event'
-                    :style="eventStyle(event, date, timeToY, minutesToPixels)">
-                    {{event.name}}
+                <div v-for="(event,index) in eventsInDay(date)" :key="index" class='event'
+                    :style="eventStyle(event, date, timeToY, minutesToPixels)"
+                    @click="showEvent(event, $event)">
+                    <v-icon v-show="event && event.type === 'schedule'" small>mdi-alarm</v-icon>{{ event ? event.name: ''}}
                 </div>
                 <div v-if="present" class="indicator" :style="{ left:indicator.x + 'px', top:indicator.y + 'px' }"></div>
             </template>
@@ -89,6 +92,24 @@
             </template>
         </v-calendar>
         </v-sheet>
+        <v-menu v-model="eventOpen" :activator="selectedElement" max-width="270" nudge-right="100" nudge-bottom="12" :close-on-content-click="false">
+            <v-card>
+                <v-card-text class="pb-0 pt-2">
+                    <span class="caption font-italic font-weight-bold">
+                        {{ selectedEvent.start }}{{ selectedEvent.end ? ' -> '+ selectedEvent.end : '' }}</span>
+                    <v-divider></v-divider>
+                    <p class="mt-1 mb-0 pa-1">{{ selectedEvent.source ?  selectedEvent.source.text : ''}}</p>
+                </v-card-text>
+                <v-card-actions>
+                    <v-btn small text>
+                        Focus
+                    </v-btn>
+                    <v-btn small text>
+                        Focus Parent
+                    </v-btn>
+                </v-card-actions>
+            </v-card>
+        </v-menu>
     </app-layout>
 </template>
 
@@ -113,6 +134,9 @@ export default {
             x:0,
             y:-1
         },
+        eventOpen: false,
+        selectedEvent: {},
+        selectedElement: null,
     }),
     components: {
         AppLayout
@@ -237,6 +261,10 @@ export default {
         },
         eventStyle(event, date, timeToY, minutesToPixels){
 
+            if(!event){
+                return;
+            }
+
             let top = timeToY(event.startMinutes(date));
 
             let duration = event.duration();
@@ -295,6 +323,22 @@ export default {
         },
         next(){
             this.$refs.calendar.next();
+        },
+        showEvent(event, mouseEvent){
+            const open = () => {
+                this.selectedEvent = event
+                this.selectedElement = mouseEvent.target
+                setTimeout(() => this.eventOpen = true, 10)
+            }
+
+            if (this.eventOpen) {
+                this.eventOpen = false
+                setTimeout(open, 10)
+            } else {
+                open()
+            }
+
+            mouseEvent.stopPropagation();
         }
     }
 }
@@ -339,6 +383,9 @@ export default {
     overflow: hidden; /* width already cross cell*/
     position: relative;
     z-index: 4;
+}
+.event>span>.v-icon{
+    margin-top: -4px;
 }
 .event-start, .event-mid, .v-calendar-weekly__day{
     overflow: visible;
