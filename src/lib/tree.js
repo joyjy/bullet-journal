@@ -14,20 +14,22 @@ export default {
         }
         return maxDepth;
     },
-    find(notes, predicate){
+    find(notes, predicate, options = {}){
         if(notes.length === 0){
-            return;
+            return null;
         }
         for (let i = 0; i < notes.length; i++) {
-            let note = notes[i];
+            let index = i;
+            if(options.reserve){
+                index = notes.length - i - 1;
+            }
+            let note = notes[index];
+            
             if(predicate(note)){
                 return note;
-            }else{
-                let found = this.find(note.notes, predicate);
-                if(found){
-                    return found;
-                }
             }
+
+            return this.find(note.notes, predicate, options);
         }
     },
     path(notes, predicate, stack){

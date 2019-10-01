@@ -56,4 +56,7 @@ export default {
   -moz-osx-font-smoothing: grayscale;
   color: #212121; /*grey darken-4*/
 }
+.v-list-item__action{
+  margin: 0!important;
+}
 </style>

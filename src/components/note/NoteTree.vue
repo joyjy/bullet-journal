@@ -45,11 +45,11 @@
             </v-toolbar-items>
         </template>
         
-        <div class="blank" @click="focusLast"></div>
-        
-        <note-tree-root :query="query" :parent="$data" :root="root"
+        <note-tree-root ref="tree" :query="query" :parent="$data" :root="root"
             @refresh="refresh">
         </note-tree-root>
+        
+        <div id="tail" :style="{'height': treeHeight===0?0:`calc(100% - ${treeHeight}px)`}" @click="focusLast"></div>
     </app-layout>
 </template>
 
@@ -73,6 +73,7 @@ export default {
             depth: 0,
             collapseLevel: -1,
             query: undefined,
+            treeHeight: 0,
         }
     },
     components:{
@@ -84,6 +85,17 @@ export default {
     },
     mounted: function(){
         this.$eventbus.$on("search", e => this.search(e))
+        this.$store.subscribe((mutation) => {
+            switch(mutation.type){
+                case "collapse":
+                case "switchOutline":
+                case "archive":
+                case "display":
+                    this.tailHeightChange();
+                break;
+            }
+        })
+        this.tailHeightChange()
     },
     destroyed: function(){
         this.$eventbus.$off("search")
@@ -148,6 +160,17 @@ export default {
             this.$router.push({ name:"note", params:{ id: this.id }, query: {q: payload}});
         },
         focusLast(e){
+            let last = this.$store.getters.findLastVisibleNote();
+            this.$store.commit("focus", {note:last, position:last.text.length})
+        },
+        tailHeightChange(){
+            this.$nextTick(() => {
+                if(this.$refs.tree.$el.offsetHeight < window.innerHeight){
+                    this.treeHeight = this.$refs.tree.$el.offsetHeight;
+                }else{
+                    this.treeHeight = 0;
+                }
+            })
         }
     }
 }
@@ -158,11 +181,8 @@ export default {
     transform: scale(0.75);
     transform-origin: 75% center;
 }
-.blank{
-    position: absolute;
-    left: 0;
-    top: 0;
+#tail{
     width: 100%;
-    height: 100%;
+    min-height: 100px;
 }
 </style>

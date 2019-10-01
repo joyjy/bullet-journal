@@ -4,17 +4,23 @@ import traversal from "@/lib/tree";
 
 export default {
 
+    // note.archived
+    // note.display.collapsed
     // note.display.text = {focus:false, cursor:-1}
     // note.display.content = {focus:false, cursor:-1}
+    // note.display.archived
 
     mutations: {
+        archive({state}, {note}){
+            note.archived = !note.archived;
+        },
         collapse({state}, {note}){
-            note.display.collapse = !note.display.collapse;
+            note.display.collapsed = !note.display.collapsed;
         },
         switchOutline({state}, payload){
             traversal.each(payload.notes, (note, depth) => {
                 if(note.notes.length > 0){
-                    note.display.collapse = depth == payload.level;
+                    note.display.collapsed = depth == payload.level;
                 }
             }, {level: payload.level});
         },
@@ -31,8 +37,8 @@ export default {
             note.display.text.focus = false;
             note.display.text.cursor = -1;
         },
-        displayColumn({state}, {note, value}){
-            Vue.set(note.display,"column", value);
+        display({state}, {note, key, value}){
+            Vue.set(note.display, key, value);
         }
     }
 }

@@ -3,6 +3,7 @@ import Vue from "vue";
 export default {
 
     state: {
+        dragging: false,
         note: {
             clickType: "sgl" // sgl or dbl
         },
@@ -26,6 +27,9 @@ export default {
         },
         drawerPinned(state, pinned){
             state.drawer.pinned = pinned;
+        },
+        dragging(state, value){
+            state.dragging = value;
         },
         updateSettings(state, {select, key, value}){
             let left = select(state);

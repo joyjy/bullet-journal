@@ -6,7 +6,8 @@
             </v-icon>
         </div>
         
-        <v-menu open-on-hover offset-y open-delay="1000" :close-on-content-click="false">
+        <v-menu v-model="menu" :open-on-hover="!dragging" :open-on-click="false"
+            offset-y nudge-left="10" nudge-bottom="2" open-delay="800" close-delay="100" min-width="140">
             <template v-slot:activator="{ on }">
                 <div :class="['note-bullet', {time: note.time || note.schedule}]" 
                     @dblclick="click('dbl', $event)" @click.capture="click('sgl', $event)"
@@ -16,7 +17,6 @@
                 </div>
             </template>
             <v-list subheader dense>
-
                 <v-list-item v-if="note.time || note.schedule">
                     <v-list-item-content class="caption font-italic"
                         v-html="timestamp">
@@ -24,28 +24,19 @@
                 </v-list-item>
                 <v-divider v-if="note.time || note.schedule"></v-divider>
 
+                <v-list-item @click="$emit('archive-note')">
+                    <v-list-item-title>
+                        {{ note.archived ? 'Active' : 'Archive' }}
+                    </v-list-item-title>
+                    <v-list-item-action-text>
+                    </v-list-item-action-text>
+                </v-list-item>
                 <v-list-item @click="$emit('del-note')">
                     <v-list-item-title>
                         Delete
                     </v-list-item-title>
                     <v-list-item-action-text>
-                    </v-list-item-action-text>
-                </v-list-item>
-
-                <v-divider></v-divider>
-
-                <v-list-item>
-                    <v-list-item-title @click.prevent="displayColumn = !displayColumn" >
-                        <input type="checkbox" :checked="displayColumn" /> Show sub in columns
-                    </v-list-item-title>
-                    <v-list-item-action-text>
-                    </v-list-item-action-text>
-                </v-list-item>
-                <v-list-item>
-                    <v-list-item-title @click.prevent="displayCompleted = !displayCompleted">
-                        <input type="checkbox" :checked="displayCompleted"/> Show completed
-                    </v-list-item-title>
-                    <v-list-item-action-text>
+                        ⇧⌘⌫
                     </v-list-item-action-text>
                 </v-list-item>
             </v-list>
@@ -68,7 +59,8 @@ export default {
             "collapsed": "mdi-menu-right",
             "filtered": "mdi-filter-variant",
             "none": ""
-        }
+        },
+        menu: false,
     }),
     computed:{
         stamp: function(){
@@ -108,19 +100,14 @@ export default {
 
             return value;
         },
-        displayColumn:{
-            get(){ 
-                return this.note.display.column;
-            },
-            set(value){
-                this.$store.commit('displayColumn', {note:this.note, value: value})
-            }
-        },
-        displayCompleted:{
-            get(){ 
-                return false 
-            },
-            set(value){
+        dragging(){
+            return this.$store.state.settings.dragging;
+        }
+    },
+    watch:{
+        dragging(){
+            if(this.dragging){
+                setTimeout(() => this.menu = false, 100)
             }
         }
     },

@@ -1,12 +1,14 @@
 <template>
-    <li :class="['note-item', col>0?'note-col-'+col:'']" >
+    <li :class="['note-item', col>0?'note-col-'+col:'', {archived: note.archived}]"
+        v-show="!parent.display || !note.archived || note.archived && parent.display.archived" >
         <div v-show="filtered || ignoreFiltered" class="note-wrapper"> 
             <note-bullet :note="note" :collapsed = "collapsed"
                 @collapse-note="switchCollapse"
-                @del-note="deleteNote">
+                @del-note="deleteNote"
+                @archive-note="$store.commit('archive', {note:note})">
             </note-bullet>
             <div class="d-flex flex-column flex-grow-1" style="width:100%">
-                <editable-div :note="note" :type="'text'" :match="match" 
+                <editable-div :note="note" :type="'text'" :match="match"
                     @input="saveNote"
                     @new-content="saveNote"
                     @new-note="newNote"
@@ -27,17 +29,10 @@
                     @del-content="deleteContent">
                 </editable-div>
             </div>
-            <div class="toolbar" v-if="note.notes.length > 0">
-                <v-menu>
-                    <template v-slot:activator="{on}">
-                        <v-btn text icon small v-on="on">
-                            <v-icon>mdi-dots-horizontal</v-icon>
-                        </v-btn>
-                    </template>
-                </v-menu>
-            </div>
+            <note-menu v-if="collapsed == 'expand'" :note="note"></note-menu>
         </div>
         <draggable tag="ul" v-model="noteList" :group="{ name: 'note-tree' }"
+            @start="$store.commit('dragging', true)" @end="$store.commit('dragging', false)"
             v-show="collapsed == 'expand' || collapsed == 'filtered'">
             <note-tree-item v-for="(child,i) in noteList" :key="child.id"
                 :note="child" :index="i" :parent="note" :root="root"
@@ -52,8 +47,9 @@ import { mapMutations, mapGetters } from "vuex"
 import _ from "lodash"
 import draggable from "vuedraggable"
 
-import NoteBullet from "./NoteBullet.vue"
-import EditableDiv from "./EditableDiv.vue"
+import NoteBullet from "./NoteBullet"
+import EditableDiv from "./EditableDiv"
+import NoteMenu from "./NoteMenu"
 import range from "@/lib/range"
 import filter from "@/lib/filter"
 
@@ -73,7 +69,8 @@ export default {
     components:{
         draggable,
         NoteBullet,
-        EditableDiv
+        EditableDiv,
+        NoteMenu
     },
     created: function(){
         this.childrenMatch = false;
@@ -100,7 +97,7 @@ export default {
                 return "filtered"
             }
 
-            return this.note.display.collapse ? "collapsed" : "expand";
+            return this.note.display.collapsed ? "collapsed" : "expand";
         },
         filtered: function(){
             return this.selfMatch || this.childrenMatch;
@@ -332,11 +329,18 @@ export default {
     display: flex;
 }
 .toolbar{
+    margin-top: -1px;
     margin-right: 1.5rem;
-    opacity: .2;
+    opacity: .3;
 }
 .toolbar:hover{
     opacity: .8;
+}
+.archived .note-text{
+    opacity: .5;
+}
+.archived>.note-wrapper>div>.note-text{
+    text-decoration-line: line-through;
 }
 .debug{
     display: none;

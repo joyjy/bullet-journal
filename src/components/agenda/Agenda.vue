@@ -101,11 +101,8 @@
                     <p class="mt-1 mb-0 pa-1">{{ selectedEvent.source ?  selectedEvent.source.text : ''}}</p>
                 </v-card-text>
                 <v-card-actions>
-                    <v-btn small text>
+                    <v-btn small text :to="{name:'note', params:{id:selectedEvent.source ?  selectedEvent.source.id : ''}}">
                         Focus
-                    </v-btn>
-                    <v-btn small text>
-                        Focus Parent
                     </v-btn>
                 </v-card-actions>
             </v-card>
@@ -384,7 +381,7 @@ export default {
     position: relative;
     z-index: 4;
 }
-.event>span>.v-icon{
+.event .v-icon{
     margin-top: -4px;
 }
 .event-start, .event-mid, .v-calendar-weekly__day{

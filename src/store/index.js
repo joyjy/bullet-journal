@@ -71,6 +71,9 @@ export default new Vuex.Store({
                 return null;
             }
             return state.flattern[index+1];
+        },
+        findLastVisibleNote: (state) => () => {
+            return traversal.find(state.notes, n => n.notes.length == 0 || n.display.collapsed, {reserve: true})
         }
     },
     mutations: {
