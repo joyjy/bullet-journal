@@ -62,6 +62,13 @@ const insert = function(target, date, event, orderByTime){
         target[date].splice(index);
     }
 
+    if(index > 0){
+        let prevEvent = target[date][index-1]
+        if(prevEvent){
+            event.overlap = moment(event.start).isBefore(moment(prevEvent.start).add(30,'m'));
+        }
+    }
+
     if(target[date][index] === undefined){
         target[date][index] = event;
     }else{

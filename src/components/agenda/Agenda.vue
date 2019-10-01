@@ -269,6 +269,10 @@ export default {
             let realHeight = minutesToPixels(event.duration());
             if(realHeight > height){
                 height = realHeight;
+                let offset = realHeight%18;
+                if(offset != 0){
+                    height += 18 - offset;
+                }
             }
 
             let style = { top: top + 'px', height: height + 'px', width: '96%'}

@@ -12,10 +12,13 @@ class Query{
             let result = [];
             for (let i = 0; i < ands.length; i++) {
                 const text = ands[i];
-                result.push({
-                    type:i === 0 ? "OR" : "AND",
-                    value: text.trim()
-                });
+                let value = text.trim();
+                if(value.length > 0){
+                    result.push({
+                        type:i === 0 ? "OR" : "AND",
+                        value: text.trim()
+                    });
+                }
             }
             return result;
         });

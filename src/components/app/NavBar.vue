@@ -49,7 +49,7 @@
           </template>
 
           <v-list-item v-for="n in $store.state.saved.notes"
-            :key="n.id" :to="{name: 'note', params:{id:n.id}} ">
+            :key="n.id" :to="{name: 'note', params:{id:n.id}}">
             <v-list-item-content>
               <v-list-item-title>{{ n.name }}</v-list-item-title>
             </v-list-item-content>
@@ -70,8 +70,9 @@
             </v-list-item-content>
           </template>
 
-          <v-list-item v-for="text in $store.state.saved.filters"
-            :key="text" :to="{name: 'note', query: {q: text}} ">
+          <v-list-item v-for="text in $store.state.saved.filters" :key="text"
+            @click="$router.push({name: 'note', query: {q: text}})"
+            :class="{'v-list-item--active': $route.query.q === text}">
             <v-list-item-content>
               <v-list-item-title>{{ text }}</v-list-item-title>
             </v-list-item-content>

@@ -27,11 +27,11 @@
         <template v-slot:toolbar-items>
 
             <v-toolbar-items>
-                <v-text-field class="compact-form" :style="{width: 20+'rem'}" clearable solo rounded flat
+                <v-text-field class="compact-form" clearable solo rounded flat
                     :prepend-inner-icon="query && isSavedFilter(query.value) ? 'mdi-filter' : 'mdi-filter-outline'"
                     @click:prepend-inner="switchSaveFilter({text:query.value})"
-                    :value="$route.query.q"
-                    @change="search" @click:clear="search('')">
+                    :value="$route.query.q" :style="{width: counter+'rem'}"
+                    @input="debounceSearch" @click:clear="search('')">
                 </v-text-field>
 
                 <v-tooltip bottom>
@@ -73,7 +73,7 @@ export default {
             depth: 0,
             collapseLevel: -1,
             query: undefined,
-            treeHeight: 0,
+            treeHeight: 0
         }
     },
     components:{
@@ -116,6 +116,12 @@ export default {
         }),
         id: function(){
             return this.$route.params.id;
+        },
+        counter(){
+            if(this.$route.query.q){
+                return _.max([this.$route.query.q.length, 20]);
+            }
+            return 20;
         }
     },
     methods:{
@@ -159,6 +165,7 @@ export default {
         search(payload){
             this.$router.push({ name:"note", params:{ id: this.id }, query: {q: payload}});
         },
+        debounceSearch: _.debounce(function(payload){this.search(payload)}, 500),
         focusLast(e){
             let last = this.$store.getters.findLastVisibleNote();
             this.$store.commit("focus", {note:last, position:last.text.length})
