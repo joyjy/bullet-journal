@@ -190,6 +190,6 @@ export default {
 <style>
 #tail{
     width: 100%;
-    min-height: 100px;
+    min-height: 180px;
 }
 </style>

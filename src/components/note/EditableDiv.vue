@@ -88,7 +88,7 @@ export default {
                 }else{
                     this.$store.commit("unfocus", {note:this.note});
                 }
-                this.$emit('editing', this.editing)
+                this.$emit("editing", this.editing)
             }
         }
     },
@@ -102,6 +102,7 @@ export default {
                 text: e.target.innerText,
                 position: range.position(this.$el), // change innerHtml must keep position
                 type: this.type,
+                nativeEvent: e,
             };
 
             this.$emit("input", payload)
@@ -111,7 +112,8 @@ export default {
                 return;
             }
 
-            if(range.position(this.$el) == 0){
+            let [position, length] = range.positionAndLength(this.$el);
+            if(position == 0 && length == 0){
                 if(this.type == "content"){
                     this.$emit("del-content")
                 }else{

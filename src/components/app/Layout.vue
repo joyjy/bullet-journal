@@ -30,7 +30,7 @@
 </template>
 
 <script>
-import TagPane from "../tag/TagPane";
+import TagPane from "../tag/Pane";
 
 export default {
     props: ["rightDrawer", "color"],
@@ -46,6 +46,9 @@ export default {
     width: 100%;
     top: 48px;
     z-index: 5;
+}
+main{
+    overflow: hidden;
 }
 .compact-form {
     transform: scale(0.75);

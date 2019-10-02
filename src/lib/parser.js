@@ -4,7 +4,7 @@ const clarify = function(text){
     return text.replace(/</g, "&lt;");
 }
 
-const addMatchTag = function(text, match, textOffset, type){
+const addMatchTag = function(text, match, textOffset, targetType){
     if(!match || !match.matched || match.ranges.length === 0){
         return clarify(text);
     }
@@ -12,18 +12,18 @@ const addMatchTag = function(text, match, textOffset, type){
     let matchedText = "";
 
     for (let i = 0; i < match.ranges.length; i++) {
-        const range = match.ranges[i];
+        let [start, length, type] = match.ranges[i];
 
-        if(range[2] !== type){
+        if(type !== targetType){
             continue;
         }
         
-        let start = range[0] - textOffset;
+        start = start - textOffset;
 
-        if(start >= 0 && start < text.length && range[1] <= text.length - start){
+        if(start >= 0 && start < text.length && length <= text.length - start){
             let left = text.substring(0, start);
-            let center = text.substring(start, start+range[1]);
-            let right = text.substring(start+range[1], text.length);
+            let center = text.substring(start, start+length);
+            let right = text.substring(start+length, text.length);
 
             matchedText += clarify(left) + '<span class="matched">' + clarify(center) + "</span>" + clarify(right);
         }

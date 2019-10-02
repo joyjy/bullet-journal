@@ -13,7 +13,7 @@
                 @click.stop="$eventbus.$emit('search', searched(tag) == 0?'':tag)">
                 <span draggable @dragstart="draggedTag=tag">
                     <span class="font-weight-bold">{{ tag }}</span>
-                    <span>({{ tags.all[tag].count }})</span>
+                    <span v-if="tags.all[tag]">({{ tags.all[tag].count }})</span>
                 </span>
             </v-chip>
         </v-chip-group>
@@ -41,7 +41,7 @@
                 @click.stop="$eventbus.$emit('search', searched(tag) == 0?'':tag)">
                     <span draggable @dragstart="draggedTag=tag">
                         <span class="font-weight-bold">{{ tag }}</span>
-                        <span>({{ tags.all[tag].count }})</span>
+                        <span v-if="tags.all[tag]">({{ tags.all[tag].count }})</span>
                     </span>
                     <v-btn text icon x-small @click.stop="removeFromGroup(curGroupName, i)" class="mr-n2">
                         <v-icon size="13">mdi-close</v-icon>

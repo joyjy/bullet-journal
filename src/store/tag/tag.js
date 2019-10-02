@@ -11,14 +11,29 @@ export default {
         groups:[],
         recently: [],
     },
+    getters:{
+        suggests: (state, getters, rootState, rootGetters) => (t) => {
+            let sortable = [];
+            for(const tag in state.all){
+                let index = tag.indexOf(t);
+                if(index == 0 && tag.length == t.length || index == -1){
+                    continue;
+                }
+                sortable.splice(_.sortedIndexBy(sortable, tag, (tag) => -state.all[tag].lastAdd), 0, tag);
+            }
+            sortable.splice(10);
+            return sortable;
+        }
+    },
     mutations: {
         add(state, {tags}){
             _.each(tags, tag => {
                 if(!state.all[tag.text]){
-                    Vue.set(state.all, tag.text, { count: 0, group: '' });
+                    Vue.set(state.all, tag.text, { count: 0, group: '', lastAdd: 0});
                     state.count++;
                 }
                 state.all[tag.text].count++;
+                state.all[tag.text].lastAdd = _.now();
 
                 let index = state.recently.indexOf(tag.text);
                 if(index > -1){

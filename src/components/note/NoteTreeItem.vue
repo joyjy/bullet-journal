@@ -17,15 +17,13 @@
                     @upgrade-note="upgradeNote"
                     @up-note="upNote" 
                     @down-note="downNote" 
-                    @nav-between-note="navigationNote">
+                    @nav-between-note="navigationNote"
+                    @editing="focus = $event">
                 </editable-div>
-                <div class="debug">
-                    cursor: {{ note.display.text.cursor }}
-                </div>
                 <editable-div v-show="displayContent || focusContent"
                     :type="'content'" :note="note" :match="match"
                     @input="saveNote"
-                    @editing="focusContent = $event"
+                    @editing="focusContent = $event;focus = $event;"
                     @del-content="deleteContent">
                 </editable-div>
             </div>
@@ -39,6 +37,8 @@
                 :query="subQuery" @matched = "childrenMatchChanged">
             </note-tree-item>
         </draggable>
+
+        <tag-suggest ref="suggest" :focus="focus" :lastInput="lastInput" :container="this"></tag-suggest>
     </li>
 </template>
 
@@ -50,7 +50,8 @@ import draggable from "vuedraggable"
 import NoteBullet from "./NoteBullet"
 import EditableDiv from "./EditableDiv"
 import NoteMenu from "./NoteMenu"
-import range from "@/lib/range"
+import TagSuggest from "../tag/Suggest"
+
 import filter from "@/lib/filter"
 
 export default {
@@ -65,12 +66,15 @@ export default {
         childrenMatch: false,
         focusContent: false,
         ignoreFiltered: false,
+        focus: false,
+        lastInput: {},
     }),
     components:{
         draggable,
         NoteBullet,
         EditableDiv,
-        NoteMenu
+        NoteMenu,
+        TagSuggest
     },
     created: function(){
         this.childrenMatch = false;
@@ -134,7 +138,7 @@ export default {
                 return 6;
             }
             return 0;
-        }
+        },
     },
     watch: {
         query: function(){ // new query input
@@ -158,23 +162,16 @@ export default {
         saveNote: function(payload){
             payload.note = this.note;
             this.$store.dispatch("saveNote", payload)
-            .then(() => {
-                if(this.isStarred(this.note.id)){
-                    this.$store.commit("saved/updateNote", {note: this.note})
-                }
-            })
-            .then(() => {
-                let lastToken = this.note.tokens[this.note.tokens.length-1];
-                if(!lastToken){
-                    return;
-                }
-                if(lastToken.text === ":"){
-                    let rect = this.$refs.emoji.$el.getBoundingClientRect();
-                    this.$refs.emoji.toggle({clientX: rect.left, clientY: rect.top})
-                }
-            })
+                .then(() => this.lastInput = payload)
+                .then(() => this.afterNoteChange(payload));
+            
             if(payload.type === "content"){
                 this.focusContent = true;
+            }
+        },
+        afterNoteChange: function(payload){
+            if(this.isStarred(this.note.id)){
+                this.$store.commit("saved/updateNote", {note: this.note})
             }
         },
         newNote: function(payload){
@@ -272,6 +269,10 @@ export default {
             this.$store.dispatch("upNote", payload)
         },
         navigationNote: function(payload){
+            if(this.suggests.length > 0){
+                navigationSuggest(payload);
+                return;
+            }
             let target;
             let position;
             switch(payload.direction){
@@ -305,7 +306,7 @@ export default {
                 this.$store.dispatch("saveNote", { note: this.note, text: "", type:"content", position: -1});
             }
             this.$store.commit("focus", {note: this.note, position: this.note.text.length})
-        }
+        },
     }
 }
 </script>
@@ -342,13 +343,12 @@ export default {
 .archived>.note-wrapper>div>.note-text{
     text-decoration-line: line-through;
 }
-.debug{
-    display: none;
+.suggest{
     position: absolute;
-    right:0;
-    top:0;
+    min-width: 100px;
 }
-[contenteditable="true"].editing{
-    background-color: inherit;
+.suggest .v-list-item{
+    min-height: 1.2rem;
+    font-weight: initial;
 }
 </style>
