@@ -42,6 +42,10 @@
                     </template>
                     <span>Toggle Outline Level: {{ collapseLevel == -1 ? 'All': collapseLevel+1 }}</span>
                 </v-tooltip>
+
+                <v-btn icon>
+                    <v-icon>mdi-settings-outline</v-icon>
+                </v-btn>
             </v-toolbar-items>
         </template>
         
@@ -119,9 +123,9 @@ export default {
         },
         counter(){
             if(this.$route.query.q){
-                return _.max([this.$route.query.q.length, 20]);
+                return _.max([this.$route.query.q.length, 19]);
             }
-            return 20;
+            return 19;
         }
     },
     methods:{

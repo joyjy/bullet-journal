@@ -49,12 +49,12 @@ export default {
 }
 .compact-form {
     transform: scale(0.75);
-    transform-origin: 75% center;
+    transform-origin: 85% center;
 }
 .inline-form {
     transform: scale(0.75);
     transform-origin: center;
     padding:0;
-    margin: 0 -14px;
+    margin: 0 -20%;
 }
 </style>

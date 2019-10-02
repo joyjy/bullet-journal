@@ -9,7 +9,6 @@ export default {
         all: {},
         count: 0,
         groups:[],
-        frequently: [],
         recently: [],
     },
     mutations: {
@@ -26,17 +25,8 @@ export default {
                     state.recently.splice(index, 1);
                 }
                 state.recently.splice(0, 0, tag.text);
-
-                if(state.frequently.length == 0 || state.all[tag.text].count >= state.all[state.frequently[0]].count){
-                    let index = state.frequently.indexOf(tag.text);
-                    if(index > -1){
-                        state.frequently.splice(index, 1);
-                    }
-                    state.frequently.splice(0, 0, tag.text);
-                }
             });
             state.recently.splice(10);
-            state.frequently.splice(10);
         },
         remove(state, {tags}){
             _.each(tags, tag => {
@@ -63,7 +53,7 @@ export default {
             state.groups.splice(index, 1);
         },
         addToGroup(state, {tag, group}){
-            Vue.set(state.all[tag.text], "group", group);
+            Vue.set(state.all[tag], "group", group);
         },
         removeFromGroup(state, {tag}){
             if(state.all[tag]){

@@ -4,29 +4,31 @@
 
         <v-row class="pl-3 align-center">
             <v-divider class="mx-1"></v-divider>
-            <h4 class="caption">Recently / Frequently</h4>
+            <h4 class="caption">Recently</h4>
             <v-divider class="mx-1"></v-divider>
         </v-row>
         <v-chip-group column :style="{height:'104px'}">
-            <v-chip v-for="tag in tops" :key="tag" outlined small
-                :input-value="!$route.query.q ? false: $route.query.q.includes(tag)"
-                @click="$eventbus.$emit('search', tag)">
-                <span class="font-weight-bold">{{ tag }}</span>
-                <span>({{ tags.all[tag].count }})</span>
+            <v-chip v-for="tag in tags.recently" :key="tag" outlined small
+                :input-value="searched(tag) > -1"
+                @click.stop="$eventbus.$emit('search', searched(tag) == 0?'':tag)">
+                <span draggable @dragstart="draggedTag=tag">
+                    <span class="font-weight-bold">{{ tag }}</span>
+                    <span>({{ tags.all[tag].count }})</span>
+                </span>
             </v-chip>
         </v-chip-group>
         
         <v-row class="pl-3 align-center">
             <v-divider class="mx-1"></v-divider>
             <h4 class="caption pa-1">Groups</h4>
-            <v-col cols="4" class="py-0 mt-n1" style="position:relative;z-index:2">
+            <v-col cols="4" class="py-0" style="margin-top:-2px;position:relative;z-index:2">
                 <v-text-field v-model="newGroup" class="inline-form" flat hide-details
                     @keydown.enter="addGroup" append-icon="mdi-plus">
                 </v-text-field>
             </v-col>
             <v-divider class="mx-1"></v-divider>
         </v-row>
-        <v-tabs center-active height="24" hide-slider class="mt-n1" @change="curGroup = $event">
+        <v-tabs center-active height="24" hide-slider @change="curGroup = $event">
             <v-tab v-for="group in tags.groups" :key="group.name" class="px-2" @dragenter="$emit('click')">
                 {{group.name}}
             </v-tab>
@@ -35,10 +37,12 @@
             @dragleave="prepareGroup = false" @drop.prevent="addToGroup" @dragover.prevent="prepareGroup = true">
             <v-chip-group column>
                 <v-chip v-for="(tag,i) in groupedTags[curGroupName]" :key="tag" outlined small
-                    :input-value="!$route.query.q ? false: $route.query.q.includes(tag)"
-                    @click="$eventbus.$emit('search', tag)">
-                    <span class="font-weight-bold">{{ tag }}</span>
-                    <span>({{ tags.all[tag].count }})</span>
+                :input-value="searched(tag) > -1"
+                @click.stop="$eventbus.$emit('search', searched(tag) == 0?'':tag)">
+                    <span draggable @dragstart="draggedTag=tag">
+                        <span class="font-weight-bold">{{ tag }}</span>
+                        <span>({{ tags.all[tag].count }})</span>
+                    </span>
                     <v-btn text icon x-small @click.stop="removeFromGroup(curGroupName, i)" class="mr-n2">
                         <v-icon size="13">mdi-close</v-icon>
                     </v-btn>
@@ -56,10 +60,10 @@
         </v-row>
         <v-chip-group v-show="showAll" column>
             <v-chip v-for="tag in all" :key="tag.text" outlined small
-                :input-value="!$route.query.q ? false: $route.query.q.includes(tag)"
-                @click="$eventbus.$emit('search', tag.text)"
+                :input-value="searched(tag) > -1"
+                @click.stop="$eventbus.$emit('search', searched(tag.text) == 0?'':tag.text)"
                 v-show="!tag.group">
-                <span :draggable="true" @drag="dragTag" @dragstart="draggedTag=tag">
+                <span draggable @dragstart="draggedTag=tag.text" >
                     <span class="font-weight-bold">{{ tag.text }}</span>
                     <span>({{ tag.count }})</span>
                 </span>
@@ -93,12 +97,6 @@ export default {
         ...mapState({
             tags: state => state.tag,
         }),
-        tops: function(){
-            let sortable = _.union(this.tags.recently, this.tags.frequently) // todo, frequently all > recently
-            sortable = _.orderBy(sortable, (tag) => this.tags.all[tag].count, 'desc')
-            sortable.splice(12);
-            return sortable;
-        },
         all: function(){
             let sortable = [];
             for(const text in this.tags.all){
@@ -144,12 +142,6 @@ export default {
         removeGroup(name){
             this.$store.commit('tag/removeGroup', {name:name});
         },
-        dragTag(event){
-            //console.log(event);
-        },
-        switchTabGroup(event){
-            console.log(event)
-        },
         addToGroup(group){
             this.$store.commit("tag/addToGroup", {
                 tag: this.draggedTag, 
@@ -161,6 +153,18 @@ export default {
             let tag = this.groupedTags[group][i];
             this.groupedTags[group].splice(i, 1);
             this.$store.commit("tag/removeFromGroup", {tag});
+        },
+        searched(tag){
+            if(this.$route.query.q){
+                let index = this.$route.query.q.indexOf(tag);
+                if(index == 0 && this.$route.query.q.length == tag.length){
+                    return 0; //'exact';
+                }
+                if(index > -1){
+                    return 1; //'include';
+                }
+            }
+            return -1; //'none';
         }
     }
 }

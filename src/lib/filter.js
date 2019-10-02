@@ -27,15 +27,13 @@ class Query{
 
 class Match{
 
-    constructor(matched, start, length){
+    constructor(matched){
         this.matched = matched;
         this.ranges = [];
-        this.start = start,
-        this.length = length;
     }
 
-    addMatchRange(start, length){
-        this.ranges.push([start, length]);
+    addMatchRange(type, start, length){
+        this.ranges.push([start, length, type]);
     }
 }
 
@@ -58,7 +56,7 @@ export default {
                 let start = note.text.indexOf(q.value);
                 match.matched = match.matched || start > -1;
                 if(start > -1){
-                    match.addMatchRange(start, q.value.length);
+                    match.addMatchRange("text", start, q.value.length);
                 }
             }
         }

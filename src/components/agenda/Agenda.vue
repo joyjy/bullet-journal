@@ -357,6 +357,7 @@ export default {
     z-index: 5;
 }
 .event{
+    cursor: pointer;
     padding:0 .25rem;
     margin-bottom: 1px;
     width:98%;

@@ -4,7 +4,7 @@ const clarify = function(text){
     return text.replace(/</g, "&lt;");
 }
 
-const addMatchTag = function(text, match, textOffset){
+const addMatchTag = function(text, match, textOffset, type){
     if(!match || !match.matched || match.ranges.length === 0){
         return clarify(text);
     }
@@ -13,6 +13,10 @@ const addMatchTag = function(text, match, textOffset){
 
     for (let i = 0; i < match.ranges.length; i++) {
         const range = match.ranges[i];
+
+        if(range[2] !== type){
+            continue;
+        }
         
         let start = range[0] - textOffset;
 
@@ -34,7 +38,7 @@ const addMatchTag = function(text, match, textOffset){
 
 const urlReg = /[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)?/gi;
 
-const parseHtml = function(tokens, match){
+const parseHtml = function(type, tokens, match){
 
     if(tokens.length === 0){
         return "";
@@ -48,7 +52,7 @@ const parseHtml = function(tokens, match){
 
         switch (token.type) {
             case "tag":
-                htmlContent += '<span class="'+token.type+'">' + addMatchTag(token.text, match, textOffset) +"</span>";
+                htmlContent += '<span class="'+token.type+'">' + addMatchTag(token.text, match, textOffset, type) +"</span>";
                 break;
             case "state":
                 let elClass = "state";
@@ -61,20 +65,20 @@ const parseHtml = function(tokens, match){
                 }else if(token.text === "[x]" || token.text === "[DONE]"){
                     elClass += " done";
                 }
-                htmlContent += '<span class="'+elClass+'">' + addMatchTag(token.text, match, textOffset) +"</span>";
+                htmlContent += '<span class="'+elClass+'">' + addMatchTag(token.text, match, textOffset, type) +"</span>";
                 break;
             case "empty":
                 htmlContent += token.text;
                 break;
             case "text":
                 if (token.text.match(urlReg)) {
-                    htmlContent += '<a class="link" href="'+token.text+'">'+addMatchTag(token.text, match, textOffset)+"</a>";
+                    htmlContent += '<a class="link" href="'+token.text+'">'+addMatchTag(token.text, match, textOffset, type)+"</a>";
                 } else {
-                    htmlContent += addMatchTag(token.text, match, textOffset);
+                    htmlContent += addMatchTag(token.text, match, textOffset, type);
                 }
                 break;
             default:
-                htmlContent += addMatchTag(token.text, match, textOffset);
+                htmlContent += addMatchTag(token.text, match, textOffset, type);
                 break;
         }
 
@@ -88,9 +92,9 @@ export default {
     parse: lexer.tokenize,
     html(note, match, type){
         if(type === "content"){
-            return parseHtml(note.content.tokens, match);
+            return parseHtml("content", note.content.tokens, match);
         }
 
-        return parseHtml(note.tokens, match);
+        return parseHtml("text", note.tokens, match);
     }
 }
