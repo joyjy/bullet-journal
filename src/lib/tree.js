@@ -29,8 +29,12 @@ export default {
                 return note;
             }
 
-            return this.find(note.notes, predicate, options);
+            let found = this.find(note.notes, predicate, options);
+            if(found){
+                return found;
+            }
         }
+        return null;
     },
     path(notes, predicate, stack){
         if(!stack){

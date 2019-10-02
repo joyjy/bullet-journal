@@ -13,12 +13,10 @@ export default {
 
             parent.notes.splice(index, 1);
         },
-        downgradeNote(state, {parent, note, index}){
-
-            let prev = parent.notes[index-1];
+        downgradeNote(state, {parent, newParent, note, index}){
 
             parent.notes.splice(index, 1);
-            prev.notes.push(note);
+            newParent.notes.push(note);
         },
         upgradeNote(state, {grandParent, grandIndex, parent, note, index}){
 
@@ -79,7 +77,11 @@ export default {
         },
         downgradeNote({state, commit, rootState}, payload){
 
+            payload.newParent = payload.parent.notes[payload.index-1];
             commit("downgradeNote", payload);
+            if(payload.newParent.display.collapsed){
+                commit("collapse", {note: payload.newParent})
+            }
             commit("focus", {note:payload.note, position:payload.position});
             commit("flattern");
 

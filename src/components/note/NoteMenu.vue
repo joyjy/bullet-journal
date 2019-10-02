@@ -53,8 +53,4 @@ export default {
 </script>
 
 <style>
-.inline-form {
-    transform: scale(0.75);
-    transform-origin: center;
-}
 </style>

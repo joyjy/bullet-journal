@@ -1,6 +1,6 @@
 <template>
     <li :class="['note-item', col>0?'note-col-'+col:'', {archived: note.archived}]"
-        v-show="!parent.display || !note.archived || note.archived && parent.display.archived" >
+        v-show="!note.archived || note.archived && (parent.display && parent.display.archived)" >
         <div v-show="filtered || ignoreFiltered" class="note-wrapper"> 
             <note-bullet :note="note" :collapsed = "collapsed"
                 @collapse-note="switchCollapse"
@@ -206,10 +206,10 @@ export default {
                 let text = this.note.text;
                 let notes = this.note.notes;
 
-                let prev = this.$store.getters.findPrevNote(this.note)
+                let prev = this.$store.getters.findLastVisibleNote(this.note)
 
                 if(!prev){
-                    throw "prev undefined"
+                    throw "prev"
                 }
                 
                 batchId = _.now().toString();
@@ -277,12 +277,12 @@ export default {
             switch(payload.direction){
                 case "up":
                 case "left":
-                    target = this.$store.getters.findPrevNote(this.note);
+                    target = this.$store.getters.findLastVisibleNote(this.note);
                     position = payload.position || (target ? target.text.length: 0);
                     break;
                 case "down":
                 case "right":
-                    target = this.$store.getters.findNextNote(this.note);
+                    target = this.$store.getters.findNextVisibleNote(this.note);
                     position = payload.position || 0
                     break;
             }

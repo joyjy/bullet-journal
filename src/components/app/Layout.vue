@@ -1,8 +1,8 @@
 <template>
     <div class="fill-height">
-        <v-navigation-drawer v-if="rightDrawer || false" app clipped right class="px-2">
+        <v-navigation-drawer v-if="rightDrawer || false" app clipped right width="360">
             <slot name="right-drawer">
-                <tag-all-list></tag-all-list>
+                <tags></tags>
             </slot>
         </v-navigation-drawer>
 
@@ -30,12 +30,12 @@
 </template>
 
 <script>
-import AllTag from "../tag/AllTag";
+import TagPane from "../tag/TagPane";
 
 export default {
     props: ["rightDrawer", "color"],
     components:{
-        "tag-all-list": AllTag,
+        "tags": TagPane,
     }
 }
 </script>
@@ -46,5 +46,15 @@ export default {
     width: 100%;
     top: 48px;
     z-index: 5;
+}
+.compact-form {
+    transform: scale(0.75);
+    transform-origin: 75% center;
+}
+.inline-form {
+    transform: scale(0.75);
+    transform-origin: center;
+    padding:0;
+    margin: 0 -14px;
 }
 </style>

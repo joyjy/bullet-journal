@@ -10,7 +10,7 @@ class Note{
             tokens: []
         }
         this.display = {
-            collapse: false,
+            collapsed: false,
             text: {
                 focus: false,
                 cursor: 0,

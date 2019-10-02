@@ -58,23 +58,26 @@ export default new Vuex.Store({
             let from = parent || state;
             return traversal.find(from.notes, (note) => predicate(note));
         },
-        findPrevNote: (state) => (note) => {
-            let index = _.indexOf(state.flattern, note);
-            if(index === 0 || index === -1){
-                return null;
+        findLastVisibleNote: (state) => (before) => {
+            let index = -1
+            if(before){
+                index = _.indexOf(state.flattern, before);
             }
-            return state.flattern[index-1];
+            return traversal.find(state.notes, n => {
+                return (n.notes.length == 0 || n.display.collapsed) // find visible
+                        && (index == -1 || _.lastIndexOf(state.flattern, n, index-1) > -1) // and front of before
+            }, {reserve: true})
         },
-        findNextNote: (state) => (note) => {
-            let index = _.indexOf(state.flattern, note);
-            if(index === state.flattern.length-1 || index === -1){
-                return null;
+        findNextVisibleNote: (state) => (after) => {
+            let index = -1
+            if(after){
+                index = _.indexOf(state.flattern, after);
             }
-            return state.flattern[index+1];
+            return traversal.find(state.notes, n => {
+                return (n.notes.length == 0 || n.display.collapsed) // find visible
+                        && (index == -1 || _.indexOf(state.flattern, n, index+1) > -1) // and behind of after
+            }, {reserve: true})
         },
-        findLastVisibleNote: (state) => () => {
-            return traversal.find(state.notes, n => n.notes.length == 0 || n.display.collapsed, {reserve: true})
-        }
     },
     mutations: {
         undo(state){
@@ -104,17 +107,18 @@ export default new Vuex.Store({
             }
 
             _.each(state.flattern, function(n){
-                let tags = [];
+                //let tags = [];
                 _.each(n.tokens, function(t){
                     if(t.type === "tag"){
-                        tags.push(t);
+                        //tags.push(t);
                     }else if(t.time){
                         if(typeof t.time === "object"){
                             commit("setTimePrototype", {note:n, token:t});
+                            return;
                         };
                     }
                 });
-                commit("tag/add", {tags});
+                //commit("tag/add", {tags});
 
                 commit("agenda/count", {note: n})
                 commit("agenda/add", {note: n, time: n.time})

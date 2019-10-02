@@ -20,9 +20,9 @@ export default {
         switchOutline({state}, payload){
             traversal.each(payload.notes, (note, depth) => {
                 if(note.notes.length > 0){
-                    note.display.collapsed = depth == payload.level;
+                    note.display.collapsed = payload.level>-1 ? depth >= payload.level : false;
                 }
-            }, {level: payload.level});
+            });
         },
         focus({state}, {note, position, type}){
             

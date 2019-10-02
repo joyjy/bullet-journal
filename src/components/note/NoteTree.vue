@@ -184,10 +184,6 @@ export default {
 </script>
 
 <style>
-.compact-form {
-    transform: scale(0.75);
-    transform-origin: 75% center;
-}
 #tail{
     width: 100%;
     min-height: 100px;
