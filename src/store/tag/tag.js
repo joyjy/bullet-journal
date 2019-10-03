@@ -1,8 +1,6 @@
 import Vue from "vue";
 import _ from "lodash";
 
-// {name}
-
 export default {
     namespaced: true,
     state: {
@@ -19,21 +17,22 @@ export default {
                 if(index == 0 && tag.length == t.length || index == -1){
                     continue;
                 }
-                sortable.splice(_.sortedIndexBy(sortable, tag, (tag) => -state.all[tag].lastAdd), 0, tag);
+                let orderIndex = _.sortedIndexBy(sortable, tag, (tag) => -state.all[tag].lastAdd);
+                sortable.splice(orderIndex, 0, tag);
             }
-            sortable.splice(10);
+            sortable.splice(7);
             return sortable;
         }
     },
     mutations: {
-        add(state, {tags}){
+        add(state, {tags, note}){
             _.each(tags, tag => {
                 if(!state.all[tag.text]){
                     Vue.set(state.all, tag.text, { count: 0, group: '', lastAdd: 0});
                     state.count++;
                 }
                 state.all[tag.text].count++;
-                state.all[tag.text].lastAdd = _.now();
+                state.all[tag.text].lastAdd = note ? note.id : _.now();
 
                 let index = state.recently.indexOf(tag.text);
                 if(index > -1){
@@ -41,7 +40,7 @@ export default {
                 }
                 state.recently.splice(0, 0, tag.text);
             });
-            state.recently.splice(10);
+            state.recently.splice(20);
         },
         remove(state, {tags}){
             _.each(tags, tag => {
@@ -74,6 +73,14 @@ export default {
             if(state.all[tag]){
                 Vue.set(state.all[tag], "group", '');
             }
+        },
+    },
+    actions: {
+        replace({commit}, {oldTags, newTags}){
+            let removeds = _.difference(oldTags, newTags, 'text');
+            commit("remove", removeds);
+            let addeds = _.difference(newTags, oldTags, 'text');
+            commit("add", addeds);
         },
     }
 }

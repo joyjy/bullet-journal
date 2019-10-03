@@ -1,5 +1,5 @@
 <template>
-    <div :class="['note-' + (type || 'text'), {editing: editing}]" contenteditable="true" 
+    <div :class="['note-' + (type || 'text'), {imeSpace: text.includes('　')}]" contenteditable="true" 
         v-html="innerHtml" 
         @focus="editing = true"
         @blur="editing = false"
@@ -88,15 +88,17 @@ export default {
                 }else{
                     this.$store.commit("unfocus", {note:this.note});
                 }
-                this.$emit("editing", this.editing)
             }
+            this.$emit("editing", this.editing)
         }
     },
     methods: {
         inputText(e){
             if(e.isComposing && e.data == "　"){ // ime hasn"t submit 
+                this.$emit("composing", true);
                 return;
             }
+            this.$emit("composing", false);
             
             let payload = { 
                 text: e.target.innerText,
@@ -109,8 +111,10 @@ export default {
         },
         pressDelete(e){
             if(e.isComposing){ // ime hasn"t submit 
+                this.$emit("composing", true);
                 return;
             }
+            this.$emit("composing", false);
 
             let [position, length] = range.positionAndLength(this.$el);
             if(position == 0 && length == 0){
@@ -311,5 +315,8 @@ span.matched{
 }
 span.state > .matched{
     color: #424242; /* grey darken-3 */
+}
+.imeSpace{
+    text-decoration: dashed underline pink;
 }
 </style>

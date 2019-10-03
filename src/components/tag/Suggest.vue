@@ -1,8 +1,8 @@
 <template>
-    <div class="suggest" v-if="requireSuggest" v-show="suggests.length > 0"
+    <div class="suggest" v-if="lastInput.requireSuggest" v-show="suggests.length > 0"
             :style="{top:suggestRect.bottom+'px', left:suggestRect.left+'px'}">
             <v-list dense>
-                <v-list-item v-for="s in suggests" :key="s" @click="appendTag(s)">
+                <v-list-item v-for="(s, i) in suggests" :key="s" @click="appendTag(s)" :class="{selected: selected == i}">
                     <v-list-item-title>{{s}}</v-list-item-title>
                 </v-list-item>
             </v-list>
@@ -13,12 +13,11 @@
 import range from "@/lib/range"
 
 export default {
-    props: ['focus', 'lastInput', 'container'],
+    props: ['focus', 'lastInput', 'container', 'composing'],
     data: () => ({
-        requireSuggestType: '',
-        requireSuggest: '',
         suggestedEl: null,
         suggests: [],
+        selected: 0,
     }),
     watch:{
         lastInput(){
@@ -27,7 +26,7 @@ export default {
         focus(){
             if(!this.focus){
                 setTimeout(() => {
-                    this.requireSuggest = '';
+                    this.lastInput.requireSuggest = '';
                     this.suggests = [];
                 }, 10);
             }
@@ -52,25 +51,27 @@ export default {
             let tokens = payload.type == "content" ? payload.note.content.tokens : payload.note.tokens;
             let lastToken = tokens[tokens.length-1];
             if(lastToken && (lastToken.type ==="tag" || ["#","@"].includes(lastToken.text))){
-                this.requireSuggestType = payload.type;
-                this.requireSuggest = lastToken.text;
+                this.lastInput.requireSuggest = lastToken.text;
                 this.suggestedEl = payload.nativeEvent.target;
                 this.suggests = this.$store.getters['tag/suggests'](lastToken.text);
-            }else if(lastToken && lastToken.text[0] === ":"){
-                this.requireSuggestType = payload.type;
-                this.requireSuggest = lastToken.text;
+            }else if(lastToken && lastToken.text === ":"){
+                this.lastInput.requireSuggest = lastToken.text;
                 this.suggestedEl = payload.nativeEvent.target;
-                this.suggests = ["😀","😃","😄","😁","😆","😅","😂","🤣","😭"]; // todo
+                this.suggests = [":😀",":😃",":😄",":😁",":😆",":😅",":😂",":🤣",":😭"]; // todo
             }else{
-                this.requireSuggest = "";
+                this.lastInput.requireSuggest = "";
                 this.suggests = [];
             }
         },
         debounceShowSuggest: _.debounce(function(payload){this.showSuggest(payload);}, 500),
         appendTag(tag){
+            tag = tag || this.suggests[this.selected];
+            if(!tag){
+                throw "appendTag";
+            }
             let text = this.lastInput.type == "content"? this.lastInput.note.content.text : this.lastInput.note.text;
 
-            text += tag.substring(this.requireSuggest.length) + "\xa0";
+            text += tag.substring(this.lastInput.requireSuggest.length) + "\xa0";
 
             let payload = { 
                 text: text,
@@ -81,7 +82,7 @@ export default {
 
             this.$store.dispatch("saveNote", payload)
                 .then(() => {
-                    this.requireSuggest = '';
+                    this.lastInput.requireSuggest = '';
                     this.suggests = [];
                 })
                 .then(() => {
@@ -89,12 +90,32 @@ export default {
                 })
         },
         navigationSuggest(payload){
-            console.log(payload)
+            switch(payload.direction){
+                case "down":
+                    this.selected++;
+                    if(this.selected >= this.suggests.length){
+                        this.selected = 0;
+                    }
+                    break;
+                case "up":
+                    this.selected--;
+                    if(this.selected < 0){
+                        this.selected = this.suggests.length-1;
+                    }
+                    break;
+            }
         },
     }
 }
 </script>
 
 <style>
-
+.selected::before{
+    background-color: currentColor;
+    top: 0; 
+    left: 0;
+    width: 100%; 
+    height: 100%;
+    opacity: .1;
+}
 </style>

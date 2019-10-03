@@ -7,7 +7,7 @@
             <h4 class="caption">Recently</h4>
             <v-divider class="mx-1"></v-divider>
         </v-row>
-        <v-chip-group column :style="{height:'104px'}">
+        <v-chip-group column :style="{'max-height':'104px'}">
             <v-chip v-for="tag in tags.recently" :key="tag" outlined small
                 :input-value="searched(tag) > -1"
                 @click.stop="$eventbus.$emit('search', searched(tag) == 0?'':tag)">
@@ -28,7 +28,7 @@
             </v-col>
             <v-divider class="mx-1"></v-divider>
         </v-row>
-        <v-tabs center-active height="24" hide-slider @change="curGroup = $event">
+        <v-tabs height="24" hide-slider @change="curGroup = $event">
             <v-tab v-for="group in tags.groups" :key="group.name" class="px-2" @dragenter="$emit('click')">
                 {{group.name}}
             </v-tab>

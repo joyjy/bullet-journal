@@ -52,22 +52,27 @@ export default {
                 payload.time.context = { id: payload.note.id };
             }
 
+            let newTags = _.filter(payload.tokens, ["type", "tag"])
+            let oldTags;
+
             if(payload.type === "content"){
-                commit("tag/remove", {tags: _.filter(payload.note.content.tokens, ["type","tag"])});
+                oldTags = _.filter(payload.note.content.tokens, ["type","tag"]);
+                
                 commit("agenda/remove", {time: payload.note.time, note: payload.note});
                 commit("saveContent", payload);
                 commit("agenda/add", {time: payload.note.time, note: payload.note});
                 commit("focus", payload);
 
             } else { // text
-                commit("tag/remove", {tags: _.filter(payload.note.tokens, ["type","tag"])});
+                oldTags = _.filter(payload.note.tokens, ["type","tag"]);
+                
                 commit("agenda/remove", {time: payload.note.schedule, note: payload.note});
                 commit("saveText", payload);
                 commit("agenda/add", {time: payload.note.schedule, note: payload.note});
                 commit("focus", payload);
             }
             
-            commit("tag/add", {tags: _.filter(payload.tokens, ["type", "tag"])});
+            this.dispatch("tag/replace", {oldTags, newTags});
             
             return Promise.resolve();
         },

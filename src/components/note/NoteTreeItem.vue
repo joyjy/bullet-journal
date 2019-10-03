@@ -18,17 +18,20 @@
                     @up-note="upNote" 
                     @down-note="downNote" 
                     @nav-between-note="navigationNote"
-                    @editing="focus = $event">
+                    @editing="focus = $event;"
+                    @composing="composing = $event">
                 </editable-div>
                 <editable-div v-show="displayContent || focusContent"
                     :type="'content'" :note="note" :match="match"
                     @input="saveNote"
-                    @editing="focusContent = $event;focus = $event;"
+                    @editing="focus = $event; focusContent = $event;"
+                    @composing="composing = $event"
                     @del-content="deleteContent">
                 </editable-div>
             </div>
             <note-menu v-if="collapsed == 'expand'" :note="note"></note-menu>
         </div>
+
         <draggable tag="ul" v-model="noteList" :group="{ name: 'note-tree' }"
             @start="$store.commit('dragging', true)" @end="$store.commit('dragging', false)"
             v-show="collapsed == 'expand' || collapsed == 'filtered'">
@@ -38,7 +41,8 @@
             </note-tree-item>
         </draggable>
 
-        <tag-suggest ref="suggest" :focus="focus" :lastInput="lastInput" :container="this"></tag-suggest>
+        <tag-suggest ref="suggest" :focus="focus" :composing="composing"
+            :lastInput="lastInput" :container="this"></tag-suggest>
     </li>
 </template>
 
@@ -67,7 +71,8 @@ export default {
         focusContent: false,
         ignoreFiltered: false,
         focus: false,
-        lastInput: {},
+        composing: false,
+        lastInput: {requireSuggest:''},
     }),
     components:{
         draggable,
@@ -162,7 +167,7 @@ export default {
         saveNote: function(payload){
             payload.note = this.note;
             this.$store.dispatch("saveNote", payload)
-                .then(() => this.lastInput = payload)
+                .then(() => {payload.requireSuggest=""; this.lastInput = payload})
                 .then(() => this.afterNoteChange(payload));
             
             if(payload.type === "content"){
@@ -175,6 +180,11 @@ export default {
             }
         },
         newNote: function(payload){
+            if(this.lastInput.requireSuggest){
+                this.$refs.suggest.appendTag();
+                return;
+            }
+
             if(this.note.text == ""){
                 if(this.root && this.root != this.parent || !this.root && this.parent.id){
                     this.upgradeNote(payload);
@@ -269,8 +279,8 @@ export default {
             this.$store.dispatch("upNote", payload)
         },
         navigationNote: function(payload){
-            if(this.suggests.length > 0){
-                navigationSuggest(payload);
+            if(this.lastInput.requireSuggest){
+                this.$refs.suggest.navigationSuggest(payload);
                 return;
             }
             let target;
