@@ -290,6 +290,10 @@ span.tag{
     color:#78909C; /*blue-grey lighten-1*/
     cursor: pointer;
 }
+span.emoji{
+    font-size: 18px;
+    vertical-align: middle;
+}
 span.state{
     padding: 0 .2rem;
     margin-right: .1rem;

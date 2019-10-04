@@ -52,14 +52,14 @@
             <template v-slot:day="{date}" >
                 <div v-for="(event, index) in dayEvents(date)" :key="index"
                     :class="['event', eventLongDayClass(event)]"
-                    v-show=" dayEvents(date).length<=4 || index<3"
+                    v-show=" dayEvents(date).length<=mouthDayHeight || index<mouthDayHeight-1"
                     @click="showEvent(event, $event)">
                     <span v-if="event && (!event.index || event.index == 0 || date == displayedStart)"
                         :style="longDayTextWidth(event, date)">
                         <v-icon v-show="event.type === 'schedule'" small>mdi-alarm</v-icon>{{event.name}}
                     </span>
                 </div>
-                <div v-if="dayEvents(date).length>4" class="event" @click="">
+                <div v-if="dayEvents(date).length>mouthDayHeight" class="event" @click="type='week'">
                     more...
                 </div>
             </template>
@@ -134,6 +134,7 @@ export default {
         eventOpen: false,
         selectedEvent: {},
         selectedElement: null,
+        mouthDayHeight: 5, // todo month cross weeks
     }),
     components: {
         AppLayout
@@ -320,7 +321,6 @@ export default {
             }else{
                 this.start = moment(this.start).subtract(7, 'd').format("YYYY-MM-DD");
             }
-            
         },
         next(){
             this.$refs.calendar.next();

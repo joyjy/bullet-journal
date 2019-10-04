@@ -6,7 +6,7 @@ import Agenda from "@/components/agenda/Agenda";
 import Setting from "@/components/setting/Setting";
 import Signin from "@/components/app/Signin";
 
-import Diary from "@/components/notebook/Diary";
+import notebook from "@/components/notebook/Notebook";
 
 Vue.use(VueRouter)
 
@@ -15,8 +15,8 @@ export default new VueRouter({
     routes: [
         { path: "/note/:id?", name: "note", component: NoteTree },
         { path: "/agenda/:type?/:start?", name: "agenda", component: Agenda},
-        { path: "/notebook/", name: "notebooks"},
-        { path: "/notebook/:name", name: "notebook", component: Diary },
+        { path: "/notebook/", name: "notebooks", component:notebook},
+        { path: "/notebook/:name", name: "notebook", component: notebook },
         { path: "/setting", name: "setting", component: Setting },
         { path: "/signin", name: "signin", component: Signin },
         { path: "/*", redirect: { name: "note" }},

@@ -37,7 +37,6 @@ export default {
             });
         },
         focus({state}, {note, position, type}){
-            
             let display = type == 'content' ? note.display.content: note.display.text;
 
             display.focus = true;

@@ -56,24 +56,24 @@ export default {
                 this.dispatch("saveNote", payload);
             }
 
-            return Promise.resolve(payload.note);
+            return payload.note;
         },
         deleteNote({state, commit, rootState}, payload){
 
+            let start = _.now();
             traversal.each(payload.note.notes, (n) => {
                 commit("tag/remove", {tags: _.filter(n.tokens, ["type","tag"])});
                 commit("agenda/remove", {time: n.time, note: n});
                 commit("agenda/remove", {time: n.schedule, note: n});
             })
 
+            start = _.now();
             commit("tag/remove", {tags: _.filter(payload.note.tokens, ["type","tag"])});
             commit("agenda/remove", {time: payload.note.time, note: payload.note});
             commit("agenda/remove", {time: payload.note.schedule, note: payload.note});
 
             commit("deleteNote", payload);
-            commit("flattern");
-
-            return Promise.resolve()
+            _.debounce(() => commit("flattern"), 100, {leading:true})
         },
         downgradeNote({state, commit, rootState}, payload){
 

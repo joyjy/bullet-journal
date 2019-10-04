@@ -1,7 +1,11 @@
 import lexer from "./lexer";
 
 const clarify = function(text){
-    return text.replace(/</g, "&lt;");
+    let xssed = text.replace(/</g, "&lt;");
+    if(xssed[0] === ':' && xssed.codePointAt(1) > 0xffff){
+        xssed = ":<span class='emoji'>"+xssed.substring(1)+"</span>";
+    }
+    return xssed;
 }
 
 const addMatchTag = function(text, match, textOffset, targetType){
@@ -71,11 +75,14 @@ const parseHtml = function(type, tokens, match){
                 htmlContent += token.text;
                 break;
             case "text":
+                let content;
                 if (token.text.match(urlReg)) {
-                    htmlContent += '<a class="link" href="'+token.text+'">'+addMatchTag(token.text, match, textOffset, type)+"</a>";
+                    content = '<a class="link" href="'+token.text+'">'+addMatchTag(token.text, match, textOffset, type)+"</a>";
                 } else {
-                    htmlContent += addMatchTag(token.text, match, textOffset, type);
+                    content = addMatchTag(token.text, match, textOffset, type);
                 }
+
+                htmlContent += content;
                 break;
             default:
                 htmlContent += addMatchTag(token.text, match, textOffset, type);

@@ -154,18 +154,18 @@ export default {
                 return;
             }
 
-            time = toTime(time, note);
-            let {target, total, m} = eventRange(state, time);
+            // time = toTime(time, note);
+            // let {target, total, m} = eventRange(state, time);
 
-            for (let i = 0; i <= total; i++) {
-                let date = m.format("YYYY-MM-DD");
-                if(!target[date]){
-                    continue;
-                }
-                let index = _.findIndex(target[date], (e) => e.type === time.type && e.source.id === note.id);
-                target[date].splice(index, 1); // todo after order
-                m.add(1, "d");
-            }
+            // for (let i = 0; i <= total; i++) {
+            //     let date = m.format("YYYY-MM-DD");
+            //     if(!target[date]){
+            //         continue;
+            //     }
+            //     let index = _.findIndex(target[date], (e) => e.type === time.type && e.source.id === note.id);
+            //     target[date].splice(index, 1); // todo after order
+            //     m.add(1, "d");
+            // }
         }
     }
 }

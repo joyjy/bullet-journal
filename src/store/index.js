@@ -45,10 +45,6 @@ export default new Vuex.Store({
         findNoteStackById: (state) => (id) => {
             return traversal.path(state.notes, (note) => note.id === parseInt(id, 10));
         },
-        findNoteByText: (state) => (text, parent) => {
-            let from = parent || state;
-            return traversal.find(from.notes, (note) => note.text.replace(/\xa0/g, " ") === text);
-        },
         findNoteBy: (state) => (predicate, parent) => {
             let from = parent || state;
             return traversal.find(from.notes, (note) => predicate(note));
@@ -65,13 +61,40 @@ export default new Vuex.Store({
             }, {stop: (n) => n.archived || n.display.collapsed})
             return next || note;
         },
+        findByPathTextOrCreate: (state) => (path) => {
+            let parent = state;
+            for (let i = 0; i < path.length; i++) {
+                let text = path[i];
+                let found = _.find(parent.notes, (n, p) => n.text.replace(/\xa0/g, " ") === text)
+                if(!found){
+                    found = this.commit("newNote", {parent:parent, text:text})
+                }
+                parent = found;
+            }
+            
+            return parent;
+        },
+        findNoteByPathText: (state) => (path) => {
+            let parent = state;
+            for (let i = 0; i < path.length; i++) {
+                let text = path[i];
+                let found = _.find(parent.notes, (n, p) => n.text.replace(/\xa0/g, " ") === text)
+                if(!found){
+                    return null;
+                }
+                parent = found;
+            }
+            return parent;
+        },
     },
     mutations: {
         undo(state){
             undoRedoHistory.undo(state);
         },
         flattern(state){
+            let start = _.now();
             state.flattern = traversal.flattern(state.notes);
+            console.log("flattern", (_.now()-start)+"ms")
         },
         mergeNotes(state, {notes}){
             notes = traversal.dup(notes, (n) => toNote(n));
@@ -84,51 +107,33 @@ export default new Vuex.Store({
     },
     actions: {
         async init({commit, state}){
-            // long time, running async
             return new Promise((resolve) => setTimeout(() => {
-                
+                let start = _.now();
+
                 if(state.notes.length === 0){
                     this.dispatch("newNote", {});
                 }else{
                     commit("flattern");
                 }
 
-                if(state.flattern.length === 1){
-                    let [note] = state.flattern[0];
-                    if(note.text === "") { // init state, let focus to hint editable
-                        commit("focus", { note: note, position: 0});
-                    }
-                }
-
-                _.each(state.flattern, function([n,p]){
+                _.each(state.flattern, function([n]){
+                    commit("unfocus", {note:n})
                     //let tags = [];
                     _.each(n.tokens, function(t){
-                        if(t.type === "tag"){
-                            //tags.push(t);
-                        }else if(t.time){
-                            if(typeof t.time === "object"){
-                                commit("setTimePrototype", {note:n, token:t});
-                                return;
-                            };
-                        }
+                        // if(t.type === "tag"){
+                        //     tags.push(t);
+                        // }
                     });
                     //commit("tag/add", {tags, note:n});
 
-                    commit("agenda/count", {note: n})
-                    commit("agenda/add", {note: n, time: n.time})
-                    commit("agenda/add", {note: n, time: n.schedule})
+                    // commit("agenda/count", {note: n})
+                    // commit("agenda/add", {note: n, time: n.time})
+                    // commit("agenda/add", {note: n, time: n.schedule})
                 });
 
+                console.log("init", (_.now()-start)+"ms")
                 resolve();
             }, 0));
-        },
-        findByTextOrNewNote({state, commit, getters}, payload){
-
-            let found = getters.findNoteByText(payload.text, payload.parent);
-            if(!found){
-                found = this.dispatch("newNote", payload);
-            }
-            return Promise.resolve(found);
         },
         merge({commit}, payload){
 

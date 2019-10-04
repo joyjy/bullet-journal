@@ -26,7 +26,7 @@
 
                 <v-list-item @click="$emit('archive-note')">
                     <v-list-item-title>
-                        {{ note.archived ? 'Active' : 'Archive' }}
+                        {{ note.archived ? 'Unarchive' : 'Archive' }}
                     </v-list-item-title>
                     <v-list-item-action-text>
                     </v-list-item-action-text>

@@ -142,7 +142,7 @@ export default {
                 this.notes = this.$store.state.notes;
             }else {
                 let stack = this.$store.getters.findNoteStackById(this.id)
-                if(stack){
+                if(stack.length > 0){
                     stack.unshift("Root");
                     this.breadsrumbs = stack;
                     this.notes = stack.slice(-1)
@@ -161,7 +161,7 @@ export default {
         switchCollapse(){
             this.collapseLevel++;
             let maxLevel = this.depth-2;
-            if(this.collapseLevel > _.min([maxLevel, 2])){
+            if(this.collapseLevel > _.min([maxLevel, 3])){
                 this.collapseLevel = -1;
             }
             this.$store.commit("switchOutline", { notes: this.notes, level: this.collapseLevel });

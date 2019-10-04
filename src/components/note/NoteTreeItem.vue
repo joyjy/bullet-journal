@@ -1,6 +1,5 @@
 <template>
-    <li :class="['note-item', col>0?'note-col-'+col:'', {archived: note.archived}]"
-        v-show="!note.archived || note.archived && (parent.display && parent.display.archived)" >
+    <li :class="['note-item', col>0?'note-col-'+col:'', {archived: note.archived}]" v-show="archivedShow" :data-id="note.id">
         <div v-show="filtered || ignoreFiltered" class="note-wrapper"> 
             <note-bullet :note="note" :collapsed = "collapsed"
                 @collapse-note="switchCollapse"
@@ -144,6 +143,21 @@ export default {
             }
             return 0;
         },
+        archivedShow(){
+            if(!this.note.archived){
+                return true;
+            }
+            if(this.parent.display && this.parent.display.archived){
+                return true;
+            }
+            if(false){ // global setting
+                return true;
+            }
+            if(this.root === this.note){
+                return true;
+            }
+            return false;
+        }
     },
     watch: {
         query: function(){ // new query input
@@ -204,26 +218,22 @@ export default {
         },
         deleteNote: function(payload){
             // first node can't be remove, only empty
-            if(this.index == 0 && this.parent.notes.length == 1 && !this.parent.id){
+            if(this.index == 0 
+                && (!this.parent.id // first note of forest
+                    || this.root && this.root == this.parent)){ // first note of root
                 return;
             }
 
             let batchId = "";
-            if(payload && payload.keyboard){
-                let text = this.note.text;
-                let notes = this.note.notes;
-
-                let prev = this.$store.getters.findLastVisibleNote(this.note)
-
-                if(!prev){
-                    throw "prev"
-                }
-                
+            let prev = this.$store.getters.findLastVisibleNote(this.note);
+            let text = this.note.text;
+            if(payload && payload.keyboard && text.length > 0){
                 batchId = _.now().toString();
+
                 this.$store.dispatch("saveNote", { 
                     note: prev, 
                     text: prev.text + text,
-                    notes: prev.notes.concat(notes),
+                    notes: prev.notes.concat(this.note.notes),
                     position: prev.text.length,
                     batchId: batchId,
                 })
@@ -236,6 +246,9 @@ export default {
                 keyboard: payload && payload.keyboard,
                 batchId: batchId,
             })
+            if(text.length == 0){
+                this.$store.commit("focus", {note: prev, position: prev.text.length})
+            }
         },
         downgradeNote: function(payload){
             if(this.index == 0){
