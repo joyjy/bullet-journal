@@ -37,7 +37,7 @@ export default {
         },
     },
     actions: {
-        async newNote({state, commit, rootState}, payload){
+        newNote({state, commit, rootState}, payload){
 
             payload.note = new Note();
 
@@ -53,7 +53,7 @@ export default {
             commit("flattern");
 
             if(payload.text){
-                await this.dispatch("saveNote", payload);
+                this.dispatch("saveNote", payload);
             }
 
             return Promise.resolve(payload.note);

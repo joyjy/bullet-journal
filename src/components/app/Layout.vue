@@ -1,6 +1,6 @@
 <template>
     <div class="fill-height">
-        <v-navigation-drawer v-if="rightDrawer || false" app clipped right width="360">
+        <v-navigation-drawer v-if="rightDrawer || false" app clipped right :width="rightDrawerWidth || 360">
             <slot name="right-drawer">
                 <tags></tags>
             </slot>
@@ -33,7 +33,7 @@
 import TagPane from "../tag/Pane";
 
 export default {
-    props: ["rightDrawer", "color"],
+    props: ["rightDrawer", "rightDrawerWidth", "color"],
     components:{
         "tags": TagPane,
     }

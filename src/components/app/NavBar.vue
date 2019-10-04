@@ -1,14 +1,19 @@
 <template>
-    <v-navigation-drawer app :mini-variant="!pinned && !hover" :expand-on-hover="!pinned" mini-variant-width="64"
+    <v-navigation-drawer app :mini-variant="!pinned && !hover" :expand-on-hover="!pinned" mini-variant-width="68"
       @mouseover.native="hover = true"
       @mouseleave.native="hover = false">
       <template v-slot:prepend>
         <v-list nav>
           <v-list-item two-line>
             <v-list-item-avatar class="align-self-center">
-              <v-avatar color="grey lighten-3">
-                <span class="headline">{{ $store.getters.profile() }}</span>
-              </v-avatar>
+              <v-badge overlap color="error lighten-2">
+                <template v-slot:badge>
+                  <v-icon small>mdi-sync-off</v-icon>
+                </template>
+                <v-avatar color="grey lighten-3">
+                  <span class="headline">{{ $store.getters.profile() }}</span>
+                </v-avatar>
+              </v-badge>
             </v-list-item-avatar>
 
             <v-list-item-content>
@@ -101,7 +106,7 @@
             </v-list-item-action>
         </v-list-item>
 
-        <v-list-group prepend-icon="mdi-book" value="true" no-action>
+        <!-- <v-list-group prepend-icon="mdi-book" value="true" no-action>
             <template v-slot:activator>
                 <v-list-item-title>Notebook</v-list-item-title>
             </template>
@@ -124,7 +129,7 @@
                 </v-list-item-action>
             </v-list-item>
 
-        </v-list-group>
+        </v-list-group> -->
 
       </v-list>
       

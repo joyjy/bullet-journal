@@ -1,12 +1,12 @@
 <template>
-    <div class="suggest" v-if="lastInput.requireSuggest" v-show="suggests.length > 0"
-            :style="{top:suggestRect.bottom+'px', left:suggestRect.left+'px'}">
-            <v-list dense>
-                <v-list-item v-for="(s, i) in suggests" :key="s" @click="appendTag(s)" :class="{selected: selected == i}">
-                    <v-list-item-title>{{s}}</v-list-item-title>
-                </v-list-item>
-            </v-list>
-        </div>
+    <v-card class="suggest" v-if="lastInput.requireSuggest" v-show="suggests.length > 0"
+        :style="{top:suggestRect.bottom+'px', left:suggestRect.left+'px'}">
+        <v-list dense>
+            <v-list-item v-for="(s, i) in suggests" :key="s" @click="appendTag(s)" :class="{selected: selected == i}">
+                <v-list-item-title>{{s}}</v-list-item-title>
+            </v-list-item>
+        </v-list>
+    </v-card>
 </template>
 
 <script>
@@ -35,11 +35,11 @@ export default {
     computed: {
         suggestRect(){
             let targetRect = range.rect(this.suggestedEl);
-            targetRect = targetRect || this.suggestedEl ? this.suggestedEl.getBoundingClientRect() : undefined;
+            targetRect = targetRect || (this.suggestedEl ? this.suggestedEl.getBoundingClientRect() : undefined);
             let elRect = this.container.$el.getBoundingClientRect();
             if(elRect && targetRect){
                 return {
-                    left:targetRect.left - elRect.left,
+                    left: targetRect.left - elRect.left,
                     bottom: targetRect.top - elRect.top + targetRect.height
                 };
             }
@@ -54,6 +54,9 @@ export default {
                 this.lastInput.requireSuggest = lastToken.text;
                 this.suggestedEl = payload.nativeEvent.target;
                 this.suggests = this.$store.getters['tag/suggests'](lastToken.text);
+                if(this.suggests.length == 0){
+                    this.lastInput.requireSuggest = "";
+                }
             }else if(lastToken && lastToken.text === ":"){
                 this.lastInput.requireSuggest = lastToken.text;
                 this.suggestedEl = payload.nativeEvent.target;
@@ -110,7 +113,16 @@ export default {
 </script>
 
 <style>
-.selected::before{
+.suggest{
+    position: absolute;
+    min-width: 100px;
+    z-index: 2;
+}
+.suggest .v-list-item{
+    min-height: 1.2rem;
+    font-weight: initial;
+}
+.suggest .v-list-item.selected::before{
     background-color: currentColor;
     top: 0; 
     left: 0;

@@ -1,15 +1,27 @@
-
 import Vue from "vue";
 import traversal from "@/lib/tree";
 
 export default {
-
+    visible(note, parent){
+        if(note.archived){
+            if(parent){
+                if(parent.display && !parent.display.archived){
+                    return false; // archived and can't display
+                }
+            }else{ // only top level no parent, // todo
+                return false;
+            }
+        }
+        if(parent && parent.display && parent.display.collapsed){
+            return false;
+        }
+        return true;
+    },
     // note.archived
     // note.display.collapsed
     // note.display.text = {focus:false, cursor:-1}
     // note.display.content = {focus:false, cursor:-1}
     // note.display.archived
-
     mutations: {
         archive({state}, {note}){
             note.archived = !note.archived;

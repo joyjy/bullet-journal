@@ -278,8 +278,8 @@ export default {
             let style = { top: top + 'px', height: height + 'px', width: '96%'}
 
             if(event.overlap){
-                style.left = '4px';
-                style.width = 'calc(98% - 4px)';
+                style.left = '1.5rem';
+                style.width = 'calc(98% - 1.5rem)';
             }
 
             if(event.index > 0){

@@ -14,7 +14,7 @@ export default {
         }
         return maxDepth;
     },
-    find(notes, predicate, options = {}){
+    find(notes, predicate, options = {}, parent){
         if(notes.length === 0){
             return null;
         }
@@ -24,14 +24,35 @@ export default {
                 index = notes.length - i - 1;
             }
             let note = notes[index];
-            
-            if(predicate(note)){
-                return note;
-            }
 
-            let found = this.find(note.notes, predicate, options);
-            if(found){
-                return found;
+            if(options.reserve){ // child's tail first
+
+                if(options.stop && options.stop(note)){
+                    if(predicate(note, parent)){
+                        return note;
+                    }
+                    continue;
+                }
+                
+                let found = this.find(note.notes, predicate, options, note);
+                if(found){
+                    return found;
+                }
+                if(predicate(note, parent)){
+                    return note;
+                }
+            }else{
+
+                if(predicate(note, parent)){
+                    return note;
+                }
+                if(options.stop && options.stop(note)){
+                    continue;
+                }
+                let found = this.find(note.notes, predicate, options, note);
+                if(found){
+                    return found;
+                }
             }
         }
         return null;
@@ -74,15 +95,20 @@ export default {
             this.each(note.notes, iteratee, {level, depth: depth+1});
         }
     },
-    flattern(notes){
+    flattern(notes, parent, totalIndex = 0){
         let array = [];
         if(notes.length === 0){
             return array;
         }
         for (let i = 0; i < notes.length; i++) {
             let note = notes[i];
-            array.push(note);
-            array = array.concat(this.flattern(note.notes));
+            note.total = totalIndex;
+            array.push([note, parent, i]);
+            totalIndex++;
+
+            let sub = this.flattern(note.notes, note, totalIndex);
+            array = array.concat(sub);
+            totalIndex += sub.length;
         }
         return array;
     },

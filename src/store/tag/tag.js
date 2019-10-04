@@ -77,10 +77,10 @@ export default {
     },
     actions: {
         replace({commit}, {oldTags, newTags}){
-            let removeds = _.difference(oldTags, newTags, 'text');
-            commit("remove", removeds);
-            let addeds = _.difference(newTags, oldTags, 'text');
-            commit("add", addeds);
+            let removeds = _.differenceBy(oldTags, newTags, 'text');
+            commit("remove", { tags: removeds });
+            let addeds = _.differenceBy(newTags, oldTags, 'text');
+            commit("add", { tags: addeds });
         },
     }
 }

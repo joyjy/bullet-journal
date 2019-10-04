@@ -1,5 +1,5 @@
 <template>
-  <app-layout :right-drawer="true">
+  <app-layout :right-drawer="true" :right-drawer-width="272">
         <template v-slot:toolbar>
             {{ today.text }}
         </template>
@@ -93,13 +93,13 @@ export default {
         AppLayout,
         NoteTreeRoot
     },
-    created: async function(){
-        this.notebook = await this.findByTextOrCreate({ text: "Diary #notebook"});
+    created: function(){
+        this.notebook = this.findByTextOrCreate({ text: "Diary #notebook"});
 
-        let yearNote = await this.findByTextOrCreate({ text: this.parts.year, parent: this.notebook});
-        let monthNote = await this.findByTextOrCreate({ text: this.parts.month, parent: yearNote});
+        let yearNote = this.findByTextOrCreate({ text: this.parts.year, parent: this.notebook});
+        let monthNote = this.findByTextOrCreate({ text: this.parts.month, parent: yearNote});
 
-        this.today = await this.findByTextOrCreate({ 
+        this.today = this.findByTextOrCreate({ 
                                 parent: monthNote, 
                                 index: monthNote.notes.length, 
                                 text: this.parts.title
@@ -108,7 +108,7 @@ export default {
             this.newNote({ parent: this.today });
         }
 
-        this.todo = await this.findByTextOrCreate({ text: 'Inbox'})
+        this.todo = this.findByTextOrCreate({ text: 'Inbox'})
         if(this.todo.notes.length == 0){
             this.newNote({ parent: this.todo });
         }

@@ -7,8 +7,8 @@
                 @del-note="deleteNote"
                 @archive-note="$store.commit('archive', {note:note})">
             </note-bullet>
-            <div class="d-flex flex-column flex-grow-1" style="width:100%">
-                <editable-div :note="note" :type="'text'" :match="match"
+            <div class="d-flex flex-column flex-grow-1" style="width: calc(100% - 21px)">
+                <editable-div :note="note" :type="'text'" :match="match" :style="{paddingRight:collapsed == 'expand'?'1rem':''}"
                     @input="saveNote"
                     @new-content="saveNote"
                     @new-note="newNote"
@@ -297,15 +297,9 @@ export default {
                     position = payload.position || 0
                     break;
             }
-
-            if(target == undefined){
-                return;
-            }
-            
             if(position > target.text.length){
                 position = target.text.length;
             }
-
             this.$nextTick(() => {
                 this.$store.commit("focus", {note: target, position: position})
             })
@@ -340,8 +334,9 @@ export default {
     display: flex;
 }
 .toolbar{
-    margin-top: -1px;
-    margin-right: 1.5rem;
+    position: absolute;
+    right: 0;
+    margin-right: 1rem;
     opacity: .3;
 }
 .toolbar:hover{
@@ -352,13 +347,5 @@ export default {
 }
 .archived>.note-wrapper>div>.note-text{
     text-decoration-line: line-through;
-}
-.suggest{
-    position: absolute;
-    min-width: 100px;
-}
-.suggest .v-list-item{
-    min-height: 1.2rem;
-    font-weight: initial;
 }
 </style>
