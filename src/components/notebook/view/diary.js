@@ -108,17 +108,19 @@ export default {
         }]
     },{
         name:'with-last',
-        icon: 'mdi-view-split-vertical',
+        icon: 'mdi-view-column',
         rows: [{
             cols: [{
-                colWidth: 5,
+                colWidth: 4,
                 rows:[
                     {cols: [yesterday]},
                     {cols: [lastWeek]},
                     {cols: [lastMonth]},
                     {cols: [lastYear]},
                 ]
-            }, today]
+            }, today, {
+                colWidth: 3,
+            }]
         }]
     }],
     view: 1,

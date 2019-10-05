@@ -15,7 +15,7 @@
             </v-btn-toggle>
         </template>
 
-        <v-row no-gutters class="notebook">
+        <v-row no-gutters class="notebook fill-height">
             <v-col v-if="notebook.mode == 'items'" cols="3"></v-col>
             
             <grid-view :view="notebook.views[view]" @name="currentName = $event"></grid-view>
@@ -29,7 +29,8 @@ import { mapState, mapGetters, mapMutations } from "vuex"
 import AppLayout from "../app/Layout"
 import GridView from "./view/Grid"
 
-import diary from './view/diary'
+import diary from './view/diary';
+import template from './view/template';
 
 export default {
     data: () => ({
@@ -41,7 +42,7 @@ export default {
         GridView,
     },
     created(){
-        this.notebook = diary;
+        this.notebook = template;
     },
     computed: {
         name(){

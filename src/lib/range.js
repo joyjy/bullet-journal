@@ -1,3 +1,42 @@
+const recurisePositionAndLengh = function(el, container, offset, length){
+    for (let i = 0; i < el.childNodes.length; i++) {
+        const child = el.childNodes[i];
+        if(child.nodeType == Node.ELEMENT_NODE && child.firstChild.isSameNode(container)){
+            return [offset, length];
+        }else if(child.isSameNode(container)){
+            return [offset, length];
+        }else{
+            let result = recurisePositionAndLengh(child, container, offset, length)
+            if(result){
+                return result;
+            }
+        }
+        offset += child.textContent.length; // .replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, "_")
+    }
+}
+
+const recuriseFocus = function(el, position, range){
+    console.log('focus', el, position)
+    for (let i = 0; i < el.childNodes.length; i++) {
+        if(position < 0){
+            throw el, position;
+        }
+        const node = el.childNodes[i];
+        if(position <= node.textContent.length){
+            if(node.nodeType == Node.TEXT_NODE){
+                range.setStart(node, position);
+                range.setEnd(node, position);
+                return;
+            }else {
+                recuriseFocus(node, position, range);
+            }
+            break;
+        }else{
+            position -= node.textContent.length;
+        }
+    }
+}
+
 export default {
     rect(el){
         if(!el){
@@ -36,14 +75,9 @@ export default {
             return [offset, length];
         }
 
-        for (let i = 0; i < el.childNodes.length; i++) {
-            const child = el.childNodes[i];
-            if(child.nodeType == Node.ELEMENT_NODE && child.firstChild.isSameNode(container)){
-                return [offset, length];
-            }else if(child.isSameNode(container)){
-                return [offset, length];
-            }
-            offset += child.textContent.length;
+        let result = recurisePositionAndLengh(el, container, offset, length);
+        if(result){
+            return result;
         }
 
         throw range;
@@ -56,24 +90,7 @@ export default {
         if(position && position > 0){
             let range = document.createRange();//Create a range (a range is a like the selection but invisible)
             
-            for (let i = 0; i < el.childNodes.length; i++) {
-                if(position < 0){
-                    throw el, position;
-                }
-                const node = el.childNodes[i];
-                if(position <= node.textContent.length){
-                    if(node.nodeType == Node.TEXT_NODE){
-                        range.setStart(node, position);
-                        range.setEnd(node, position);
-                    }else{
-                        range.setStart(node.firstChild, position);
-                        range.setEnd(node.firstChild, position);
-                    }
-                    break;
-                }else{
-                    position -= node.textContent.length;
-                }
-            }
+            recuriseFocus(el, position, range);
 
             let selection = window.getSelection();//get the selection object (allows you to change selection)
             selection.removeAllRanges();//remove any selections already made

@@ -106,10 +106,16 @@
             </v-list-item-action>
         </v-list-item>
 
-        <!-- <v-list-group prepend-icon="mdi-book" value="true" no-action>
+        <v-list-group prepend-icon="mdi-book" value="true" no-action v-if="this.$store.state.user.account === 'joyjy2ah@gmail.com'">
             <template v-slot:activator>
                 <v-list-item-title>Notebook</v-list-item-title>
             </template>
+
+            <v-list-item :to="{name:'notebook', params:{name:'diary'}}">
+                <v-list-item-title>
+                    diary
+                </v-list-item-title>
+            </v-list-item>
 
             <v-list-item v-for="notebook in $store.state.notebook.list" :key="notebook.name">
                 <v-list-item-title>
@@ -129,7 +135,7 @@
                 </v-list-item-action>
             </v-list-item>
 
-        </v-list-group> -->
+        </v-list-group>
 
       </v-list>
       

@@ -20,7 +20,6 @@ export default {
                 let orderIndex = _.sortedIndexBy(sortable, tag, (tag) => -state.all[tag].lastAdd);
                 sortable.splice(orderIndex, 0, tag);
             }
-            sortable.splice(7);
             return sortable;
         }
     },

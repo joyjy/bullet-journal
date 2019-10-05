@@ -22,7 +22,7 @@ import _ from "lodash";
 import traversal from "@/lib/tree";
 import { toNote } from "@/model/note";
 
-export default new Vuex.Store({
+const store = new Vuex.Store({
     strict: true,
     plugins: [vuexPersist.plugin, vuexPersistCookie.plugin, undoRedoPlugin],
     modules: {
@@ -67,9 +67,20 @@ export default new Vuex.Store({
                 let text = path[i];
                 let found = _.find(parent.notes, (n, p) => n.text.replace(/\xa0/g, " ") === text)
                 if(!found){
-                    found = this.commit("newNote", {parent:parent, text:text})
+                    store.dispatch("newNote", {
+                        parent:parent,
+                        text:text,
+                        index:parent.notes.length
+                    }).then((n) => found = n);
+                    while(!found){
+                        // blocking wait
+                    }
                 }
                 parent = found;
+            }
+
+            if(parent.notes.length == 0){
+                store.dispatch("newNote", { parent:parent});
             }
             
             return parent;
@@ -142,4 +153,6 @@ export default new Vuex.Store({
             return Promise.resolve();
         }
     }
-})
+});
+
+export default store

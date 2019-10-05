@@ -121,6 +121,7 @@ export default {
                     break;
                 case "#":
                 case "@":
+                case ":":
                     if(state === "$start" || state==="$split"){
                         if(start < end){
                             tokens.push(new Token("text", text, start, end));
