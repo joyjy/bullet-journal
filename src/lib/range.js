@@ -16,7 +16,6 @@ const recurisePositionAndLengh = function(el, container, offset, length){
 }
 
 const recuriseFocus = function(el, position, range){
-    console.log('focus', el, position)
     for (let i = 0; i < el.childNodes.length; i++) {
         if(position < 0){
             throw el, position;

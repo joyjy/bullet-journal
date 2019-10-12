@@ -1,24 +1,13 @@
 <template>
-  <v-app>
-    <app-nav-bar v-if="signed()"></app-nav-bar>
-    
-    <router-view></router-view>
-
-    <app-fab v-if="false"></app-fab>
-  </v-app>
+  <router-view></router-view>
 </template>
 
 <script>
-import { mapState, mapGetters, mapMutations } from "vuex"
-
-import AppNavBar from "@/components/app/NavBar.vue"
-import AppFab from "@/components/app/Fab.vue"
+import { mapGetters, mapMutations, mapActions } from "vuex"
 
 export default {
   data: () => ({}),
   components: {
-    AppNavBar,
-    AppFab,
   },
   created: function(){
     if(!this.signed() && this.$route.name != 'signin'){
@@ -26,20 +15,27 @@ export default {
     }
   },
   mounted: function () {
-    this.$el.ownerDocument.addEventListener('keydown', this.onKey, {capture: true})
+    window.addEventListener('keydown', this.onKey, {capture: true})
   },
   beforeDestroy: function () {
-    this.$el.ownerDocument.removeEventListener('keydown', this.onKey)
+    window.removeEventListener('keydown', this.onKey)
   },
   computed: {
     ...mapGetters(["signed"])
   },
   methods: {
     ...mapMutations(["undo"]),
+    ...mapActions(["save"]),
     onKey: function(e){
-      if(e.keyCode == 90){
-        if(navigator.platform.indexOf('Mac') > -1 && event.metaKey || event.ctrlKey){
+      if(e.keyCode == 90){ // 
+        if(navigator.platform.indexOf('Mac') > -1 && event.metaKey || event.ctrlKey){ // ctrl+z
           this.undo();
+          e.preventDefault();
+          e.stopPropagation();
+        }
+      }else if(e.keyCode == 83) {// s
+        if(navigator.platform.indexOf('Mac') > -1 && event.metaKey || event.ctrlKey){ // ctrl+s
+          this.save();
           e.preventDefault();
           e.stopPropagation();
         }

@@ -176,10 +176,12 @@ export default {
         },
         tailHeightChange(){
             this.$nextTick(() => {
-                if(this.$refs.tree.$el.offsetHeight < window.innerHeight){
-                    this.treeHeight = this.$refs.tree.$el.offsetHeight;
-                }else{
-                    this.treeHeight = 0;
+                if(this.$refs.tree){
+                    if(this.$refs.tree.$el.offsetHeight < window.innerHeight){
+                        this.treeHeight = this.$refs.tree.$el.offsetHeight;
+                    }else{
+                        this.treeHeight = 0;
+                    }
                 }
             })
         }

@@ -41,7 +41,7 @@ export default {
         }
     },
     actions: {
-        saveNote({state, commit}, payload){
+        saveNote({commit}, payload){
 
             payload.before = _.clone(payload.note); // for undo
             payload.tokens = parser.parse(payload.text);

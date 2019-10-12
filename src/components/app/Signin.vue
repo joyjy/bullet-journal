@@ -1,22 +1,24 @@
 <template>
-    <v-container>
-        <v-row align="center" justify="center">
-            <v-col cols="3">
-                <v-form v-model="valid" @submit.prevent="signIn">
-                    <div>Sign in</div>
-                    <v-input>
-                        <v-text-field label="Email" v-model="email" required>
-                        </v-text-field>
-                    </v-input>
-                    <v-input>
-                        <v-text-field label="Password" v-model="password" type="password" required>
-                        </v-text-field>
-                    </v-input>
-                    <v-btn type="submit" @click="signIn">Sign in</v-btn>
-                </v-form>
-            </v-col>
-        </v-row>
-    </v-container>
+    <v-app>
+        <v-container class="fill-height">
+            <v-row justify="center">
+                <v-col cols="3">
+                    <h3>Sign in</h3>
+                    <v-form v-model="valid" @submit.prevent="signIn">
+                        <v-input>
+                            <v-text-field label="Email" v-model="email" required hide-details>
+                            </v-text-field>
+                        </v-input>
+                        <v-input>
+                            <v-text-field label="Password" v-model="password" type="password" required hide-details>
+                            </v-text-field>
+                        </v-input>
+                        <v-btn color="primary" type="submit" class="d-block ml-auto mr-2" >Sign in</v-btn>
+                    </v-form>
+                </v-col>
+            </v-row>
+        </v-container>
+    </v-app>
 </template>
 
 <script>
@@ -31,9 +33,11 @@ export default {
             this.$store.dispatch("signIn", {
                 email: this.email, 
                 password: this.password
-            }).then((succeed) => {
+            }).then(({succeed, message}) => {
                 if(succeed){
                     this.$router.replace({name:'note'})
+                }else{
+                    this.valid = succeed;
                 }
             })
         }

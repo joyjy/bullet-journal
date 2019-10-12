@@ -10,7 +10,7 @@ export default {
         recently: [],
     },
     getters:{
-        suggests: (state, getters, rootState, rootGetters) => (t) => {
+        suggests: (state) => (t) => {
             let sortable = [];
             for(const tag in state.all){
                 let index = tag.indexOf(t);

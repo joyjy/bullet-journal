@@ -1,5 +1,5 @@
 <template>
-    <draggable tag="ul" class="note-tree body-2 align-self-start" v-model="noteList" :group="{ name: 'note-tree' }">
+    <draggable v-if="parent" tag="ul" class="note-tree body-2 align-self-start" v-model="noteList" :group="{ name: 'note-tree' }">
         <note-tree-item v-for="(note,i) in noteList" :key="note.id"
             :note="note" :index="i" :parent="parent" :query="query" :root="root">
         </note-tree-item>
@@ -46,7 +46,6 @@ export default {
     flex: 0 0;
     flex-wrap: wrap;
 }
-
 .sortable-ghost{
     height: 2px;
     overflow: hidden;

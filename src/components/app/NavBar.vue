@@ -111,19 +111,14 @@
                 <v-list-item-title>Notebook</v-list-item-title>
             </template>
 
-            <v-list-item :to="{name:'notebook', params:{name:'diary'}}">
-                <v-list-item-title>
-                    diary
-                </v-list-item-title>
-            </v-list-item>
-
-            <v-list-item v-for="notebook in $store.state.notebook.list" :key="notebook.name">
+            <v-list-item v-for="notebook in $store.state.notebook.list" :key="notebook.name"
+                @click="$router.push({name: 'notebook', params: {name: notebook.name}})">
                 <v-list-item-title>
                     {{ notebook.name }}
                 </v-list-item-title>
             </v-list-item>
 
-            <v-list-item @click="">
+            <v-list-item @click="$eventbus.$emit('show-notebook-wizard', true)">
                 <v-list-item-title>Add...</v-list-item-title>
                 <v-list-item-action>
                     <v-tooltip right max-width="200">

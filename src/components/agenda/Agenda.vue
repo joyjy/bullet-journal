@@ -35,62 +35,62 @@
           </v-menu>
         </template>
 
-        <v-sheet height="702"><!--todo-->
-        <v-calendar ref="calendar" :type="type" :weekdays="weekdays" @change="update"
-            v-model="now" :start="start" :end="end" :interval-style="intervalStyle" :interval-height="36"
-            :class="['border-top', 'border-left', type=='week'?'border-bottom':'']" :style="{height:'100%'}">
+        <v-sheet height="calc(100vh - 48px - 24px)">
+            <v-calendar ref="calendar" :type="type" :weekdays="weekdays" @change="update"
+                v-model="now" :start="start" :end="end" :interval-style="intervalStyle" :interval-height="36">
 
-            <!--month-->
-            <template v-slot:day-label="{date, day}">
-                <v-btn text icon>
-                    {{day}}
-                </v-btn>
-                <div class="badge" v-show="noteCountAtDay(date) > 0" :title="'Created ' + noteCountAtDay(date) + ' notes' ">
-                    {{ noteCountAtDay(date) }}
-                </div>
-            </template>
-            <template v-slot:day="{date}" >
-                <div v-for="(event, index) in dayEvents(date)" :key="index"
-                    :class="['event', eventLongDayClass(event)]"
-                    v-show=" dayEvents(date).length<=mouthDayHeight || index<mouthDayHeight-1"
-                    @click="showEvent(event, $event)">
-                    <span v-if="event && (!event.index || event.index == 0 || date == displayedStart)"
-                        :style="longDayTextWidth(event, date)">
-                        <v-icon v-show="event.type === 'schedule'" small>mdi-alarm</v-icon>{{event.name}}
-                    </span>
-                </div>
-                <div v-if="dayEvents(date).length>mouthDayHeight" class="event" @click="type='week'">
-                    more...
-                </div>
-            </template>
+                <!-- month view header-->
+                <template v-slot:day-label="{date, day}">
+                    <v-btn text icon>
+                        {{day}}
+                    </v-btn>
+                    <div class="badge" v-show="noteCountAtDay(date) > 0" :title="'Created ' + noteCountAtDay(date) + ' notes' ">
+                        {{ noteCountAtDay(date) }}
+                    </div>
+                </template>
+                <!-- month view day-->
+                <template v-slot:day="{date}" >
+                    <div v-for="(event, index) in dayEvents(date)" :key="index"
+                        :class="['event', eventLongDayClass(event)]"
+                        v-show="dayEvents(date).length<=mouthDayHeight || index<mouthDayHeight-1"
+                        @click="showEvent(event, $event)">
+                        <span v-if="event && (!event.index || event.index == 0 || date == displayedStart)"
+                            :style="longDayTextWidth(event, date)">
+                            <v-icon v-show="event.type === 'schedule'" small>mdi-alarm</v-icon>{{event.name}}
+                        </span>
+                    </div>
+                    <div v-if="dayEvents(date).length>mouthDayHeight" class="event" @click="type='week'">
+                        more...
+                    </div>
+                </template>
 
-            <!--week-->
-            <template v-slot:day-header="{date}">
-                <div class="badge" v-show="noteCountAtDay(date) > 0" :title="'Created ' + noteCountAtDay(date) + ' notes' ">
-                    {{ noteCountAtDay(date) }}
-                </div>
-                <div v-for="(event,index) in eventsAtDay(date)" :key="index"
-                    :class="['event', eventLongDayClass(event)]"
-                    @click="showEvent(event, $event)">
-                    <span v-if="event && (!event.index || event.index == 0 || date == displayedStart)"
-                        :style="longDayTextWidth(event, date)">
-                        <v-icon v-show="event.type === 'schedule'" small>mdi-alarm</v-icon>{{event.name}}
-                    </span>
-                </div>
-            </template>
-            <template v-slot:day-body="{date, present, timeToY, minutesToPixels}">
-                <div v-for="(event,index) in eventsInDay(date)" :key="index" class='event'
-                    :style="eventStyle(event, date, timeToY, minutesToPixels)"
-                    @click="showEvent(event, $event)">
-                    <v-icon v-show="event && event.type === 'schedule'" small>mdi-alarm</v-icon>{{ event ? event.name: ''}}
-                </div>
-                <div v-if="present" class="indicator" :style="{ left:indicator.x + 'px', top:indicator.y + 'px' }"></div>
-            </template>
+                <!--week-->
+                <template v-slot:day-header="{date}">
+                    <div class="badge" v-show="noteCountAtDay(date) > 0" :title="'Created ' + noteCountAtDay(date) + ' notes' ">
+                        {{ noteCountAtDay(date) }}
+                    </div>
+                    <div v-for="(event,index) in eventsAtDay(date)" :key="index"
+                        :class="['event', eventLongDayClass(event)]"
+                        @click="showEvent(event, $event)">
+                        <span v-if="event && (!event.index || event.index == 0 || date == displayedStart)"
+                            :style="longDayTextWidth(event, date)">
+                            <v-icon v-show="event.type === 'schedule'" small>mdi-alarm</v-icon>{{event.name}}
+                        </span>
+                    </div>
+                </template>
+                <template v-slot:day-body="{date, present, timeToY, minutesToPixels}">
+                    <div v-for="(event,index) in eventsInDay(date)" :key="index" class='event'
+                        :style="eventStyle(event, date, timeToY, minutesToPixels)"
+                        @click="showEvent(event, $event)">
+                        <v-icon v-show="event && event.type === 'schedule'" small>mdi-alarm</v-icon>{{ event ? event.name: ''}}
+                    </div>
+                    <div v-if="present" class="indicator" :style="{ left:indicator.x + 'px', top:indicator.y + 'px' }"></div>
+                </template>
 
-            <template v-slot:day-month>
-                <div>day-month</div>
-            </template>
-        </v-calendar>
+                <template v-slot:day-month>
+                    <div>day-month</div>
+                </template>
+            </v-calendar>
         </v-sheet>
         <v-menu v-model="eventOpen" :activator="selectedElement" max-width="270" nudge-right="100" nudge-bottom="12" :close-on-content-click="false">
             <v-card>
@@ -111,11 +111,9 @@
 </template>
 
 <script>
-import { mapState, mapGetters } from 'vuex'
-
-import AppLayout from "../app/Layout"
-
-import moment from "moment"
+import { mapState, mapGetters } from 'vuex';
+import AppLayout from "../app/Layout";
+import moment from "moment";
 
 export default {
     data:() =>({
@@ -161,7 +159,7 @@ export default {
         ...mapGetters('agenda', ['eventsAtDay', 'eventsInDay', 'noteCountAtDay']),
         now: {
             get(){
-                this.current.format("YYYY-MM-DD")
+                return this.current.format("YYYY-MM-DD")
             },
             set(value){
                 let newCurrent =  moment(value);
@@ -248,7 +246,7 @@ export default {
         dayEvents(date){
             return this.eventsAtDay(date).concat(this.eventsInDay(date));
         },
-        intervalStyle({date, day, future, hasDay, hasTime, hour, minute, month, past, present, weekday, year}){
+        intervalStyle({hour}){
             if(hour < 6 || hour > 21){
                 return {
                     backgroundColor: '#EEEEEE'
@@ -263,11 +261,9 @@ export default {
                 return;
             }
 
-            let top = timeToY(event.startMinutes(date));
-
-            let duration = event.duration();
+            let top = timeToY(event.startMinutes);
             let height = 18;
-            let realHeight = minutesToPixels(event.duration());
+            let realHeight = minutesToPixels(event.durationMinutes);
             if(realHeight > height){
                 height = realHeight;
                 let offset = realHeight%18;
@@ -279,8 +275,8 @@ export default {
             let style = { top: top + 'px', height: height + 'px', width: '96%'}
 
             if(event.overlap){
-                style.left = '1.5rem';
-                style.width = 'calc(98% - 1.5rem)';
+                style.left = event.overlap+'rem';
+                style.width = 'calc(98% - '+ event.overlap + 'rem)';
             }
 
             if(event.index > 0){
@@ -310,7 +306,7 @@ export default {
 
             return 'event-mid'
         },
-        longDayTextWidth(event, date){
+        longDayTextWidth(event){
             if(event.total){
                 return { width: "calc("+100*(event.total-event.index+1)+"%)"}
             }

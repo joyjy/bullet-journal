@@ -1,5 +1,7 @@
 <template>
-    <div class="fill-height">
+    <v-app>
+        <app-nav-bar></app-nav-bar>
+
         <v-navigation-drawer v-if="rightDrawer || false" app clipped right :width="rightDrawerWidth || 360">
             <slot name="right-drawer">
                 <tags></tags>
@@ -26,15 +28,17 @@
                 </slot>
             </v-container>
         </v-content>
-    </div>
+    </v-app>
 </template>
 
 <script>
+import AppNavBar from "./NavBar"
 import TagPane from "../tag/Pane";
 
 export default {
     props: ["rightDrawer", "rightDrawerWidth", "color"],
     components:{
+        AppNavBar,
         "tags": TagPane,
     }
 }

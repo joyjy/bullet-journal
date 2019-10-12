@@ -1,10 +1,8 @@
+import userAPI from "@/api/user"
 
 export default {
     state: {
-        "name": "",
-        "profile": "",
-        "account": "",
-        "sessionId": "",
+        token: "",
     },
     getters: {
         profile: (state) => () => {
@@ -18,24 +16,21 @@ export default {
         }
     },
     mutations: {
-        signIn(state, {name, account, sessionId}){
-            state.name = name;
-            state.account = account;
-            state.sessionId = sessionId;
+        signIn(state, {token}){
+            state.token = token;
         },
-        signOut(state, {}){
-            state.name = "";
-            state.account = "";
-            state.sessionId = "";
+        signOut(state){
+            state.token = "";
         },
     },
     actions: {
-        signIn({commit}, {email}){
-            let succeed = false;
-            if(email === "joyjy2ah@gmail.com"){
-                commit("signIn", {name:"JoYJY", account:email, "sessionId":"fake"})
-            }
-            return Promise.resolve(succeed);
+        signIn({commit}, {email, password}){
+            return userAPI.signin(email, password).then(({result, message, data}) => {
+                if(result){
+                    commit("signIn", data)
+                }
+                return Promise.resolve({result, message})
+            })
         }
     }
 }

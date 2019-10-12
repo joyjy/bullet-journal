@@ -1,104 +1,37 @@
 import Vue from "vue";
 import _ from "lodash";
-import moment from "moment";
-
-import {toTime} from "@/model/time";
-
-class Event {
-
-    constructor({note, type, hasTime, start, end, index, total, order}){
-        this.name = note.text.substring(note.tokens[0].text.length);
-        this.source = note;
-        this.type = type;
-        this.hasTime = hasTime;
-        this.start = start;
-        this.end = end;
-        this.index = index;
-        this.total = total;
-        this.order = order;
-    }
-
-    startMinutes(date){
-        let m = moment(this.start);
-        if(date !== m.format("YYYY-MM-DD")){
-            return 0;
-        }
-        return (m.hours()*60)+m.minutes();
-    }
-
-    duration(){
-        if(this.end){
-            return moment.duration(moment(this.end).diff(moment(this.start))).asMinutes();
-        }
-    }
-}
+import { parseEvents } from "@/model/event"
 
 const findInsertIndex = function(array, event, orderBy){
-    if(event.order){
+    if(event.order > -1){
         return event.order;
     }
     let orderByVal = orderBy(event);
     for (let i = array.length; i>0; i--) {
         const curVal = orderBy(array[i-1]);
-        if(orderByVal > curVal){
+        if(orderByVal >= curVal){
             return i;
         }
     }
-
-    return array.length;
+    return 0;
 }
 
-const insert = function(target, date, event, orderByTime){
-
-    let index = findInsertIndex(target[date], event, e => {
-        return orderByTime ? e.startMinutes(date): e.start
-    });
-
-    if(event.index === 0){
-        event.order = index;
-    }
-
-    if(index > target[date].length){
-        target[date].splice(index);
-    }
-
-    if(index > 0){
-        let prevEvent = target[date][index-1]
-        if(prevEvent){
-            event.overlap = moment(event.start).isBefore(moment(prevEvent.start).add(30,'m'));
+const reset = function(array, index){
+    for (; index < array.length; index++) {
+        let event = array[index];
+        let prevEvent = array[index-1];
+        if(event.startMinutes < prevEvent.startMinutes + _.max([prevEvent.durationMinutes, 30])){
+            event.overlap = (prevEvent.overlap || 0)+1;
         }
     }
-
-    if(target[date][index] === undefined){
-        target[date][index] = event;
-    }else{
-        target[date].splice(index, 0, event); // todo reset after orders
-    }
-
-    return index;
-}
-
-const eventRange = function(state, time){
-
-    let hasTime = Boolean(time.startTime);
-    let target = hasTime ? state.time : state.day;
-    let startDate = time.start().clone().hour(0).minute(0);
-    let m = startDate.clone();
-    let total = 0;
-    if(time.endDate || time.endTime){
-        let endDate = time.end().clone().hour(0).minute(0);
-        total = moment.duration(endDate.diff(startDate)).asDays();
-    }
-
-    return {hasTime, target, m, total}
 }
 
 export default {
     namespaced: true,
     state: {
-        day: {},
-        time: {},
-        count: {},
+        day: {}, // '<date>':[{event}/undefined]
+        time: {}, // '<date>':[{event}/undefined]
+        count: {}, // '<date>':{added:<0>, removed:<0>}
     },
     getters:{
         eventsInDay: (state) => (date) => {
@@ -108,64 +41,60 @@ export default {
             return state.day[date] || [];
         },
         noteCountAtDay: (state) => (date) => {
-            return state.count[date];
+            let counts = state.count[date];
+            if(counts){
+                return counts.added;
+            }
+            return 0;
         }
     },
     mutations:{
-        count(state, {note}){
-            let date = moment(note.id).format("YYYY-MM-DD");
+        count(state, {date, type}){
             if(!state.count[date]){
-                Vue.set(state.count, date, 0);
+                Vue.set(state.count, date, {added: 0, removed: 0});
             }
-            state.count[date]++;
+            state.count[date][type]++;
         },
-        add(state, {note, time}){
-            if(!time){
-                return;
-            }
-            
-            time = toTime(time, note);
-            let {hasTime, target, total, m} = eventRange(state, time);
-            
-            let order = -1;
-            for (let i = 0; i <= total; i++) {
-                let date = m.format("YYYY-MM-DD");
+        add(state, {note}){
+            parseEvents(note, (event) => {
+                let target = event.hasTime ? state.time: state.day;
+                let date = event.date;
+
                 if(!target[date]){
                     Vue.set(target, date, []);
                 }
-                let event = new Event({
-                    note: note,
-                    hasTime: hasTime,
-                    type: time.type,
-                    start: time.startFormat(),
-                    end: time.endFormat(),
-                    index: i,
-                    total: total,
+            
+                let index = findInsertIndex(target[date], event, e => {
+                    return event.hasTime ? e.startMinutes: e.start
                 });
-                if(order > -1){
-                    event.order = order;
+                if(event.order == -1){
+                    event.order = index;
                 }
-                order = insert(target, date, event, hasTime);
-                m.add(1, "d");
-            }
+            
+                if(index > target[date].length){
+                    target[date].splice(index);
+                }
+            
+                if(index > 0){
+                    let prevEvent = target[date][index-1]
+                    if(prevEvent && event.startMinutes < prevEvent.startMinutes + _.max([prevEvent.durationMinites, 30])){
+                        event.overlap = (prevEvent.overlap || 0)+1;
+                    }
+                }
+            
+                if(target[date][index] === undefined){
+                    target[date][index] = event;
+                }else{
+                    target[date].splice(index, 0, event); // todo reset after orders
+                    if(event.hasTime){
+                        reset(target[date], index+1)
+                    }
+                }
+
+                return index;
+            })
         },
-        remove(state, {note, time}){
-            if(!time){
-                return;
-            }
-
-            // time = toTime(time, note);
-            // let {target, total, m} = eventRange(state, time);
-
-            // for (let i = 0; i <= total; i++) {
-            //     let date = m.format("YYYY-MM-DD");
-            //     if(!target[date]){
-            //         continue;
-            //     }
-            //     let index = _.findIndex(target[date], (e) => e.type === time.type && e.source.id === note.id);
-            //     target[date].splice(index, 1); // todo after order
-            //     m.add(1, "d");
-            // }
+        remove(){
         }
     }
 }

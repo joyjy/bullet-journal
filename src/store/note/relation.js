@@ -1,5 +1,6 @@
 import Vue from "vue";
 import _ from "lodash";
+import moment from "moment"
 import traversal from "@/lib/tree"
 import { Note } from "@/model/note";
 
@@ -37,7 +38,7 @@ export default {
         },
     },
     actions: {
-        newNote({state, commit, rootState}, payload){
+        newNote({commit, rootState}, payload){
 
             payload.note = new Note();
 
@@ -51,6 +52,7 @@ export default {
             
             commit("addNote", payload);
             commit("flattern");
+            commit("agenda/count", {date: moment(payload.note.id).format("YYYY-MM-DD"), type: "added"})
 
             if(payload.text){
                 this.dispatch("saveNote", payload);
@@ -58,24 +60,23 @@ export default {
 
             return payload.note;
         },
-        deleteNote({state, commit, rootState}, payload){
+        deleteNote({commit}, payload){
 
-            let start = _.now();
             traversal.each(payload.note.notes, (n) => {
                 commit("tag/remove", {tags: _.filter(n.tokens, ["type","tag"])});
                 commit("agenda/remove", {time: n.time, note: n});
                 commit("agenda/remove", {time: n.schedule, note: n});
             })
 
-            start = _.now();
             commit("tag/remove", {tags: _.filter(payload.note.tokens, ["type","tag"])});
             commit("agenda/remove", {time: payload.note.time, note: payload.note});
             commit("agenda/remove", {time: payload.note.schedule, note: payload.note});
 
             commit("deleteNote", payload);
-            _.debounce(() => commit("flattern"), 100, {leading:true})
+            commit("flattern");
+            commit("agenda/count", {date: moment(payload.note.id).format("YYYY-MM-DD"), type: "removed"})
         },
-        downgradeNote({state, commit, rootState}, payload){
+        downgradeNote({commit}, payload){
 
             payload.newParent = payload.parent.notes[payload.index-1];
             commit("downgradeNote", payload);
@@ -87,7 +88,7 @@ export default {
 
             return Promise.resolve()
         },
-        upgradeNote({state, commit, getters, rootState, rootGetters}, payload){
+        upgradeNote({commit, rootState, rootGetters}, payload){
 
             let stack = rootGetters.findNoteStackById(payload.parent.id);
             if(stack.length > 1){
@@ -104,7 +105,7 @@ export default {
 
             return Promise.resolve()
         },
-        downNote({state, commit, rootState}, payload){
+        downNote({commit}, payload){
 
             payload.fromIndex = payload.index;
             payload.toIndex = payload.index+1;
@@ -116,7 +117,7 @@ export default {
 
             return Promise.resolve()
         },
-        upNote({state, commit, rootState}, payload){
+        upNote({commit}, payload){
 
             payload.fromIndex = payload.index;
             payload.toIndex = payload.index-1;
@@ -128,7 +129,7 @@ export default {
 
             return Promise.resolve();
         },
-        dragToSort({state, commit, rootState}, payload){
+        dragToSort({commit, rootState}, payload){
 
             if(!payload.note){
                 payload.note = rootState;

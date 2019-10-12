@@ -1,4 +1,3 @@
-import Vue from "vue";
 
 export default {
     namespaced: true,
@@ -19,7 +18,7 @@ export default {
                 }
             }
         },
-        nextState:  (state, getters, rootState, rootGetters) => (note) => {
+        nextState:  (getters) => (note) => {
             if(note.tokens[0].type !== "state"){
                 throw note;
             }
