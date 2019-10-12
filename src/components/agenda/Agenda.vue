@@ -35,13 +35,13 @@
           </v-menu>
         </template>
 
-        <v-sheet height="calc(100vh - 48px - 24px)">
+        <v-sheet height="calc(100vh - 48px - 24px)" v-resize="onResize">
             <v-calendar ref="calendar" :type="type" :weekdays="weekdays" @change="update"
-                v-model="now" :start="start" :end="end" :interval-style="intervalStyle" :interval-height="36">
+                :start="start" :end="end" :interval-style="intervalStyle" :interval-height="36">
 
                 <!-- month view header-->
-                <template v-slot:day-label="{date, day}">
-                    <v-btn text icon>
+                <template v-slot:day-label="{date, day, present}">
+                    <v-btn fab depressed x-small :text="!present">
                         {{day}}
                     </v-btn>
                     <div class="badge" v-show="noteCountAtDay(date) > 0" :title="'Created ' + noteCountAtDay(date) + ' notes' ">
@@ -59,7 +59,8 @@
                             <v-icon v-show="event.type === 'schedule'" small>mdi-alarm</v-icon>{{event.name}}
                         </span>
                     </div>
-                    <div v-if="dayEvents(date).length>mouthDayHeight" class="event" @click="type='week'">
+                    <div v-if="dayEvents(date).length>mouthDayHeight" class="event"
+                        @click="$router.push({name:'agenda', params:{type:'week', start:date}})">
                         more...
                     </div>
                 </template>
@@ -138,6 +139,7 @@ export default {
         AppLayout
     },
     created: function(){
+        this.start = this.$route.params.start;
     },
     mounted: function(){
         let time = moment();
@@ -157,19 +159,6 @@ export default {
             weekStart: state => state.settings.agenda.weekStart,
         }),
         ...mapGetters('agenda', ['eventsAtDay', 'eventsInDay', 'noteCountAtDay']),
-        now: {
-            get(){
-                return this.current.format("YYYY-MM-DD")
-            },
-            set(value){
-                let newCurrent =  moment(value);
-                if(newCurrent.isBefore(moment(this.start))){
-                    this.start = newCurrent.subtract(newCurrent.date()-1, 'd').format("YYYY-MM-DD")
-                }else if(newCurrent.isAfter(moment(this.end))){
-                    this.start = newCurrent.format("YYYY-MM-DD");
-                }
-            }
-        },
         weekdays(){
             if(this.weekStart == 0){
                 return [0, 1, 2, 3, 4, 5, 6]
@@ -182,7 +171,7 @@ export default {
                 return this.agendaType || 'month';
             },
             set(value){
-                this.$store.commit("agendaType", value)
+                this.$router.push({name:'agenda', params:{type:value, start:this.start}})
             }
         },
         title () {
@@ -223,18 +212,41 @@ export default {
         }
     },
     watch: {
+        "$route" (to, from) {
+            if(from.params.type != to.params.type){
+                this.$store.commit("agendaType", to.params.type)
+            }
+            if(to.params.start){
+                this.start = to.params.start;
+            }else{
+                let now = moment();
+                this.start = now.format("YYYY-MM-DD");
+                this.$refs.calendar.scrollToTime({hour: now.hour(), minute: now.minute()})
+            }
+        },
         type: function(to, from){
             if(from === 'month' && to === 'week'){
-                let offset = this.current.day() - this.weekStart;
-                this.start = this.current.subtract(offset, 'd').format("YYYY-MM-DD");
             }
+        },
+        start: function(){
+            this.onResize();
         }
     },
     methods: {
+        onResize(){
+            let startOf = moment(this.start).startOf('month');
+            let endOf = moment(this.start).endOf('month');
+            let first = this.weekStart ? startOf.isoWeek(): startOf.week();
+            let last = this.weekStart ? endOf.isoWeek(): startOf.week();
+            if( first > last) {
+                last = first + last;
+            }
+            let weeks = last-first+1;
+            let weekHeight = (this.$refs.calendar.$el.clientHeight-18)/weeks
+            this.mouthDayHeight = Math.round((weekHeight-34)/20);
+        },
         setToday(){
-            let now = moment();
-            this.now = now
-            this.$refs.calendar.scrollToTime({hour: now.hour(), minute: now.minute()})
+            this.$router.push({name:'agenda', params:{type:this.type}})
         },
         update({start, end}){
             if(this.start == start.date && this.end == end.date){
@@ -312,14 +324,22 @@ export default {
             }
         },
         prev(){
+            let currentStart = moment(this.start);
             if(this.type == 'month'){
-                this.$refs.calendar.prev();
+                currentStart.month(currentStart.month()-1);
             }else{
-                this.start = moment(this.start).subtract(7, 'd').format("YYYY-MM-DD");
+                currentStart.subtract(7, 'd');
             }
+            this.$router.push({name:'agenda', params:{type: this.type, start: currentStart.format("YYYY-MM-DD")}})
         },
         next(){
-            this.$refs.calendar.next();
+            let currentStart = moment(this.start);
+            if(this.type == 'month'){
+                currentStart.month(currentStart.month()+1);
+            }else{
+                currentStart.add(7, 'd');
+            }
+            this.$router.push({name:'agenda', params:{type: this.type, start: currentStart.format("YYYY-MM-DD")}})
         },
         showEvent(event, mouseEvent){
             const open = () => {

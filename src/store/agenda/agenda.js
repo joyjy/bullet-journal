@@ -1,6 +1,7 @@
 import Vue from "vue";
 import _ from "lodash";
 import { parseEvents } from "@/model/event"
+import moment from "moment";
 
 const findInsertIndex = function(array, event, orderBy){
     if(event.order > -1){
@@ -49,7 +50,9 @@ export default {
         }
     },
     mutations:{
-        count(state, {date, type}){
+        count(state, {note, date, type}){
+            date = date || moment(note.id).format("YYYY-MM-DD")
+            type = type || 'added';
             if(!state.count[date]){
                 Vue.set(state.count, date, {added: 0, removed: 0});
             }
