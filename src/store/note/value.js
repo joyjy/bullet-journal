@@ -1,11 +1,10 @@
 import Vue from "vue";
 import _ from "lodash";
 import parser from "@/lib/parser";
-import { toTime } from "@/model/time";
 
 export default {
     mutations:{
-        saveText(state, {note, text, tokens, notes, time}){
+        saveText({note, text, tokens, notes, time}){
 
             note.text = text;
             note.tokens = tokens;
@@ -20,7 +19,7 @@ export default {
                 Vue.delete(note, "time");
             }
         },
-        saveContent(state, {note, text, tokens, time}){
+        saveContent({note, text, tokens, time}){
 
             _.each(tokens, function(token){ // filter except schedule state
                 if(token.type === "state" && !token.time || token.time && token.time.type === "stamp"){
@@ -36,9 +35,6 @@ export default {
                 Vue.delete(note, "schedule");
             }
         },
-        setTimePrototype(state, {note, token}){
-            token.time = toTime(token.time, note);
-        }
     },
     actions: {
         saveNote({commit}, payload){

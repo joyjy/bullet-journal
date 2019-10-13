@@ -6,18 +6,11 @@ Vue.use(Vuex);
 import { modules, reducer } from "./modules"
 
 import VuexPersist from "vuex-persist";
-import Cookies from "js-cookie";
 
 const vuexPersist = new VuexPersist({
     key: "bullet-note",
     storage: window.localStorage,
     reducer: reducer,
-});
-const vuexPersistCookie = new VuexPersist({
-    restoreState: (key) => Cookies.getJSON(key),
-    saveState: (key, state) => Cookies.set(key, state, {expires: 3}),
-    modules: ["user"], //only save user module,
-    filter: (mutation) => mutation.type === "signIn" || mutation.type === "signOut",
 });
 import undoRedoPlugin, {undoRedoHistory} from "./plugins/undo";
 
@@ -28,7 +21,7 @@ import dataAPI from "@/api/data";
 
 const store = new Vuex.Store({
     strict: true,
-    plugins: [vuexPersist.plugin, vuexPersistCookie.plugin, undoRedoPlugin],
+    plugins: [vuexPersist.plugin, undoRedoPlugin],
     modules: modules,
     state: {
         notes: [], // notes as tree

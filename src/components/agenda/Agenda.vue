@@ -224,10 +224,6 @@ export default {
                 this.$refs.calendar.scrollToTime({hour: now.hour(), minute: now.minute()})
             }
         },
-        type: function(to, from){
-            if(from === 'month' && to === 'week'){
-            }
-        },
         start: function(){
             this.onResize();
         }

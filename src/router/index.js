@@ -3,7 +3,7 @@ import VueRouter from "vue-router";
 
 import NoteTree from "@/components/note/NoteTree";
 import Agenda from "@/components/agenda/Agenda";
-import Setting from "@/components/setting/Setting";
+import Setting from "@/components/app/Setting";
 import Signin from "@/components/app/Signin";
 
 import notebook from "@/components/notebook/Notebook";

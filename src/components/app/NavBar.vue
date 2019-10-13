@@ -2,38 +2,9 @@
     <v-navigation-drawer app :mini-variant="!pinned && !hover" :expand-on-hover="!pinned" mini-variant-width="68"
       @mouseover.native="hover = true"
       @mouseleave.native="hover = false">
-      <template v-slot:prepend>
-        <v-list nav>
-          <v-list-item two-line>
-            <v-list-item-avatar class="align-self-center">
-              <v-badge overlap color="error lighten-2">
-                <template v-slot:badge>
-                  <v-icon small>mdi-sync-off</v-icon>
-                </template>
-                <v-avatar color="grey lighten-3">
-                  <span class="headline">{{ $store.getters.profile() }}</span>
-                </v-avatar>
-              </v-badge>
-            </v-list-item-avatar>
 
-            <v-list-item-content>
-              <v-list-item-title>{{ $store.state.user.name }}</v-list-item-title>
-              <v-list-item-subtitle class="text-truncate" :style="{display:'inline-block'}">
-                {{ $store.state.user.account }}
-              </v-list-item-subtitle>
-              <v-list-item-subtitle class="caption" :title="stat">
-                {{ stat }}
-              </v-list-item-subtitle>
-            </v-list-item-content>
-            
-            <v-list-item-action @click="pinned = !pinned">
-              <v-btn text icon>
-                <v-icon v-if="pinned">mdi-pin</v-icon>
-                <v-icon v-else>mdi-pin-outline</v-icon>
-              </v-btn>
-            </v-list-item-action>
-          </v-list-item>
-        </v-list>
+      <template v-slot:prepend>
+        <nav-bar-header :pinned="pinned" @pin="pinned = !pinned"></nav-bar-header>
       </template>
 
       <v-divider></v-divider>
@@ -148,12 +119,15 @@
 </template>
 
 <script>
-import Vue from 'vue'
+import NavBarHeader from "./NavBarHeader";
 
 export default {
     data: () => ({
       hover:false
     }),
+    components:{
+      NavBarHeader,
+    },
     computed: {
         pinned:{
             get(){
@@ -163,9 +137,6 @@ export default {
               this.$store.commit("drawerPinned", value)
             }
         },
-        stat: function(){
-          return this.$store.state.flattern.length + " bullets, " + this.$store.state.tag.count + " tags."
-        }
     }
 }
 </script>

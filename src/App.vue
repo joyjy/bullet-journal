@@ -3,7 +3,7 @@
 </template>
 
 <script>
-import { mapGetters, mapMutations, mapActions } from "vuex"
+import { mapGetters, mapMutations, mapActions, mapState } from "vuex"
 
 export default {
   data: () => ({}),
@@ -21,7 +21,15 @@ export default {
     window.removeEventListener('keydown', this.onKey)
   },
   computed: {
-    ...mapGetters(["signed"])
+    ...mapGetters(["signed"]),
+    ...mapState({token: state => state.user.token})
+  },
+  watch:{
+    token(){
+      if(!this.token){
+        this.$router.push({'name': 'signin'})
+      }
+    }
   },
   methods: {
     ...mapMutations(["undo"]),

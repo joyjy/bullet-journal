@@ -15,6 +15,7 @@ const reducer = (state) => ({
     tag: state.tag,
     agenda: state.agenda,
     settings: state.settings,
+    user: state.user,
 })
 
 const modules = {
