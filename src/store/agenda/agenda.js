@@ -97,7 +97,17 @@ export default {
                 return index;
             })
         },
-        remove(){
+        remove(state, {note}){
+            parseEvents(note, (event) => {
+                let target = event.hasTime ? state.time: state.day;
+                let date = event.date;
+
+                let index = _.findIndex(target[date], e => e.source.id == note.id);
+                target[date].splice(index, 1);
+                if(event.hasTime){
+                    reset(target[date], index+1)
+                }
+            })
         }
     }
 }

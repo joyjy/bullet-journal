@@ -63,18 +63,16 @@ export default {
         deleteNote({commit}, payload){
 
             traversal.each(payload.note.notes, (n) => {
-                commit("tag/remove", {tags: _.filter(n.tokens, ["type","tag"])});
-                commit("agenda/remove", {time: n.time, note: n});
-                commit("agenda/remove", {time: n.schedule, note: n});
+                commit("tag/remove", {tags: _.filter(n.tokens.concat(n.content.tokens), ["type","tag"])});
+                commit("agenda/remove", {note: n});
             })
 
-            commit("tag/remove", {tags: _.filter(payload.note.tokens, ["type","tag"])});
-            commit("agenda/remove", {time: payload.note.time, note: payload.note});
-            commit("agenda/remove", {time: payload.note.schedule, note: payload.note});
+            commit("tag/remove", {tags: _.filter(payload.note.tokens.concat(payload.note.content.tokens), ["type","tag"])});
+            commit("agenda/remove", {note: payload.note});
 
             commit("deleteNote", payload);
             commit("flattern");
-            commit("agenda/count", {date: moment(payload.note.id).format("YYYY-MM-DD"), type: "removed"})
+            commit("agenda/count", {date: moment().format("YYYY-MM-DD"), type: "removed"})
         },
         downgradeNote({commit}, payload){
 

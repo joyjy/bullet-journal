@@ -102,7 +102,7 @@
                     <p class="mt-1 mb-0 pa-1">{{ selectedEvent.source ?  selectedEvent.source.text : ''}}</p>
                 </v-card-text>
                 <v-card-actions>
-                    <v-btn small text :to="{name:'note', params:{id:selectedEvent.source ?  selectedEvent.source.id : ''}}">
+                    <v-btn small text @click="focusParent">
                         Focus
                     </v-btn>
                 </v-card-actions>
@@ -356,6 +356,11 @@ export default {
             }
 
             mouseEvent.stopPropagation();
+        },
+        focusParent(){
+            let stack = this.$store.getters.findNoteStackById(this.selectedEvent.source.id);
+            let parent = stack.length > 1 ? stack[stack.length-2] : stack[0];
+            this.$router.push({name:'note', params:{id:parent.id}});
         }
     }
 }
