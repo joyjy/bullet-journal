@@ -1,13 +1,18 @@
 <template>
-    <v-col :class="{'pb-4': view.title}" :cols="view.colWidth">
-        <v-subheader v-show="view.title">{{ `${name || view.title}` }}</v-subheader>
+    <v-col :class="[{'view': view.title}]" :cols="view.colWidth">
+        <template v-if="view.title">
+            <v-row class="align-center" no-gutters>
+                <v-subheader>{{ `${name || view.title}` }}</v-subheader>
+                <v-btn v-show="!name" icon small class="ml-auto" @click="create">
+                    <v-icon>mdi-plus</v-icon>
+                </v-btn>
+            </v-row>
+        </template>
 
-        <div v-if="view.space" ></div>
-        <component v-else-if="component" :is="component.name" v-bind="props" @name="name=$event"></component>
+        <component v-if="view.component" :is="view.component.name" v-bind="props" class="mb-3"></component>
         <v-row v-else v-for="(row,i) in view.rows" :key=i no-gutters :style="{height:row.height }">
             <grid-view v-for="(view,j) in row.cols" :view="view" :key="j"></grid-view>
         </v-row>
-        
     </v-col>
 </template>
 
@@ -21,23 +26,29 @@ export default {
         name: '',
     }),
     components:{
-        NoteTreeRoot
+        NoteTreeRoot,
     },
     computed: {
-        component(){
-            if(this.view.component && this.props){
-                return this.view.component;
-            }
-            return false;
-        },
         props(){
             let props = this.view.component.props(this);
             return props;
         }
     },
+    methods: {
+        create(){
+
+        }
+    }
 }
 </script>
 
 <style>
-
+.view{
+    border-bottom: 1px solid #cecece;
+    border-right: 1px solid #cecece;
+}
+.view .v-subheader{
+    height: auto;
+    padding: 8px 16px 8px 16px;
+}
 </style>

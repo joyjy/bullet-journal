@@ -8,7 +8,7 @@
             </note-bullet>
             <div class="d-flex flex-column flex-grow-1" style="width: calc(100% - 21px)">
                 <editable-div :note="note" :type="'text'" :match="match" :style="{paddingRight:collapsed == 'expand'?'1rem':''}"
-                    @input="saveNote"
+                    @input="debounceSaveNote"
                     @new-content="saveNote"
                     @new-note="newNote"
                     @del-note="deleteNote"
@@ -22,7 +22,7 @@
                 </editable-div>
                 <editable-div v-show="displayContent || focusContent"
                     :type="'content'" :note="note" :match="match"
-                    @input="saveNote"
+                    @input="debounceSaveNote"
                     @editing="focus = $event; focusContent = $event;"
                     @composing="composing = $event"
                     @del-content="deleteContent">
@@ -178,6 +178,7 @@ export default {
             this.childrenMatch = this.childrenMatch || childMatch;
             this.$emit("matched", this.filtered); // up boardcast match to display path;
         },
+        debounceSaveNote: _.debounce(function(payload){this.saveNote(payload);}, 100),
         saveNote: function(payload){
             payload.note = this.note;
             this.$store.dispatch("saveNote", payload)
