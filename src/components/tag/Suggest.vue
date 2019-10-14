@@ -22,7 +22,7 @@ export default {
     }),
     watch:{
         lastInput(){
-            this.debounceShowSuggest(this.lastInput)
+            this.showSuggest(this.lastInput)
         },
         focus(){
             if(!this.focus){
@@ -52,9 +52,10 @@ export default {
     },
     methods: {
         showSuggest(payload){
+
             let tokens = payload.type == "content" ? payload.note.content.tokens : payload.note.tokens;
             let lastToken = tokens[tokens.length-1];
-            if(!lastToken || lastToken.type !== "tag" || !["#","@",':'].includes(lastToken.text[0])){
+            if(!lastToken || lastToken.type !== "tag" && !["#","@",':'].includes(lastToken.text[0])){
                 this.lastInput.requireSuggest = "";
                 this.suggests = [];
                 return;
@@ -73,7 +74,6 @@ export default {
                 }
             }
         },
-        debounceShowSuggest: _.debounce(function(payload){this.showSuggest(payload);}, 500),
         appendTag(tag){
             tag = tag || this.suggests[this.selected];
             if(!tag){

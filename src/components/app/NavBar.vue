@@ -17,14 +17,14 @@
           <v-list-item-title>All Note</v-list-item-title>
         </v-list-item>
 
-        <v-list-group v-if="$store.state.saved.notes.length" prepend-icon="mdi-star" no-action>
+        <v-list-group v-if="starred.length" prepend-icon="mdi-star" no-action>
           <template v-slot:activator>
             <v-list-item-content>
               <v-list-item-title>Starred</v-list-item-title>
             </v-list-item-content>
           </template>
 
-          <v-list-item v-for="n in $store.state.saved.notes"
+          <v-list-item v-for="n in starred"
             :key="n.id" :to="{name: 'note', params:{id:n.id}}">
             <v-list-item-content>
               <v-list-item-title>{{ n.name }}</v-list-item-title>
@@ -39,14 +39,14 @@
           <v-list-item-title>Starred</v-list-item-title>
         </v-list-item>
 
-        <v-list-group v-if="$store.state.saved.filters.length" prepend-icon="mdi-filter" no-action>
+        <v-list-group v-if="filters.length" prepend-icon="mdi-filter" no-action>
           <template v-slot:activator>
             <v-list-item-content>
               <v-list-item-title>Saved Filter</v-list-item-title>
             </v-list-item-content>
           </template>
 
-          <v-list-item v-for="text in $store.state.saved.filters" :key="text"
+          <v-list-item v-for="text in filters" :key="text"
             @click="$router.push({name: 'note', query: {q: text}})"
             :class="{'v-list-item--active': $route.query.q === text}">
             <v-list-item-content>
@@ -77,12 +77,12 @@
             </v-list-item-action>
         </v-list-item>
 
-        <v-list-group prepend-icon="mdi-book" value="true" no-action v-if="this.$store.state.user.account === 'joyjy2ah@gmail.com'">
+        <v-list-group prepend-icon="mdi-book" value="true" no-action v-if="account === 'joyjy2ah@gmail.com'">
             <template v-slot:activator>
                 <v-list-item-title>Notebook</v-list-item-title>
             </template>
 
-            <v-list-item v-for="notebook in $store.state.notebook.list" :key="notebook.name"
+            <v-list-item v-for="notebook in notebooks" :key="notebook.name"
                 @click="$router.push({name: 'notebook', params: {name: notebook.name}})">
                 <v-list-item-title>
                     {{ notebook.name }}
@@ -119,6 +119,7 @@
 </template>
 
 <script>
+import { mapState } from "vuex"
 import NavBarHeader from "./NavBarHeader";
 
 export default {
@@ -129,14 +130,20 @@ export default {
       NavBarHeader,
     },
     computed: {
-        pinned:{
-            get(){
-                return this.$store.state.settings.drawer.pinned || false;
-            },
-            set(value){
-              this.$store.commit("drawerPinned", value)
-            }
-        },
+      ...mapState({
+        starred: state => state.saved.notes,
+        filters: state => state.saved.filters,
+        account: state => state.user.account,
+        notebooks: state => state.notebook.list,
+      }),
+      pinned:{
+          get(){
+              return this.$store.state.settings.drawer.pinned || false;
+          },
+          set(value){
+            this.$store.commit("drawerPinned", value)
+          }
+      },
     }
 }
 </script>

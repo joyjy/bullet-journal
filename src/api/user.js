@@ -1,19 +1,6 @@
-import api from "@/api/config";
 import axios from "axios";
-
-const convertResponse = (response) =>{ 
-    return Promise.resolve({ 
-        result: response.status == 200,
-        message: response.data.message,
-        data: response.data
-    })
-}
-const convertError = (error) => {
-    return Promise.resolve({
-        result: false,
-        message: error.response.data.message,
-    });
-}
+import api from "./config";
+import {convertResponse, convertError}  from "./common"
 
 export default {
     signup(){

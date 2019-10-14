@@ -4,7 +4,7 @@ import parser from "@/lib/parser";
 
 export default {
     mutations:{
-        saveText({note, text, tokens, notes, time}){
+        saveText(state, {note, text, tokens, notes, time}){
 
             note.text = text;
             note.tokens = tokens;
@@ -19,7 +19,7 @@ export default {
                 Vue.delete(note, "time");
             }
         },
-        saveContent({note, text, tokens, time}){
+        saveContent(state, {note, text, tokens, time}){
 
             _.each(tokens, function(token){ // filter except schedule state
                 if(token.type === "state" && !token.time || token.time && token.time.type === "stamp"){

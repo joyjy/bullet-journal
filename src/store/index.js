@@ -13,6 +13,7 @@ const vuexPersist = new VuexPersist({
     reducer: reducer,
 });
 import undoRedoPlugin, {undoRedoHistory} from "./plugins/undo";
+import syncPlugin from "./plugins/sync";
 
 // ---- algorithm & data struct
 import _ from "lodash";
@@ -21,11 +22,13 @@ import dataAPI from "@/api/data";
 
 const store = new Vuex.Store({
     strict: true,
-    plugins: [vuexPersist.plugin, undoRedoPlugin],
+    plugins: [vuexPersist.plugin, undoRedoPlugin, syncPlugin],
     modules: modules,
     state: {
         notes: [], // notes as tree
         flattern: [], // notes as table
+        lastChanged: 0,
+        lastSynced: 0
     },
     getters: {
         findNoteStackById: (state) => (id) => {
@@ -37,7 +40,8 @@ const store = new Vuex.Store({
         },
         findLastVisibleNote: (state) => (note) => {
             let prev = traversal.find(state.notes, (n, p) => {
-                return n.total < note.total && modules['note-display'].visible(n, p);
+                return (!note || n.total < note.total)
+                        && modules['note-display'].visible(n, p);
             }, {reserve:true, stop: (n) => n.archived || n.display.collapsed})
             return prev || note;
         },
@@ -69,10 +73,24 @@ const store = new Vuex.Store({
             state.flattern = traversal.flattern(state.notes);
             console.log("flattern", (_.now()-start)+"ms");
         },
+        lastSynced(state, number){
+            state.lastSynced = number;
+        },
+        lastChanged(state, number){
+            state.lastChanged = number;
+        }
     },
     actions: {
         async init({commit, state}){
+
+            let {result, message, data} = await dataAPI.load(state.user.token)
+            if(result){
+                // todo merge from server
+                commit("lastSynced", data.lastModified)
+            }
+
             return new Promise((resolve) => setTimeout(() => {
+
                 let start = _.now();
 
                 if(state.notes.length === 0){
@@ -99,8 +117,11 @@ const store = new Vuex.Store({
                 resolve();
             }, 0));
         },
-        save({state}){
-            return dataAPI.save(state);
+        async save({state, commit}){
+            let {result, message, data } = await dataAPI.save(state);
+            if(result){
+                commit("lastSynced", data.time)
+            }
         },
     }
 });

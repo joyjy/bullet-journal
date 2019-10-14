@@ -94,7 +94,14 @@ export default {
                 case "\n":
                     if(state === "$start" || state === "$split"){ // position has no content
                         state = "empty";
-                    }else if(state === "text" || state === "tag"){ // no close symbol content
+                    }else if(state === "text"){ // no close symbol content
+                        tokens.push(new Token(state, text, start, end));
+                        start = end;
+                        state = "empty";
+                    }else if(state === "tag"){
+                        if(start == end-1){
+                            state = "text";
+                        }
                         tokens.push(new Token(state, text, start, end));
                         start = end;
                         state = "empty";
@@ -122,7 +129,7 @@ export default {
                 case "#":
                 case "@":
                 case ":":
-                    if(state === "$start" || state==="$split"){
+                    if(state === "$start" || state==="$split" || state === "tag"){
                         if(start < end){
                             tokens.push(new Token("text", text, start, end));
                         }
@@ -205,7 +212,7 @@ export default {
 
         if(start < end){
             let symbol = symbols.peek();
-            if(state === "tag" && symbol.is("#") && symbol.index === end-1){ // tag must has content
+            if(state === "tag" && symbol.index === end-1){ // tag must has content
                 state = "text";
             }else if(state === "state"){ // [state] must closed so not allow as $end status
                 state = "text";
