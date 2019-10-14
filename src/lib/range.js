@@ -1,12 +1,12 @@
 const recurisePositionAndLengh = function(el, container, offset, length){
     for (let i = 0; i < el.childNodes.length; i++) {
         const child = el.childNodes[i];
-        if(child.nodeType == Node.ELEMENT_NODE && child.firstChild.isSameNode(container)){
+        if(child.nodeType === Node.ELEMENT_NODE && child.firstChild.isSameNode(container)){
             return [offset, length];
         }else if(child.isSameNode(container)){
             return [offset, length];
         }else{
-            let result = recurisePositionAndLengh(child, container, offset, length)
+            let result = recurisePositionAndLengh(child, container, offset, length);
             if(result){
                 return result;
             }
@@ -22,7 +22,7 @@ const recuriseFocus = function(el, position, range){
         }
         const node = el.childNodes[i];
         if(position <= node.textContent.length){
-            if(node.nodeType == Node.TEXT_NODE){
+            if(node.nodeType === Node.TEXT_NODE){
                 range.setStart(node, position);
                 range.setEnd(node, position);
                 return;
@@ -50,7 +50,7 @@ export default {
         }
 
         let range = sel.getRangeAt(0);
-        return range.getBoundingClientRect()
+        return range.getBoundingClientRect();
     },
     position(el){
         return this.positionAndLength(el)[0];
@@ -61,7 +61,7 @@ export default {
         }
 
         let sel = window.getSelection && window.getSelection();
-        if (!sel || sel.rangeCount == 0) {
+        if (!sel || sel.rangeCount === 0) {
             return [-1, 0];
         }
 

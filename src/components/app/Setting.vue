@@ -4,15 +4,48 @@
         <v-content>
             <v-tabs dark @change="view = $event">
                 <v-tab>Account</v-tab>
-                <v-tab>Common</v-tab>
+                <v-tab>Note</v-tab>
                 <v-tab>Data</v-tab>
             </v-tabs>
             <v-container v-if="view == 0" fluid>
+                <h2>Profile</h2>
+                <v-divider></v-divider>
                 <v-row>
+                    <v-col cols="2">Username</v-col>
                     <v-col>{{ $store.state.user.username }}</v-col>
                 </v-row>
                 <v-row>
-                    <v-col>{{ $store.state.user.account }}</v-col>
+                    <v-col cols="2">Avatar</v-col>
+                    <v-col>{{ $store.state.user.profile }}</v-col>
+                </v-row>
+                <v-row>
+                    <v-col cols="2">Email</v-col>
+                    <v-col>
+                        {{ $store.state.user.account }}
+                    </v-col>
+                </v-row>
+                <v-row>
+                    <v-col cols="2">Password</v-col>
+                    <v-col></v-col>
+                </v-row>
+                <v-row>
+                    <v-col>
+                        <v-btn>Sign out</v-btn>
+                    </v-col>
+                </v-row>
+                <h3>Export</h3>
+                <v-divider></v-divider>
+                <v-row>
+                    <v-col>
+                        <v-btn>Export</v-btn>
+                    </v-col>
+                </v-row>
+                <h3>Delete</h3>
+                <v-divider></v-divider>
+                <v-row>
+                    <v-col>
+                        <v-btn>Delete account</v-btn>
+                    </v-col>
                 </v-row>
             </v-container>
             <v-container v-else-if="view == 1" fluid>

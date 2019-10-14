@@ -30,7 +30,7 @@
                     </v-list-item>
                     <v-divider></v-divider>
                     <v-list-item @click="signout">
-                        <v-list-item-title>Signout</v-list-item-title>
+                        <v-list-item-title>Sign out</v-list-item-title>
                     </v-list-item>
                 </v-list>
             </v-menu>

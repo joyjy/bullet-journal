@@ -1,6 +1,6 @@
 import Vue from "vue";
 import _ from "lodash";
-import { parseEvents } from "@/model/event"
+import { parseEvents } from "@/model/event";
 import moment from "moment";
 
 const findInsertIndex = function(array, event, orderBy){
@@ -51,8 +51,8 @@ export default {
     },
     mutations:{
         count(state, {note, date, type}){
-            date = date || moment(note.id).format("YYYY-MM-DD")
-            type = type || 'added';
+            date = date || moment(note.id).format("YYYY-MM-DD");
+            type = type || "added";
             if(!state.count[date]){
                 Vue.set(state.count, date, {added: 0, removed: 0});
             }
@@ -67,10 +67,10 @@ export default {
                     Vue.set(target, date, []);
                 }
             
-                let index = findInsertIndex(target[date], event, e => {
-                    return event.hasTime ? e.startMinutes: e.start
+                let index = findInsertIndex(target[date], event, (e) => {
+                    return event.hasTime ? e.startMinutes: e.start;
                 });
-                if(event.order == -1){
+                if(event.order === -1){
                     event.order = index;
                 }
             
@@ -79,13 +79,13 @@ export default {
                 }
             
                 if(index > 0){
-                    let prevEvent = target[date][index-1]
+                    let prevEvent = target[date][index-1];
                     if(prevEvent && event.startMinutes < prevEvent.startMinutes + _.max([prevEvent.durationMinites, 30])){
                         event.overlap = (prevEvent.overlap || 0)+1;
                     }
                 }
             
-                if(target[date][index] === undefined){
+                if(!target[date][index]){
                     target[date][index] = event;
                 }else{
                     target[date].splice(index, 0, event); // todo reset after orders
@@ -95,14 +95,14 @@ export default {
                 }
 
                 return index;
-            })
+            });
         },
         remove(state, {note}){
             parseEvents(note, (event) => {
                 let target = event.hasTime ? state.time: state.day;
                 let date = event.date;
 
-                let index = _.findIndex(target[date], e => e.source.id == note.id);
+                let index = _.findIndex(target[date], (e) => e.source.id === note.id);
                 target[date].splice(index, 1);
                 if(event.hasTime){
                     reset(target[date], index+1)

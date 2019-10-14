@@ -3,27 +3,27 @@ import Vue from "vue";
 import Vuex from "vuex";
 Vue.use(Vuex);
 
-import { modules, reducer } from "./modules"
+import { modules, reducer } from "./modules";
 
 import VuexPersist from "vuex-persist";
-
 const vuexPersist = new VuexPersist({
     key: "bullet-note",
     storage: window.localStorage,
-    reducer: reducer,
+    reducer,
 });
+
 import undoRedoPlugin, {undoRedoHistory} from "./plugins/undo";
 import syncPlugin from "./plugins/sync";
 
-// ---- algorithm & data struct
+import dataAPI from "@/api/data";
+
 import _ from "lodash";
 import traversal from "@/lib/tree";
-import dataAPI from "@/api/data";
 
 const store = new Vuex.Store({
     strict: true,
     plugins: [vuexPersist.plugin, undoRedoPlugin, syncPlugin],
-    modules: modules,
+    modules,
     state: {
         notes: [], // notes as tree
         flattern: [], // notes as table
@@ -41,21 +41,21 @@ const store = new Vuex.Store({
         findLastVisibleNote: (state) => (note) => {
             let prev = traversal.find(state.notes, (n, p) => {
                 return (!note || n.total < note.total)
-                        && modules['note-display'].visible(n, p);
-            }, {reserve:true, stop: (n) => n.archived || n.display.collapsed})
+                        && modules["note-display"].visible(n, p);
+            }, {reserve:true, stop: (n) => n.archived || n.display.collapsed});
             return prev || note;
         },
         findNextVisibleNote: (state) => (note) => {
             let next = traversal.find(state.notes, (n, p) => {
-                return n.total > note.total && modules['note-display'].visible(n, p);
-            }, {stop: (n) => n.archived || n.display.collapsed})
+                return n.total > note.total && modules["note-display"].visible(n, p);
+            }, {stop: (n) => n.archived || n.display.collapsed});
             return next || note;
         },
         findNoteByPathText: (state) => (path) => {
             let parent = state;
             for (let i = 0; i < path.length; i++) {
                 let text = path[i];
-                let found = _.find(parent.notes, (n) => n.text.replace(/\xa0/g, " ") === text)
+                let found = _.find(parent.notes, (n) => n.text.replace(/\xa0/g, " ") === text);
                 if(!found){
                     return null;
                 }
@@ -83,10 +83,10 @@ const store = new Vuex.Store({
     actions: {
         async init({commit, state}){
 
-            let {result, message, data} = await dataAPI.load(state.user.token)
+            let {result, message, data} = await dataAPI.load(state.user.token);
             if(result){
                 // todo merge from server
-                commit("lastSynced", data.lastModified)
+                commit("lastSynced", data.lastModified);
             }
 
             return new Promise((resolve) => setTimeout(() => {
@@ -113,7 +113,7 @@ const store = new Vuex.Store({
                     // commit("agenda/add", {note: n})
                 //});
 
-                console.log("init", (_.now()-start)+"ms")
+                console.log("init", (_.now()-start)+"ms");
                 resolve();
             }, 0));
         },

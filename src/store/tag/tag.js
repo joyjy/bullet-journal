@@ -13,8 +13,11 @@ export default {
         suggests: (state) => (t) => {
             let sortable = [];
             for(const tag in state.all){
+                if(!{}.hasOwnProperty.call(state.all, tag)){
+                    continue;
+                }
                 let index = tag.indexOf(t);
-                if(index == 0 && tag.length == t.length || index == -1){
+                if(index === 0 && tag.length === t.length || index === -1){
                     continue;
                 }
                 let orderIndex = _.sortedIndexBy(sortable, tag, (tag) => -state.all[tag].lastAdd);
@@ -25,9 +28,9 @@ export default {
     },
     mutations: {
         add(state, {tags, note}){
-            _.each(tags, tag => {
+            _.each(tags, (tag) => {
                 if(!state.all[tag.text]){
-                    Vue.set(state.all, tag.text, { count: 0, group: '', lastAdd: 0});
+                    Vue.set(state.all, tag.text, { count: 0, group: "", lastAdd: 0});
                     state.count++;
                 }
                 state.all[tag.text].count++;
@@ -57,8 +60,8 @@ export default {
             });
         },
         addGroup(state, {name}){
-            if(_.findIndex(state.groups, (g) => g.name === name) == -1){
-                state.groups.push({name:name})
+            if(_.findIndex(state.groups, (g) => g.name === name) === -1){
+                state.groups.push({name});
             }
         },
         removeGroup(state, {name}){
@@ -70,15 +73,15 @@ export default {
         },
         removeFromGroup(state, {tag}){
             if(state.all[tag]){
-                Vue.set(state.all[tag], "group", '');
+                Vue.set(state.all[tag], "group", "");
             }
         },
     },
     actions: {
         replace({commit}, {oldTags, newTags}){
-            let removeds = _.differenceBy(oldTags, newTags, 'text');
+            let removeds = _.differenceBy(oldTags, newTags, "text");
             commit("remove", { tags: removeds });
-            let addeds = _.differenceBy(newTags, oldTags, 'text');
+            let addeds = _.differenceBy(newTags, oldTags, "text");
             commit("add", { tags: addeds });
         },
     }
