@@ -1,7 +1,7 @@
 import Vue from "vue";
 import _ from "lodash";
-import moment from "moment"
-import traversal from "@/lib/tree"
+import moment from "moment";
+import traversal from "@/lib/tree";
 import { Note } from "@/model/note";
 
 export default {
@@ -52,7 +52,7 @@ export default {
             
             commit("addNote", payload);
             commit("flattern");
-            commit("agenda/count", {date: moment(payload.note.id).format("YYYY-MM-DD"), type: "added"})
+            commit("agenda/count", {date: moment(payload.note.id).format("YYYY-MM-DD"), type: "added"});
 
             if(payload.text){
                 this.dispatch("saveNote", payload);
@@ -72,14 +72,14 @@ export default {
 
             commit("deleteNote", payload);
             commit("flattern");
-            commit("agenda/count", {date: moment().format("YYYY-MM-DD"), type: "removed"})
+            commit("agenda/count", {date: moment().format("YYYY-MM-DD"), type: "removed"});
         },
         downgradeNote({commit}, payload){
 
             payload.newParent = payload.parent.notes[payload.index-1];
             commit("downgradeNote", payload);
             if(payload.newParent.display.collapsed){
-                commit("collapse", {note: payload.newParent})
+                commit("collapse", {note: payload.newParent});
             }
             commit("focus", {note:payload.note, position:payload.position});
             commit("flattern");
@@ -91,10 +91,10 @@ export default {
             let stack = rootGetters.findNoteStackById(payload.parent.id);
             if(stack.length > 1){
                 payload.grandParent = stack[stack.length - 2];
-                payload.grandIndex = _.indexOf(payload.grandParent.notes, payload.parent) + 1
+                payload.grandIndex = _.indexOf(payload.grandParent.notes, payload.parent) + 1;
             }else{
                 payload.grandParent = rootState;
-                payload.grandIndex = _.indexOf(rootState.notes, payload.parent) + 1
+                payload.grandIndex = _.indexOf(rootState.notes, payload.parent) + 1;
             }
 
             commit("upgradeNote", payload);
@@ -113,7 +113,7 @@ export default {
             commit("focus", {note:payload.note, position:payload.position});
             commit("flattern");
 
-            return Promise.resolve()
+            return Promise.resolve();
         },
         upNote({commit}, payload){
 

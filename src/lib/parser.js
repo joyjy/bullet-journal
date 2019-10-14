@@ -2,7 +2,7 @@ import lexer from "./lexer";
 
 const clarify = function(text){
     let xssed = text.replace(/</g, "&lt;");
-    if(xssed[0] === ':' && xssed.codePointAt(1) > 0xffff){
+    if(xssed[0] === ":" && xssed.codePointAt(1) > 0xffff){
         xssed = ":<span class='emoji'>"+xssed.substring(1)+"</span>";
     }
     return xssed;
@@ -40,7 +40,7 @@ const addMatchTag = function(text, match, textOffset, targetType){
     return clarify(text);
 }
 
-const urlReg = /[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)?/gi;
+const urlReg = /[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)?/gi;
 
 const parseHtml = function(type, tokens, match){
 

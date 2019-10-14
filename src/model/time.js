@@ -51,13 +51,13 @@ const TimeHelper = {
     endFormat(note, start){
         let end = endMoment.call(this, note);
         if(!end){
-            return undefined;
+            return;
         }
         if(this.endTime){
-            if(start && start.isSame(end, 'day')){
-                return end.format("HH:mm")
+            if(start && start.isSame(end, "d")){
+                return end.format("HH:mm");
             }else{
-                return end.format("YYYY-MM-DD HH:mm")
+                return end.format("YYYY-MM-DD HH:mm");
             }
         }
         return end.format("YYYY-MM-DD");
@@ -93,7 +93,7 @@ class Time{
     }
 
     endFormat(){
-        return TimeHelper.endFormat.call(this)
+        return TimeHelper.endFormat.call(this);
     }
 }
 

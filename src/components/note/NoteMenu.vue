@@ -1,5 +1,5 @@
 <template>
-    <v-menu offset-y open-on-hover nudge-left="120" nudge-top="30" open-delay="800" close-delay="100">
+    <v-menu offset-y nudge-left="120" nudge-top="30" open-delay="800" close-delay="100">
         <template v-slot:activator="{ on }">
             <div class="toolbar">
                 <v-btn text icon x-small v-on="on">

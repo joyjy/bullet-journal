@@ -45,7 +45,7 @@ export default {
             throw el;
         }
         let sel = window.getSelection && window.getSelection();
-        if (!sel || sel.rangeCount == 0) {
+        if (!sel || sel.rangeCount === 0) {
             return;
         }
 

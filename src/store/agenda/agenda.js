@@ -105,9 +105,9 @@ export default {
                 let index = _.findIndex(target[date], (e) => e.source.id === note.id);
                 target[date].splice(index, 1);
                 if(event.hasTime){
-                    reset(target[date], index+1)
+                    reset(target[date], index+1);
                 }
-            })
+            });
         }
     }
 }
