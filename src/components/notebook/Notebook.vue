@@ -54,7 +54,7 @@ export default {
     created(){
         let notebook = this.$store.getters["notebook/findByName"](this.name);
         if(!notebook){
-            this.$router.push({name:"note"})
+            this.$router.push({name:"note"}).catch(err => {})
         }
         this.notebook = notebook;
     },

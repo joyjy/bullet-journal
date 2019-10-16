@@ -11,7 +11,7 @@
 
 <script>
 import range from "@/lib/range"
-import search from "@jukben/emoji-search"
+import emojisearch from "@jukben/emoji-search"
 
 export default {
     props: ['focus', 'lastInput', 'container', 'composing'],
@@ -69,7 +69,7 @@ export default {
                 if(lastToken.text[0] !== ':'){
                     this.lastInput.requireSuggest = "";
                 }else{
-                    let emojis = search(lastToken.text.substring(1)).map((e) => ":"+e.char+":"+e.name);
+                    let emojis = emojisearch(lastToken.text.substring(1)).map((e) => ":"+e.char+":"+e.name);
                     this.suggests = _.take(emojis, 7);
                 }
             }
@@ -82,7 +82,8 @@ export default {
             let text = this.lastInput.type == "content"? this.lastInput.note.content.text : this.lastInput.note.text;
             text = text.slice(0, -this.lastInput.requireSuggest.length);
             if(this.emoji){
-                tag = tag.substring(0, tag.lastIndexOf(":"))
+                let i = tag.lastIndexOf(":");
+                tag = tag.substring(0, i>0 ? i:undefined);
             }
 
             text += tag + "\xa0";

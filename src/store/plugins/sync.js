@@ -15,6 +15,8 @@ const syncPlugin = (store) => {
             case "flattern":
             case "focus":
             case "unfocus":
+            case "dragging":
+            case "drawerPinned":
                 break;
             default:
                 store.commit("lastChanged", moment().valueOf());

@@ -2,7 +2,7 @@
     <v-app>
         <app-nav-bar></app-nav-bar>
         <v-content>
-            <v-tabs dark @change="$router.push({path: '/setting/' + views[$event]})">
+            <v-tabs v-model="view" dark @change="view = $event">
                 <v-tab>Account</v-tab>
                 <v-tab>Note</v-tab>
             </v-tabs>
@@ -17,25 +17,21 @@ import opml from "@/lib/opml"
 
 export default {
     data: () => ({
+        view: 0,
         views: ['account', 'note', 'data']
     }),
+    watch: {
+        view(){
+            this.$router.push({path: '/setting/' + this.views[this.view]}).catch(err => {});
+        },
+        $route(){
+            this.view = this.views.indexOf(this.$route.name);
+        }
+    },
     components:{
         AppNavBar
     },
-    computed:{
-    },
     methods: {
-        exportJson(){
-            let dataStr = JSON.stringify(this.$store.state);
-            let dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
-
-            let exportFileDefaultName = 'data.json';
-
-            let linkElement = document.createElement('a');
-            linkElement.setAttribute('href', dataUri);
-            linkElement.setAttribute('download', exportFileDefaultName);
-            linkElement.click();
-        },
         importJson(file){
 
             var reader = new FileReader();
@@ -57,5 +53,7 @@ export default {
 </script>
 
 <style>
-
+h3{
+    margin-top: 1rem;
+}
 </style>

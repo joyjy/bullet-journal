@@ -7,10 +7,10 @@
         </div>
         
         <v-menu v-model="menu" :open-on-hover="!dragging" :open-on-click="false"
-            offset-y nudge-left="10" nudge-bottom="2" open-delay="800" close-delay="100" min-width="140">
+            offset-y nudge-left="10" nudge-bottom="2" open-delay="1000" close-delay="100" min-width="140">
             <template v-slot:activator="{ on }">
                 <div :class="['note-bullet', {time: note.time || note.schedule}]" 
-                    @dblclick="click('dbl', $event)" @click.capture="click('sgl', $event)"
+                    @dblclick.prevent.stop="click('dbl', $event)" @click.prevent.stop="click('sgl', $event)"
                     v-on="on">
                     <v-icon v-if="stamp" small>mdi-av-timer</v-icon>
                     <v-icon v-else-if="schedule" small>mdi-alarm</v-icon>
@@ -119,7 +119,7 @@ export default {
             if(type != this.$store.state.settings.note.clickType){
                 return;
             }
-            this.$router.push({ name:"note", params:{ id: this.note.id }})
+            this.$router.push({ name:"note", params:{ id: this.note.id }}).catch(err => {})
         }
     }
 }

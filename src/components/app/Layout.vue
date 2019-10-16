@@ -29,7 +29,7 @@
             </v-container>
         </v-content>
 
-        <v-overlay :value="showNotebookWizard" @click.native="closeWizard">
+        <v-overlay :value="showNotebookWizard" @click.native="closeWizard" z-index="10">
             <notebook-wizard></notebook-wizard>
         </v-overlay>
     </v-app>

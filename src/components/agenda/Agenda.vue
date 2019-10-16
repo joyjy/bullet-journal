@@ -171,7 +171,7 @@ export default {
                 return this.agendaType || 'month';
             },
             set(value){
-                this.$router.push({name:'agenda', params:{type:value, start:this.start}})
+                this.$router.push({name:'agenda', params:{type:value, start:this.start}}).catch(err => {})
             }
         },
         title () {
@@ -213,8 +213,12 @@ export default {
     },
     watch: {
         "$route" (to, from) {
-            if(from.params.type != to.params.type){
-                this.$store.commit("agendaType", to.params.type)
+            if(this.type != to.params.type){
+                this.$store.commit("updateSettings", {
+                    select: (state) => state.agenda,
+                    key: "type",
+                    value: value,
+                })
             }
             if(to.params.start){
                 this.start = to.params.start;
@@ -242,7 +246,7 @@ export default {
             this.mouthDayHeight = Math.round((weekHeight-34)/20);
         },
         setToday(){
-            this.$router.push({name:'agenda', params:{type:this.type}})
+            this.$router.push({name:'agenda', params:{type:this.type}}).catch(err => {})
         },
         update({start, end}){
             if(this.start == start.date && this.end == end.date){
@@ -326,7 +330,7 @@ export default {
             }else{
                 currentStart.subtract(7, 'd');
             }
-            this.$router.push({name:'agenda', params:{type: this.type, start: currentStart.format("YYYY-MM-DD")}})
+            this.$router.push({name:'agenda', params:{type: this.type, start: currentStart.format("YYYY-MM-DD")}}).catch(err => {})
         },
         next(){
             let currentStart = moment(this.start);
@@ -335,7 +339,7 @@ export default {
             }else{
                 currentStart.add(7, 'd');
             }
-            this.$router.push({name:'agenda', params:{type: this.type, start: currentStart.format("YYYY-MM-DD")}})
+            this.$router.push({name:'agenda', params:{type: this.type, start: currentStart.format("YYYY-MM-DD")}}).catch(err => {})
         },
         showEvent(event, mouseEvent){
             const open = () => {
@@ -356,7 +360,7 @@ export default {
         focusParent(){
             let stack = this.$store.getters.findNoteStackById(this.selectedEvent.source.id);
             let parent = stack.length > 1 ? stack[stack.length-2] : stack[0];
-            this.$router.push({name:'note', params:{id:parent.id}});
+            this.$router.push({name:'note', params:{id:parent.id}}).catch(err => {});
         }
     }
 }

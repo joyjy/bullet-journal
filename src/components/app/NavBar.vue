@@ -72,7 +72,7 @@
                     <template v-slot:activator={on}>
                         <v-icon dense v-on="on">mdi-information-outline</v-icon>
                     </template>
-                    <span>Note with (timestamp) or &lt;scheduled> will show in agenda view.</span>
+                    <span>Note with (timestamp) or &lt;schedule> will show in agenda view.</span>
                 </v-tooltip>
             </v-list-item-action>
         </v-list-item>

@@ -22,8 +22,8 @@ export default new VueRouter({
         { path: "/setting", redirect: {path:"/setting/account"},
             name: "setting", component: Setting, 
             children: [
-                { path: "account", component: AccountSetting },
-                { path: "note", component: NoteSetting }
+                { path: "account", name: "account", component: AccountSetting },
+                { path: "note", name: "note", component: NoteSetting }
             ]
         },
         { path: "/signin", name: "signin", component: Signin },

@@ -11,7 +11,7 @@ export default {
   },
   created: function(){
     if(!this.signed() && this.$route.name != 'signin'){
-      this.$router.push({'name': 'signin'})
+      this.$router.push({'name': 'signin'}).catch(err => {})
     }
   },
   mounted: function () {
@@ -27,7 +27,7 @@ export default {
   watch:{
     token(){
       if(!this.token){
-        this.$router.push({'name': 'signin'})
+        this.$router.push({'name': 'signin'}).catch(err => {})
       }
     }
   },

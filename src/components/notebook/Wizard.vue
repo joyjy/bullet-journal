@@ -97,7 +97,7 @@ export default {
                 itemsSelectType: 'static'
             },{
                 name: "GTD",
-                desc: "Inbox, Next, Projects, Waiting for, Someday/Maybe -- grouped views contains 5 list",
+                desc: "Inbox, Next, Projects, Waiting for, Someday/Maybe",
                 itemsSelectType: 'static',
             },{
                 name: 'Grid',
@@ -106,7 +106,10 @@ export default {
                 name: 'Table',
                 desc: 'View notes using table',
             },{
-                name: '...',
+                name: 'Kanban',
+                desc: 'View notes using table',
+            },{
+                name: 'Freestyle',
                 desc: 'All custom from empty',
             }],
             step: 1,
@@ -149,7 +152,7 @@ export default {
                 }
             }
             this.$store.dispatch("notebook/add", payload).then(() => {
-                this.$router.push({name: 'notebook', params: {name: this.name}})
+                this.$router.push({name: 'notebook', params: {name: this.name}}).catch(err => {})
             })
         }
     }

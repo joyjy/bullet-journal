@@ -13,15 +13,17 @@
                 </template>
             </v-breadcrumbs>
 
-            <v-tooltip right>
-                <template v-slot:activator="{ on }">
-                    <v-btn  text icon small v-if="id && !query" @click="switchStarredNote({note:notes[0]})" v-on="on">
-                        <v-icon v-if="isStarred(id)" color="yellow darken-1">mdi-star</v-icon>
-                        <v-icon v-else>mdi-star-outline</v-icon>
-                    </v-btn>
-                </template>
-                <span>Toggle Starred Note</span>
-            </v-tooltip>
+            <!-- <v-toolbar-items class="ml-1"> -->
+                <v-tooltip right v-if="root && !query">
+                    <template v-slot:activator="{ on }">
+                        <v-btn text icon small @click="switchStarredNote({note:root})" v-on="on">
+                            <v-icon v-if="isStarred(id)" color="yellow darken-1">mdi-star</v-icon>
+                            <v-icon v-else>mdi-star-outline</v-icon>
+                        </v-btn>
+                    </template>
+                    <span>Toggle Starred Note</span>
+                </v-tooltip>
+            <!-- </v-toolbar-items> -->
         </template>
 
         <template v-slot:toolbar-items>
@@ -58,15 +60,16 @@
 </template>
 
 <script>
-import { mapState, mapGetters, mapMutations } from "vuex"
-import _ from "lodash"
+import Vue from "vue";
+import { mapState, mapGetters, mapMutations } from "vuex";
+import _ from "lodash";
 
-import AppLayout from "../app/Layout"
-import NoteTreeRoot from "./NoteTreeRoot"
-import range from "@/lib/range"
+import AppLayout from "../app/Layout";
+import NoteTreeRoot from "./NoteTreeRoot";
+import range from "@/lib/range";
 
-import traversal from "@/lib/tree"
-import filter from "@/lib/filter"
+import traversal from "@/lib/tree";
+import filter from "@/lib/filter";
 
 export default {
     data: function(){
@@ -134,7 +137,7 @@ export default {
             switchStarredNote: "saved/note"
         }),
         refresh: function(){
-            this.root = null;
+            Vue.set(this, 'root', null)
             this.breadsrumbs = [];
             this.notes = [];
 
@@ -146,7 +149,7 @@ export default {
                     stack.unshift("Root");
                     this.breadsrumbs = stack;
                     this.notes = stack.slice(-1)
-                    this.root = this.notes[0];
+                    Vue.set(this, 'root', this.notes[0])
                 }
             }
 
@@ -167,7 +170,7 @@ export default {
             this.$store.commit("switchOutline", { notes: this.notes, level: this.collapseLevel });
         },
         search(payload){
-            this.$router.push({ name:"note", params:{ id: this.id }, query: {q: payload}});
+            this.$router.push({ name:"note", params:{ id: this.id }, query: {q: payload}}).catch(err => {});
         },
         debounceSearch: _.debounce(function(payload){this.search(payload)}, 500),
         focusLast(e){

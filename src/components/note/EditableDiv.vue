@@ -259,7 +259,7 @@ export default {
 
             if(e.target.classList.contains("tag") || e.target.classList.contains("state")){
                 if(this.$route.name != "note"){
-                    this.$router.push({ name:"note", query: {q: e.target.innerText}});
+                    this.$router.push({ name:"note", query: {q: e.target.innerText}}).catch(err => {});
                 }else{
                     this.$eventbus.$emit("search", e.target.innerText);
                 }
@@ -302,6 +302,7 @@ span.state{
     font-weight: 700; /*.font-weight-bold */
     color: #ffffff;
     cursor: pointer;
+    word-spacing: 4px;
 }
 span.state.todo{
     background-color: #FDD835 /* yellow darken-1 */

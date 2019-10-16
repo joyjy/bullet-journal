@@ -14,17 +14,8 @@ export default {
         drawer: {
             pinned: false
         },
-        view:{
-            diary:0
-        },
     },
     mutations:{
-        switchView(state, {key, value}){
-            state.view[key] = value;
-        },
-        agendaType(state, type){
-            state.agenda.type = type;
-        },
         drawerPinned(state, pinned){
             state.drawer.pinned = pinned;
         },
