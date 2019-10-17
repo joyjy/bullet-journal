@@ -9,7 +9,7 @@ const convertResponse = (response) => {
     if(response.headers["last-modified"]){
         let time = moment.utc(response.headers["last-modified"]);
         time.local();
-        r.data.lastModified = time.valueOf();
+        r.lastModified = time.valueOf();
     }
     if(r.data.time){
         let time = moment.utc(r.data.time);
@@ -23,6 +23,7 @@ const convertError = (error) => {
     return Promise.resolve({
         result: false,
         message: error.status ? error.response.data.message : error.message,
+        unauthorized: error.status && error.response.status === 401
     });
 }
 

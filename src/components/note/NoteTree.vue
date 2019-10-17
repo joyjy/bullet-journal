@@ -29,7 +29,7 @@
         <template v-slot:toolbar-items>
 
             <v-toolbar-items>
-                <v-text-field class="compact-form" clearable solo rounded flat
+                <v-text-field class="compact-form" clearable solo rounded flat @keydown.esc.exact="$el.focus()"
                     :prepend-inner-icon="query && isSavedFilter(query.value) ? 'mdi-filter' : 'mdi-filter-outline'"
                     @click:prepend-inner="switchSaveFilter({text:query.value})"
                     :value="$route.query.q" :style="{width: counter+'rem'}"
@@ -44,10 +44,6 @@
                     </template>
                     <span>Toggle Outline Level: {{ collapseLevel == -1 ? 'All': collapseLevel+1 }}</span>
                 </v-tooltip>
-
-                <v-btn icon>
-                    <v-icon>mdi-settings-outline</v-icon>
-                </v-btn>
             </v-toolbar-items>
         </template>
         
@@ -113,10 +109,15 @@ export default {
         },
         flattern(){
             this.depth = traversal.depth(this.notes);
+        },
+        loading(to, from){
+            if(from && !to){
+                this.refresh();
+            }
         }
     },
     computed: {
-        ...mapState(['flattern']),
+        ...mapState(['flattern', 'loading']),
         ...mapGetters({
             isStarred: "saved/isStarred",
             isSavedFilter: "saved/isSavedFilter"
@@ -175,7 +176,9 @@ export default {
         debounceSearch: _.debounce(function(payload){this.search(payload)}, 500),
         focusLast(e){
             let last = this.$store.getters.findLastVisibleNote();
-            this.$store.commit("focus", {note:last, position:last.text.length})
+            if(last){
+                this.$store.commit("focus", {note:last, position:last.text.length})
+            }
         },
         tailHeightChange(){
             this.$nextTick(() => {

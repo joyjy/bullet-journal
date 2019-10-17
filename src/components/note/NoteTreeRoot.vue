@@ -1,5 +1,6 @@
 <template>
-    <draggable v-if="parent" tag="ul" class="note-tree body-2 align-self-start" v-model="noteList" :group="{ name: 'note-tree' }">
+    <draggable v-if="parent" tag="ul" v-model="noteList" :group="{ name: 'note-tree' }"
+        class="note-tree body-2 align-self-start">
         <note-tree-item v-for="(note,i) in noteList" :key="note.id"
             :note="note" :index="i" :parent="parent" :query="query" :root="root">
         </note-tree-item>
@@ -37,6 +38,8 @@ export default {
 .note-tree {
     width: 100%;
     position: relative;
+    max-width: 1000px;
+    margin: 0 auto;
 }
 .note-tree ul{
     padding-left: 16px;

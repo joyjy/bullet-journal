@@ -16,6 +16,7 @@ import undoRedoPlugin, {undoRedoHistory} from "./plugins/undo";
 import syncPlugin from "./plugins/sync";
 
 import dataAPI from "@/api/data";
+import userAPI from "@/api/user";
 
 import _ from "lodash";
 import traversal from "@/lib/tree";
@@ -27,6 +28,7 @@ const store = new Vuex.Store({
     state: {
         notes: [], // notes as tree
         flattern: [], // notes as table
+        loading: false,
         lastChanged: 0,
         lastSynced: 0
     },
@@ -73,6 +75,9 @@ const store = new Vuex.Store({
             state.flattern = traversal.flattern(state.notes);
             console.log("flattern", (_.now()-start)+"ms");
         },
+        loading(state, isLoading){
+            state.loading = isLoading;
+        },
         lastSynced(state, number){
             state.lastSynced = number;
         },
@@ -83,44 +88,50 @@ const store = new Vuex.Store({
     actions: {
         async init({commit, state}){
 
-            let {result, message, data} = await dataAPI.load(state.user.token);
-            if(result){
-                // todo merge from server
-                commit("lastSynced", data.lastModified);
-            }
+            if(state.user.token){
 
-            return new Promise((resolve) => setTimeout(() => {
-
-                let start = _.now();
-
-                if(state.notes.length === 0){
-                    this.dispatch("newNote", {});
-                }else{
-                    commit("flattern");
+                commit('loading', true);
+                let result = await dataAPI.getData(state.user.token);
+                if(result.result){
+                    if(result.data.lastChanged > state.lastChanged){
+                        result.data.notebook = {list:[]};
+                        this.replaceState(result.data)
+                        commit("flattern")
+                    }
+                    commit("lastSynced", result.lastModified);
+                }else if(result.unauthorized){
+                    commit("signOut")
                 }
-
-                //_.each(state.flattern, function([n]){
-                    //commit("unfocus", {note:n})
-                    //let tags = [];
-                    //_.each(n.tokens, function(t){
-                        // if(t.type === "tag"){
-                        //     tags.push(t);
-                        // }
-                    //});
-                    //commit("tag/add", {tags, note:n});
-
-                    // commit("agenda/count", {note: n})
-                    // commit("agenda/add", {note: n})
-                //});
-
-                console.log("init", (_.now()-start)+"ms");
-                resolve();
-            }, 0));
+                commit('loading', false);
+            }
+        },
+        async loading({state, commit}){
+            commit('loading', true);
+            let user = userAPI.getUser(state.user.token);
+            let result = await dataAPI.getData(state.user.token);
+            if(result.result){
+                if(result.data.lastChanged > state.lastChanged){
+                    result.data.notebook = {list:[]};
+                    this.replaceState(result.data)
+                    commit("flattern")
+                }
+                commit("lastSynced", result.data.lastChanged);
+                user.then(({result, message, data}) => {
+                    if(result){
+                        commit("setUser", data)
+                    }
+                });
+            }else if(result.unauthorized){
+                commit("signOut")
+            }
+            commit('loading', false);
         },
         async save({state, commit}){
-            let {result, message, data } = await dataAPI.save(state);
-            if(result){
-                commit("lastSynced", data.time)
+            let result = await dataAPI.saveData(state);
+            if(result.result){
+                commit("lastSynced", result.data.time)
+            }else if(result.unauthorized){
+                commit("signOut")
             }
         },
     }

@@ -5,7 +5,7 @@ import {convertResponse, convertError}  from "./common"
 import {reducer} from "@/store/modules" 
 
 export default {
-    async load(token){
+    async getData(token){
         try {
             const response = await axios.get(api.base +"/data", {
                 headers: {
@@ -18,7 +18,10 @@ export default {
             return convertError(error);
         }
     },
-    async save(state){
+    async saveData(state){
+        if(!state.user.token){
+            return;
+        }
         let data = reducer(state);
 
         try {

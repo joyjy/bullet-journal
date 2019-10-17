@@ -2,7 +2,7 @@
     <v-app>
         <app-nav-bar></app-nav-bar>
 
-        <v-navigation-drawer v-if="rightDrawer || false" app clipped right :width="rightDrawerWidth || 360">
+        <v-navigation-drawer v-if="rightDrawer || false" v-model="showTag" app clipped right :width="rightDrawerWidth || 360">
             <slot name="right-drawer">
                 <tags></tags>
             </slot>
@@ -18,6 +18,29 @@
             <slot name="toolbar-items">
             
             </slot>
+
+            <v-menu offset-y>
+                <template v-slot:activator="{ on }">
+                    <v-btn icon v-on="on">
+                        <v-icon>mdi-settings-outline</v-icon>
+                    </v-btn>
+                </template>
+                <v-list width="200">
+                    <v-list-item @click="showTag = !showTag">
+                        <v-list-item-title>
+                            Toggle Tags
+                        </v-list-item-title>
+                    </v-list-item>
+                    <v-list-item @click="$eventbus.$emit('show-help')">
+                        <v-list-item-title>
+                            Help
+                        </v-list-item-title>
+                        <v-list-item-action-text>
+                            ?
+                        </v-list-item-action-text>
+                    </v-list-item>
+                </v-list>
+            </v-menu>
         </v-app-bar>
 
         <v-divider id="app-bar-divider"></v-divider>
@@ -32,29 +55,48 @@
         <v-overlay :value="showNotebookWizard" @click.native="closeWizard" z-index="10">
             <notebook-wizard></notebook-wizard>
         </v-overlay>
+
+        <v-overlay :value="showHelp" @click.native="showHelp = !showHelp" z-index="10">
+            <help></help>
+        </v-overlay>
+
+        <v-overlay :value="loading" z-index="10">
+            <v-progress-linear indeterminate></v-progress-linear>
+        </v-overlay>
     </v-app>
 </template>
 
 <script>
+import { mapState } from "vuex"
+
 import AppNavBar from "./NavBar"
 import TagPane from "../tag/Pane";
 import NotebookWizard from "../notebook/Wizard";
+import Help from "../app/Help"
 
 export default {
     props: ["rightDrawer", "rightDrawerWidth", "color"],
     data: () =>({
-        showNotebookWizard:false,
+        showTag: true,
+        showNotebookWizard: false,
+        showHelp: false,
     }),
     mounted(){
         this.$eventbus.$on("show-notebook-wizard", (value) => this.showNotebookWizard = value);
+        this.$eventbus.$on("show-help", (value) => this.showHelp = !this.showHelp);
     },
     destroyed(){
         this.$eventbus.$off("show-notebook-wizard")
+        this.$eventbus.$off("show-help");
     },
     components:{
         AppNavBar,
         "tags": TagPane,
         NotebookWizard,
+        Help,
+    },
+    computed:{
+        ...mapState({ loading: state => state.loading })
     },
     methods:{
         closeWizard(event){

@@ -3,14 +3,15 @@
         v-html="innerHtml" 
         @focus="editing = true"
         @blur="editing = false"
-        @input="inputText" 
+        @input="inputText"
         @keydown.delete="pressDelete" 
-        @keypress.enter.prevent="pressEnter" 
+        @keydown.enter.prevent="pressEnter" 
         @keydown.tab.prevent="pressTab" 
         @keydown.up="pressNav"
         @keydown.down="pressNav"
         @keydown.left="pressNav"
         @keydown.right="pressNav"
+        @keydown.esc="$el.blur()"
         @dblclick.capture="click('dbl', $event)"
         @click.capture="click('sgl', $event)">
     </div>
@@ -127,6 +128,10 @@ export default {
             }
         },
         pressEnter(e){
+            if(e.isComposing){
+                return;
+            }
+
             if(this.type == "content"){
 
                 let payload = { 
@@ -150,6 +155,8 @@ export default {
                 return;
             }
 
+            let sub = navigator.platform.indexOf('Mac') > -1 && event.metaKey || event.ctrlKey;
+
             let text = e.target.innerText;
             let position = range.position(this.$el);
             if (position < text.length) { // split
@@ -158,13 +165,18 @@ export default {
 
                 let batchId = _.now();
                 this.$emit("input", { text: right, position: 0, batchId: batchId});
-                this.$emit("new-note", { text: left, prev: true, position: -1, batchId: batchId}); // default add at next
+                this.$emit("new-note", { 
+                    text: left, 
+                    prev: true, 
+                    position: -1, 
+                    batchId: batchId}); // default add at next
                 return;
             }
             
             this.$emit("new-note", {
                 keyboard: true,
-                curPosition: range.position(this.$el)
+                curPosition: range.position(this.$el),
+                sub: sub,
             });
         },
         pressTab(e){

@@ -1,4 +1,4 @@
-import userAPI from "@/api/user"
+import userAPI from "@/api/user";
 
 export default {
     state: {
@@ -40,12 +40,6 @@ export default {
 
             commit("signIn", data)
 
-            var {result, message, data} = await userAPI.getUser(state.token);
-            if(!result){
-                return Promise.resolve({result, message})
-            }
-
-            commit("setUser", data)
             return Promise.resolve({result, message})
         }
     }

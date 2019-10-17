@@ -1,6 +1,6 @@
 <template>
     <li :class="['note-item', col>0?'note-col-'+col:'', {archived: note.archived}]" v-show="archivedShow" :data-id="note.id">
-        <div v-show="filtered || ignoreFiltered" class="note-wrapper"> 
+        <div v-show="filtered || ignoreFiltered" class="note-wrapper" @mouseenter="mouseenter"> 
             <note-bullet :note="note" :collapsed = "collapsed"
                 @collapse-note="switchCollapse"
                 @del-note="deleteNote"
@@ -129,7 +129,7 @@ export default {
             if(!this.parent.display || !this.parent.display.column){
                 return 0;
             }
-            if(this.collapsed === "expand" || this.collapsed === "filtered"){
+            if(this.collapsed === "filtered"){
                 return 0;
             }
             if(this.parent.notes.length >= 30){
@@ -211,7 +211,7 @@ export default {
                 payload.parent = this.note;
             }else{
                 payload.index = payload.prev ? this.index : this.index+1;
-                payload.parent = this.parent;
+                payload.parent = payload.sub ? this.note: this.parent;
             }
 
             payload.curNote = this.note;
@@ -325,6 +325,11 @@ export default {
             }
             this.$store.commit("focus", {note: this.note, position: this.note.text.length})
         },
+        mouseenter(event){
+            if(event.button === 0){ // pressed
+                //addSelection(this)
+            }
+        }
     }
 }
 </script>

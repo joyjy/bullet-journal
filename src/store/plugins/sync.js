@@ -17,6 +17,9 @@ const syncPlugin = (store) => {
             case "unfocus":
             case "dragging":
             case "drawerPinned":
+            case "signIn":
+            case "signOut":
+            case "loading":
                 break;
             default:
                 store.commit("lastChanged", moment().valueOf());

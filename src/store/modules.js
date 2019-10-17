@@ -10,6 +10,7 @@ import userModule from "./user/user";
 import settingsModule from "./settings/display";
 
 const reducer = (state) => ({
+    lastChanged: state.lastChanged,
     notes: state.notes,
     saved: state.saved,
     tag: state.tag,

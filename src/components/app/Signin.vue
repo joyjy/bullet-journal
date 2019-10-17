@@ -46,6 +46,7 @@ export default {
                 password: this.password
             }).then(({result, message}) => {
                 if(result){
+                    this.$store.dispatch("loading");
                     this.$router.replace({name:'note'})
                 }else{
                     this.valid = result;

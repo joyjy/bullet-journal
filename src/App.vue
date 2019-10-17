@@ -22,7 +22,10 @@ export default {
   },
   computed: {
     ...mapGetters(["signed"]),
-    ...mapState({token: state => state.user.token})
+    ...mapState({
+      loading: state => state.loading,
+      token: state => state.user.token
+    })
   },
   watch:{
     token(){
@@ -35,18 +38,29 @@ export default {
     ...mapMutations(["undo"]),
     ...mapActions(["save"]),
     onKey: function(e){
+      if(this.loading){
+        return;
+      }
+
       if(e.keyCode == 90){ // 
-        if(navigator.platform.indexOf('Mac') > -1 && event.metaKey || event.ctrlKey){ // ctrl+z
+        if(navigator.platform.indexOf('Mac') > -1 && e.metaKey || e.ctrlKey){ // ctrl+z
           this.undo();
           e.preventDefault();
           e.stopPropagation();
         }
       }else if(e.keyCode == 83) {// s
-        if(navigator.platform.indexOf('Mac') > -1 && event.metaKey || event.ctrlKey){ // ctrl+s
+        if(navigator.platform.indexOf('Mac') > -1 && e.metaKey || e.ctrlKey){ // ctrl+s
           this.save();
           e.preventDefault();
           e.stopPropagation();
         }
+      }else if(e.keyCode == 191 && e.shiftKey){ // shift+/ == ?
+        if(e.target.hasAttribute("contenteditable")){
+          return;
+        }
+        this.$eventbus.$emit("show-help");
+        e.preventDefault();
+        e.stopPropagation();
       }
     }
   }
@@ -55,7 +69,8 @@ export default {
 
 <style>
 #app {
-  font-family: "Noto Sans", "Noto Sans CJK SC", sans-serif;
+  font-family: 'Avenir', Helvetica, Arial, sans-serif;
+  /* font-family: "Noto Sans", "Noto Sans CJK SC", sans-serif; */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   color: #212121; /*grey darken-4*/
